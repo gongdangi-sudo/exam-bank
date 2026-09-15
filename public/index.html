@@ -1119,7 +1119,7 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){syncOutputSubject();const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> 실제 DOCX의 <u>Word 기본 2단 섹션</u>으로 생성합니다. 보기 박스도 큰 표가 아닌 문단 테두리 방식으로 만들어 열 침범·첫 장 공백·페이지 깨짐을 방지합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> 첫 페이지부터 Word 기본 2단으로 시작하고, 제목/날짜/과목은 <u>첫 페이지 헤더</u>에 넣습니다. 따라서 제목만 있는 빈 1페이지가 생기지 않습니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 function docxEsc(s){
   return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
@@ -1194,31 +1194,76 @@ async function docxImageFromUrl(url,idx){
     return {bytes,name:`image${idx}.png`,rid:`rIdImg${idx}`,cx,cy,docPrId:100+idx};
   }catch(e){console.warn('DOCX image embed skipped',e);return null;}
 }
-function docxSectionProps({cols=1,continuous=false}={}){
-  const colXml=cols===2
-    ? '<w:cols w:num="2" w:space="425" w:sep="1"/>'
-    : '<w:cols w:num="1"/>';
-  return `<w:sectPr>${continuous?'<w:type w:val="continuous"/>':''}<w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="680" w:right="680" w:bottom="1260" w:left="680" w:header="0" w:footer="360" w:gutter="0"/>${colXml}<w:pgBorders w:offsetFrom="page"><w:top w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:left w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:bottom w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:right w:val="single" w:sz="10" w:space="18" w:color="1473E6"/></w:pgBorders></w:sectPr>`;
-}
-function docxContinuousTwoColumnBreak(){
-  // 이 문단까지는 1단. 이후 본문은 최종 sectPr의 2단 설정을 사용.
-  return `<w:p><w:pPr>${docxSectionProps({cols:1,continuous:true})}</w:pPr></w:p>`;
-}
 function docxFinalTwoColumnSectPr(){
-  return docxSectionProps({cols:2,continuous:false});
+  return `<w:sectPr>
+    <w:headerReference w:type="first" r:id="rIdHeaderFirst"/>
+    <w:headerReference w:type="default" r:id="rIdHeaderDefault"/>
+    <w:footerReference w:type="default" r:id="rIdFooter"/>
+    <w:titlePg/>
+    <w:pgSz w:w="11906" w:h="16838"/>
+    <!-- 본문은 첫 페이지부터 2단. 헤더가 들어갈 상단 공간 확보 -->
+    <w:pgMar w:top="1580" w:right="680" w:bottom="1300" w:left="680" w:header="240" w:footer="360" w:gutter="0"/>
+    <w:cols w:num="2" w:space="425" w:sep="1"/>
+    <!-- 하단 테두리를 위로 올려 footer를 테두리 바깥쪽처럼 보이게 함 -->
+    <w:pgBorders w:offsetFrom="page">
+      <w:top w:val="single" w:sz="10" w:space="18" w:color="1473E6"/>
+      <w:left w:val="single" w:sz="10" w:space="18" w:color="1473E6"/>
+      <w:bottom w:val="single" w:sz="10" w:space="68" w:color="1473E6"/>
+      <w:right w:val="single" w:sz="10" w:space="18" w:color="1473E6"/>
+    </w:pgBorders>
+  </w:sectPr>`;
 }
 function docxColumnBreak(){
   return '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr><w:r><w:br w:type="column"/></w:r></w:p>';
 }
-function docxHeaderXml(m,isSolution){
+function docxFirstHeaderContentXml(m,isSolution){
   const title=isSolution?'매일 확인 테스트 해설':'공단기 관리반 매일 확인 테스트';
   const titleTc=isSolution
-    ? `<w:tc><w:tcPr><w:tcW w:w="6500" w:type="pct"/><w:tcBorders><w:top w:val="single" w:sz="10" w:color="0667E8"/><w:left w:val="single" w:sz="10" w:color="0667E8"/><w:bottom w:val="single" w:sz="10" w:color="0667E8"/><w:right w:val="single" w:sz="10" w:color="0667E8"/></w:tcBorders><w:tcMar><w:top w:w="100" w:type="dxa"/><w:start w:w="140" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:end w:w="140" w:type="dxa"/></w:tcMar></w:tcPr>${docxP(title,{bold:true,size:30,color:'0667E8',after:0})}</w:tc>`
-    : `<w:tc><w:tcPr><w:tcW w:w="6500" w:type="pct"/><w:shd w:fill="0667E8"/><w:tcMar><w:top w:w="100" w:type="dxa"/><w:start w:w="140" w:type="dxa"/><w:bottom w:w="100" w:type="dxa"/><w:end w:w="140" w:type="dxa"/></w:tcMar></w:tcPr>${docxP(title,{bold:true,size:30,color:'FFFFFF',after:0})}</w:tc>`;
-  const dateTc=docxTc(docxP(m.date?`날짜: ${m.date}`:'',{size:16,align:'right',after:0}),{width:3500,pad:80});
-  const table=`<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="pct"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="6000"/><w:gridCol w:w="3200"/></w:tblGrid><w:tr>${titleTc}${dateTc}</w:tr></w:tbl>`;
-  const subject=`<w:tbl><w:tblPr><w:tblW w:w="1800" w:type="dxa"/><w:jc w:val="center"/><w:tblBorders><w:top w:val="single" w:sz="8" w:color="333333"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="8" w:color="333333"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="1800"/></w:tblGrid><w:tr>${docxTc(docxP(`${m.subject||''}${currentSetUnit()?` · ${currentSetUnit()}`:''}`,{bold:true,size:22,color:'0667E8',align:'center',after:0}),{width:10000,pad:20})}</w:tr></w:tbl>`;
-  return table+docxP('',{size:8,after:70})+subject+docxP('',{size:8,after:70});
+    ? `<w:tc><w:tcPr><w:tcW w:w="6500" w:type="pct"/><w:tcBorders><w:top w:val="single" w:sz="10" w:color="0667E8"/><w:left w:val="single" w:sz="10" w:color="0667E8"/><w:bottom w:val="single" w:sz="10" w:color="0667E8"/><w:right w:val="single" w:sz="10" w:color="0667E8"/></w:tcBorders><w:tcMar><w:top w:w="90" w:type="dxa"/><w:start w:w="130" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:end w:w="130" w:type="dxa"/></w:tcMar></w:tcPr>${docxP(title,{bold:true,size:28,color:'0667E8',after:0})}</w:tc>`
+    : `<w:tc><w:tcPr><w:tcW w:w="6500" w:type="pct"/><w:shd w:fill="0667E8"/><w:tcMar><w:top w:w="90" w:type="dxa"/><w:start w:w="130" w:type="dxa"/><w:bottom w:w="90" w:type="dxa"/><w:end w:w="130" w:type="dxa"/></w:tcMar></w:tcPr>${docxP(title,{bold:true,size:28,color:'FFFFFF',after:0})}</w:tc>`;
+
+  const dateTc=docxTc(
+    docxP(m.date?`날짜: ${m.date}`:'',{size:15,align:'right',after:0}),
+    {width:3500,pad:60}
+  );
+
+  const titleTable=`<w:tbl>
+    <w:tblPr><w:tblW w:w="10000" w:type="pct"/>
+      <w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>
+    </w:tblPr>
+    <w:tblGrid><w:gridCol w:w="6000"/><w:gridCol w:w="3200"/></w:tblGrid>
+    <w:tr>${titleTc}${dateTc}</w:tr>
+  </w:tbl>`;
+
+  const subject=`<w:tbl>
+    <w:tblPr><w:tblW w:w="1700" w:type="dxa"/><w:jc w:val="center"/>
+      <w:tblBorders><w:top w:val="single" w:sz="8" w:color="333333"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="8" w:color="333333"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders>
+    </w:tblPr>
+    <w:tblGrid><w:gridCol w:w="1700"/></w:tblGrid>
+    <w:tr>${docxTc(docxP(`${m.subject||''}${currentSetUnit()?` · ${currentSetUnit()}`:''}`,{bold:true,size:21,color:'0667E8',align:'center',after:0}),{width:10000,pad:12})}</w:tr>
+  </w:tbl>`;
+
+  // 해설지는 정답표도 첫 페이지 헤더 안에 넣어 본문 2단이 첫 장부터 바로 시작되게 함
+  const answerGrid=isSolution?docxAnswerGridXml():'';
+  return titleTable+docxP('',{size:5,after:35})+subject+docxP('',{size:5,after:35})+answerGrid;
+}
+function docxFirstHeaderXml(m,isSolution){
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+    ${docxFirstHeaderContentXml(m,isSolution)}
+  </w:hdr>`;
+}
+function docxDefaultHeaderXml(m){
+  // 2페이지부터는 과목만 작게 반복. 큰 제목은 첫 장에만 표시.
+  const subject=`<w:tbl>
+    <w:tblPr><w:tblW w:w="1500" w:type="dxa"/><w:jc w:val="center"/>
+      <w:tblBorders><w:top w:val="single" w:sz="6" w:color="333333"/><w:left w:val="nil"/><w:bottom w:val="single" w:sz="6" w:color="333333"/><w:right w:val="nil"/></w:tblBorders>
+    </w:tblPr>
+    <w:tblGrid><w:gridCol w:w="1500"/></w:tblGrid>
+    <w:tr>${docxTc(docxP(m.subject||'',{bold:true,size:17,color:'0667E8',align:'center',after:0}),{width:10000,pad:5})}</w:tr>
+  </w:tbl>`;
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+  <w:hdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">${subject}</w:hdr>`;
 }
 function docxAnswerGridXml(){
   const cells=currentSet.map((p,i)=>docxTc(docxP(`${i+1} ${p.answer||''}`,{bold:false,size:15,align:'center',after:0}),{width:1000,pad:25})).join('');
@@ -1268,11 +1313,11 @@ async function exportWord(mode='problem'){
       }
     }
   }
-  const body=docxHeaderXml(m,isSolution)+(isSolution?docxAnswerGridXml():'')+docxContinuousTwoColumnBreak()+docxQuestionFlowXml(mode,imageMap)+docxFinalTwoColumnSectPr();
+  const body=docxQuestionFlowXml(mode,imageMap)+docxFinalTwoColumnSectPr();
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body}</w:body></w:document>`;
-  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
+  const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/word/header1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/word/header2.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
   const packageRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`;
-  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>${imageRels.join('')}</Relationships>`;
+  const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/><Relationship Id="rIdHeaderFirst" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header1.xml"/><Relationship Id="rIdHeaderDefault" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="header2.xml"/>${imageRels.join('')}</Relationships>`;
   const settings=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:zoom w:percent="90"/><w:defaultTabStop w:val="720"/><w:doNotTrackMoves/><w:doNotTrackFormatting/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`;
   const core=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${docxEsc(m.subject||'')} ${isSolution?'해설':'문제'}</dc:title><dc:creator>공단기학원</dc:creator><cp:lastModifiedBy>공단기학원</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created></cp:coreProperties>`;
   const app=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>exam-bank</Application></Properties>`;
@@ -1282,6 +1327,8 @@ async function exportWord(mode='problem'){
   zip.folder('word').file('styles.xml',docxStylesXml());
   zip.folder('word').file('settings.xml',settings);
   zip.folder('word').file('footer1.xml',docxFooterXml(isSolution));
+  zip.folder('word').file('header1.xml',docxFirstHeaderXml(m,isSolution));
+  zip.folder('word').file('header2.xml',docxDefaultHeaderXml(m));
   zip.folder('word').folder('_rels').file('document.xml.rels',docRels);
   zip.folder('docProps').file('core.xml',core);
   zip.folder('docProps').file('app.xml',app);
@@ -2980,7 +3027,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.7.2 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.8.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -3063,7 +3110,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.7.2 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.8.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
