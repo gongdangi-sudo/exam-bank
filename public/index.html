@@ -414,6 +414,133 @@
   z-index:-1;
 }
 
+
+/* v22.3: 인쇄 전 A4 측정용. 화면 밖에서 실제 인쇄 크기와 동일하게 계산한다. */
+#printPages.print-measure{
+  display:block!important;
+  position:absolute!important;
+  left:-12000px!important;
+  top:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  width:210mm!important;
+}
+#printPages.print-measure .print-page{
+  width:210mm!important;
+  height:297mm!important;
+  position:relative!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+  overflow:hidden!important;
+  font-family:"Malgun Gothic","Noto Sans KR",sans-serif!important;
+  color:#111!important;
+}
+#printPages.print-measure .print-frame{
+  position:absolute!important;
+  left:8mm!important;
+  right:8mm!important;
+  top:8mm!important;
+  bottom:23mm!important;
+  border:1.5px solid #1473e6!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+}
+#printPages.print-measure .print-inner{
+  height:100%!important;
+  box-sizing:border-box!important;
+  padding:8mm 9mm 7mm!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+#printPages.print-measure .sheet-head{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  align-items:start!important;
+  gap:12px!important;
+  margin:0 0 5mm!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .sheet-title{
+  display:inline-block!important;
+  font-weight:800!important;
+  font-size:17px!important;
+  letter-spacing:.06em!important;
+  padding:7px 13px!important;
+}
+#printPages.print-measure .sheet-info{
+  font-size:8.5pt!important;
+  line-height:1.5!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+}
+#printPages.print-measure .subject-ribbon{
+  width:max-content!important;
+  margin:0 auto 4mm!important;
+  font-weight:800!important;
+  padding:2px 12px!important;
+  font-size:12pt!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .answer-grid{
+  display:grid!important;
+  grid-template-columns:repeat(10,1fr)!important;
+  margin:0 0 5mm!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .print-cols{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10mm!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+#printPages.print-measure .print-col{
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#printPages.print-measure .paper-q{
+  font-size:9.5pt!important;
+  line-height:1.56!important;
+  margin:0 0 5mm!important;
+}
+#printPages.print-measure .paper-q-title{
+  font-weight:800!important;
+  margin-bottom:1.4mm!important;
+  white-space:pre-wrap!important;
+  word-break:keep-all!important;
+}
+#printPages.print-measure .paper-q-choices{
+  white-space:pre-wrap!important;
+  line-height:1.55!important;
+  word-break:keep-all!important;
+}
+#printPages.print-measure .paper-q-box,
+#printPages.print-measure .official-view-box{
+  border:1px solid #777!important;
+  padding:2.2mm 2.8mm!important;
+  margin:1.8mm 0 2.2mm!important;
+  white-space:pre-wrap!important;
+  background:#fff!important;
+}
+#printPages.print-measure .solution-item{
+  font-size:9pt!important;
+  line-height:1.52!important;
+  margin:0 0 5mm!important;
+}
+#printPages.print-measure .solution-item .sol-body{
+  white-space:pre-wrap!important;
+  word-break:keep-all!important;
+  overflow-wrap:break-word!important;
+}
+#printPages.print-measure .print-page.cont .sheet-head{margin-bottom:3mm!important}
+#printPages.print-measure .print-page.cont .sheet-title{font-size:14px!important;padding:5px 10px!important}
+#printPages.print-measure .print-page.cont .subject-ribbon{font-size:10.5pt!important;margin-bottom:3mm!important}
+
 </style>
 </head>
 <body>
@@ -852,21 +979,30 @@ async function buildStablePrintPages(){
 
   const pages=document.createElement('div');
   pages.id='printPages';
-  pages.classList.add('print-measure');
+  pages.className='print-measure';
   document.body.appendChild(pages);
+
+  const settle=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const fits=async(col,el)=>{
+    await settle();
+    const cr=col.getBoundingClientRect();
+    const er=el.getBoundingClientRect();
+    return er.bottom <= cr.bottom + 0.8;
+  };
 
   let page=createStablePrintPage(sourceSheet,mode,true);
   pages.appendChild(page);
+  await settle();
+
   let colIdx=0;
-  let col=page.querySelectorAll('.print-col')[colIdx];
+  let col=page.querySelectorAll('.print-col')[0];
 
   for(const srcItem of sourceItems){
     let clone=srcItem.cloneNode(true);
     col.appendChild(clone);
     await waitCloneImages(clone);
 
-    // 현재 열을 넘치면 다음 열/다음 페이지로 이동
-    if(col.scrollHeight>col.clientHeight+2){
+    if(!(await fits(col,clone))){
       clone.remove();
 
       if(colIdx===0){
@@ -875,6 +1011,7 @@ async function buildStablePrintPages(){
       }else{
         page=createStablePrintPage(sourceSheet,mode,false);
         pages.appendChild(page);
+        await settle();
         colIdx=0;
         col=page.querySelectorAll('.print-col')[0];
       }
@@ -883,17 +1020,24 @@ async function buildStablePrintPages(){
       col.appendChild(clone);
       await waitCloneImages(clone);
 
-      // 한 문항 자체가 열보다 큰 경우만 글자를 아주 조금 줄임
-      if(col.scrollHeight>col.clientHeight+2){
+      // 한 항목 자체가 한 열보다 큰 경우만 아주 소폭 축소.
+      // 그래도 넘치면 overflow를 숨기지 않고 문항 내부 글자 크기만 추가로 줄인다.
+      if(!(await fits(col,clone))){
         clone.classList.add('print-oversize');
-        clone.style.fontSize=mode==='solution'?'8.4pt':'8.9pt';
-        clone.style.lineHeight='1.45';
+        clone.style.fontSize=mode==='solution'?'8.3pt':'8.8pt';
+        clone.style.lineHeight='1.42';
+        await settle();
+
+        if(!(await fits(col,clone))){
+          clone.style.fontSize=mode==='solution'?'7.8pt':'8.3pt';
+          clone.style.lineHeight='1.36';
+          await settle();
+        }
       }
     }
   }
 
-  // 브라우저가 레이아웃 계산을 끝내도록 한 프레임 기다림
-  await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  await settle();
   pages.classList.remove('print-measure');
   return pages;
 }
@@ -941,8 +1085,111 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> 인쇄 시 A4 페이지를 사이트가 직접 나눠 만들어서 2단·외곽선·하단 안내문이 페이지마다 동일하게 유지됩니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
-function exportWord(mode='problem'){if(!currentSet.length)return;const m=sheetMeta();const body=mode==='solution'?solutionSheetHTML():problemSheetHTML();const css=`body{font-family:'Malgun Gothic';color:#111}.exam-sheet{border:1px solid #1473e6;padding:20px}.sheet-head{display:flex;justify-content:space-between}.sheet-title{font-weight:bold;font-size:18pt}.subject-ribbon{text-align:center;font-weight:bold;margin:15px}.paper-q,.solution-item{margin:0 0 14px;line-height:1.5}.paper-q-title,.sol-no,.sol-answer,.sol-label{font-weight:bold}.paper-q-choices,.sol-body{white-space:pre-wrap}.answer-grid{margin:10px 0}.sheet-logo{text-align:right;font-weight:bold}.material-disclaimer{margin-top:18px;padding-top:10px;border-top:1px solid #cbd5e1;font-size:9pt;line-height:1.55;color:#64748b;text-align:left}`;const html=`<html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'});downloadBlob(blob,(m.subject||'시험')+(mode==='solution'?'_해설':'_문제')+'.doc');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> Word용 파일도 표 기반 2단 공단기 양식으로 생성합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+function wordEsc(s){
+  return esc(String(s||''));
+}
+function wordMultiline(s){
+  return String(s||'').split(/\r?\n/).map(line=>`<div class="wline">${wordEsc(line)}</div>`).join('');
+}
+function wordProblemBlock(p,i){
+  if(p.sourceMode==='officialImageFallback' && p.fallbackImageUrl){
+    return `<div class="wq"><div class="wqtitle">문 ${i+1}.</div><div><img src="${wordEsc(location.origin+p.fallbackImageUrl)}" style="max-width:100%;height:auto"></div></div>`;
+  }
+  if(p.originalQuestionImageUrl){
+    return `<div class="wq"><div class="wqtitle">문 ${i+1}.</div><div><img src="${wordEsc(location.origin+p.originalQuestionImageUrl)}" style="max-width:100%;height:auto"></div></div>`;
+  }
+  const view=p.viewText?`<table class="wview" cellspacing="0" cellpadding="0"><tr><td>${wordMultiline(p.viewText)}</td></tr></table>`:'';
+  return `<div class="wq">
+    <div class="wqtitle">문 ${i+1}. ${wordEsc(p.question||'')}</div>
+    ${view}
+    <div class="wchoices">${wordMultiline(p.choices||'')}</div>
+  </div>`;
+}
+function wordSolutionBlock(p,i){
+  const exp=p.editedExplanation||p.originalExplanation||p.explanation||'※ 상세 해설 미작성';
+  return `<div class="wsol">
+    <div class="wqtitle">문 ${i+1}.</div>
+    <div class="wlabel">[정답] ${wordEsc(p.answer||'')}</div>
+    <div class="wlabel">[해설]</div>
+    <div class="wexplain">${wordMultiline(exp)}</div>
+  </div>`;
+}
+function wordAnswerGrid(){
+  return `<table class="wanswers" cellspacing="0" cellpadding="0"><tr>${currentSet.map((p,i)=>`<td><b>${i+1}</b> ${wordEsc(p.answer||'')}</td>`).join('')}</tr></table>`;
+}
+function wordTwoColumns(mode){
+  const left=currentSet.slice(0,5);
+  const right=currentSet.slice(5,10);
+  const render=mode==='solution'?wordSolutionBlock:wordProblemBlock;
+  return `<table class="wcols" cellspacing="0" cellpadding="0"><tr>
+    <td class="wcol wleft">${left.map((p,i)=>render(p,i)).join('')}</td>
+    <td class="wcol wright">${right.map((p,i)=>render(p,i+5)).join('')}</td>
+  </tr></table>`;
+}
+function exportWord(mode='problem'){
+  if(!currentSet.length)return;
+  const m=sheetMeta();
+  const isSolution=mode==='solution';
+  const title=isSolution?'매일 확인 테스트 해설':'공단기 관리반 매일 확인 테스트';
+
+  const css=`
+    @page Section1{size:595.3pt 841.9pt;margin:34pt 34pt 54pt 34pt;mso-footer:f1;}
+    div.Section1{page:Section1;}
+    body{font-family:"Malgun Gothic",sans-serif;color:#111;font-size:9.5pt;}
+    table{border-collapse:collapse;}
+    .outer{width:100%;border:1.4pt solid #1473e6;}
+    .outertd{padding:18pt 20pt 14pt 20pt;}
+    .head{width:100%;margin-bottom:10pt;}
+    .title{display:inline-block;font-weight:700;font-size:16pt;padding:6pt 11pt;${isSolution?'color:#0667e8;border:1.5pt solid #0667e8;':'color:#fff;background:#0667e8;'}}
+    .date{text-align:right;font-size:8.5pt;white-space:nowrap;}
+    .subject{text-align:center;font-weight:700;color:#0667e8;font-size:12pt;margin:8pt 0 8pt 0;}
+    .subject span{border-top:1pt solid #333;border-bottom:1pt solid #333;padding:2pt 10pt;}
+    .wanswers{width:100%;border:1pt solid #333;margin:0 0 10pt 0;}
+    .wanswers td{width:10%;border-right:1pt solid #333;text-align:center;padding:2pt 1pt;font-size:8pt;}
+    .wanswers td:last-child{border-right:0;}
+    .wcols{width:100%;table-layout:fixed;}
+    .wcol{width:50%;vertical-align:top;padding:0 10pt;}
+    .wleft{border-right:1pt dotted #67aaf9;padding-left:0;}
+    .wright{padding-right:0;}
+    .wq,.wsol{margin:0 0 12pt 0;page-break-inside:avoid;}
+    .wqtitle{font-weight:700;margin:0 0 4pt 0;line-height:1.45;}
+    .wchoices,.wexplain{line-height:1.5;}
+    .wview{width:100%;border:1pt solid #777;margin:5pt 0 6pt 0;}
+    .wview td{padding:6pt 7pt;}
+    .wline{margin:0 0 2pt 0;}
+    .wlabel{font-weight:700;margin:2pt 0;}
+    .footerNote{font-size:7.5pt;color:#64748b;border-top:.5pt solid #cbd5e1;padding-top:5pt;}
+    .footerLogo{font-size:8.5pt;font-weight:700;text-align:right;white-space:nowrap;}
+    .blueD{color:#1473e6;font-size:12pt;font-weight:700;}
+  `;
+
+  const body=`<div class="Section1">
+    <table class="outer" cellspacing="0" cellpadding="0"><tr><td class="outertd">
+      <table class="head" cellspacing="0" cellpadding="0"><tr>
+        <td><span class="title">${wordEsc(title)}</span></td>
+        <td class="date">${m.date?`날짜: ${wordEsc(m.date)}`:''}</td>
+      </tr></table>
+      <div class="subject"><span>${wordEsc(m.subject||'')}${currentSet[0]?.unit?` · ${wordEsc(currentSet[0].unit)}`:''}</span></div>
+      ${isSolution?wordAnswerGrid():''}
+      ${wordTwoColumns(mode)}
+    </td></tr></table>
+  </div>
+  <div style="mso-element:footer" id="f1">
+    <table width="100%" cellspacing="0" cellpadding="0"><tr>
+      <td class="footerNote">[${isSolution?'해설지':'문제지'}] 본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</td>
+      <td class="footerLogo"><span class="blueD">D</span> 공단기학원</td>
+    </tr></table>
+  </div>`;
+
+  const doc=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8">
+  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+  <style>${css}</style></head><body>${body}</body></html>`;
+
+  const blob=new Blob(['\ufeff',doc],{type:'application/msword;charset=utf-8'});
+  downloadBlob(blob,(m.subject||'시험')+(isSolution?'_해설':'_문제')+'.doc');
+}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
 function openModal(p=null){$('#modalTitle').textContent=p?'문제 수정':'문제 등록';$('#pId').value=p?.id||'';$('#pSubject').value=p?.subject||SUBJECTS[0];$('#pExam').value=p?.exam||'';$('#pYear').value=p?.year||'';$('#pNo').value=p?.no||'';$('#pUnit').value=p?.unit||'';$('#pSubunit').value=p?.subunit||'';$('#pType').value=p?.type||'';$('#pAnswer').value=p?.answer||'';$('#pQuestion').value=p?.question||'';$('#pChoices').value=p?.choices||'';$('#pExplanation').value=p?.explanation||'';$('#modal').classList.remove('hidden')}
@@ -2635,7 +2882,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.2.2 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.3.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -2718,7 +2965,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.2.2 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.3.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
