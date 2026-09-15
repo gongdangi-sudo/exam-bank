@@ -159,6 +159,26 @@
   }
 }
 
+
+.original-question-wrap{
+  margin:0 0 12px;
+  break-inside:avoid;
+  page-break-inside:avoid;
+}
+.original-question-wrap img{
+  width:100%;
+  height:auto;
+  display:block;
+  image-rendering:auto;
+}
+@media print{
+  .original-question-wrap{
+    margin:0 0 5mm;
+    break-inside:avoid-page;
+    page-break-inside:avoid;
+  }
+}
+
 </style>
 </head>
 <body>
@@ -397,7 +417,7 @@ function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page)
 function downloadJson(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 $('#explainExportBtn').onclick=()=>{
   if(!problems.length){alert('문제은행에 문제가 없습니다.');return}
-  const payload={schema:'exam-bank-explanations-v1',instructions:'각 문제의 기출 원문과 보기는 절대 수정하지 않는다. answer를 기준으로 해설을 아주 자세히 작성한다. 반드시 다음 순서를 지킨다: 1) [정답 근거] 왜 해당 정답이 맞는지 핵심 개념을 먼저 설명한다. 2) [보기별 해설] ①부터 마지막 보기까지 각각 (O)/(X)를 표시하고, 맞는 이유 또는 틀린 이유를 최소 1~3문장으로 구체적으로 설명한다. 3) [핵심 정리] 이 문제에서 반드시 기억해야 할 이론·법령·제도·판례 포인트를 2~5개 문장으로 정리한다. 4) 법령·제도·판례 문제는 현재 시행 기준과 최신 판례를 확인하여 설명하고, 개정 전 내용과 현행 내용이 다르면 그 차이를 명시한다. 5) 기간·숫자·기관·절차·요건은 특히 정확히 확인한다. 6) 확실하지 않은 내용은 추측하지 말고 [검수 필요]와 그 사유를 적는다. 7) 단순히 정답만 반복하거나 한 줄 해설로 끝내지 않는다. explanation 필드 하나에 위 구조가 모두 들어가도록 작성한다.',items:problems.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:p.year,no:p.no,question:p.question,choices:p.choices,viewImageUrl:p.viewImageUrl||'',answer:p.answer,answerSource:p.answerSource||'',explanation:p.explanation||''}))};
+  const payload={schema:'exam-bank-explanations-v1',instructions:'각 문제의 기출 원문과 보기는 절대 수정하지 않는다. answer를 기준으로 해설을 아주 자세히 작성한다. 반드시 다음 순서를 지킨다: 1) [정답 근거] 왜 해당 정답이 맞는지 핵심 개념을 먼저 설명한다. 2) [보기별 해설] ①부터 마지막 보기까지 각각 (O)/(X)를 표시하고, 맞는 이유 또는 틀린 이유를 최소 1~3문장으로 구체적으로 설명한다. 3) [핵심 정리] 이 문제에서 반드시 기억해야 할 이론·법령·제도·판례 포인트를 2~5개 문장으로 정리한다. 4) 법령·제도·판례 문제는 현재 시행 기준과 최신 판례를 확인하여 설명하고, 개정 전 내용과 현행 내용이 다르면 그 차이를 명시한다. 5) 기간·숫자·기관·절차·요건은 특히 정확히 확인한다. 6) 확실하지 않은 내용은 추측하지 말고 [검수 필요]와 그 사유를 적는다. 7) 단순히 정답만 반복하거나 한 줄 해설로 끝내지 않는다. explanation 필드 하나에 위 구조가 모두 들어가도록 작성한다.',items:problems.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:p.year,no:p.no,question:p.question,choices:p.choices,viewImageUrl:p.viewImageUrl||'',originalQuestionImageUrl:p.originalQuestionImageUrl||'',answer:p.answer,answerSource:p.answerSource||'',explanation:p.explanation||''}))};
   downloadJson('exam-bank-해설작성용.json',payload);
   alert('해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올리면 문제별 해설을 작성한 뒤 다시 가져올 수 있습니다.');
 };
@@ -415,7 +435,10 @@ $('#generateBtn').onclick=()=>{const subject=$('#fSubject').value, exam=$('#fExa
 function koDate(v){if(!v)return '';const d=new Date(v+'T00:00:00');const w=['일','월','화','수','목','금','토'][d.getDay()];return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}.(${w})`}
 function sheetMeta(){return {title:$('#fTitle').value||'공단기 관리반 매일 확인 테스트',author:$('#fAuthor').value.trim(),date:koDate($('#fDate').value),subject:$('#fSubject').value}}
 function materialDisclaimerHTML(){return `<div class="material-disclaimer">본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</div>`;}
-function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-sheet problem-sheet" id="problemSheet"><div class="sheet-head"><div><div class="sheet-title">${esc(m.title)}</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="paper-q"><div class="paper-q-title">문 ${i+1}. ${esc(cleanSourceNoise(p.question))}</div>${p.viewImageUrl?`<div class="view-image-wrap"><img src="${esc(p.viewImageUrl)}" alt="보기 원문"></div>`:''}<div class="paper-q-choices">${esc(cleanSourceNoise(p.choices||''))}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
+function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-sheet problem-sheet" id="problemSheet"><div class="sheet-head"><div><div class="sheet-title">${esc(m.title)}</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="paper-q">${p.originalQuestionImageUrl
+  ? `<div class="original-question-wrap"><img src="${esc(p.originalQuestionImageUrl)}" alt="문 ${i+1} 원문기출"></div>`
+  : `<div class="paper-q-title">문 ${i+1}. ${esc(cleanSourceNoise(p.question))}</div>${p.viewImageUrl?`<div class="view-image-wrap"><img src="${esc(p.viewImageUrl)}" alt="보기 원문"></div>`:''}<div class="paper-q-choices">${esc(cleanSourceNoise(p.choices||''))}</div>`
+}</div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i)=>`<div><span class="n">${i+1}</span> ${esc(p.answer)}</div>`).join('');return `<section class="exam-sheet solution-sheet" id="solutionSheet"><div class="sheet-head"><div><div class="sheet-title">매일 확인 테스트 해설</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="answer-grid">${cells}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="solution-item"><div class="sol-no">문 ${i+1}.</div><div class="sol-answer">[정답] ${esc(p.answer)}</div><div class="sol-label">[해설]</div><div class="sol-body">${(p.editedExplanation||p.originalExplanation||p.explanation)?esc(p.editedExplanation||p.originalExplanation||p.explanation):'<div class="missing-explanation">※ 상세 해설 미작성<br><span>문제은행에서 ‘상세 해설용 JSON 내보내기’ 또는 위의 ‘현재 출제문항 상세 해설 요청’을 사용하세요.</span></div>'}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
@@ -525,8 +548,16 @@ function questionRegionsFromPage(tc,viewport,pageNo){
     const lines=linesFromPdfItems(col.items);
     const heads=[];
     for(let i=0;i<lines.length;i++){
-      const m=lines[i].text.match(/^\s*(?:문\s*)?(\d{1,3})\s*[.．)]\s*/);
-      if(m)heads.push({idx:i,no:+m[1],line:lines[i]});
+      const txt=lines[i].text;
+      // 19. / 문 19. / 19 ) / 19 다음 이론... / 숫자만 별도 토큰까지 허용
+      const m=txt.match(/^\s*(?:문\s*)?(\d{1,3})(?:\s*[.．)]\s*|\s+(?=[가-힣A-Za-z「『“'\[]))/);
+      const solo=txt.match(/^\s*(?:문\s*)?(\d{1,3})\s*$/);
+      const hit=m||solo;
+      if(hit){
+        const no=+hit[1];
+        // 시험 문항번호 범위만 허용하고, 연도/페이지번호 오탐은 줄임
+        if(no>=1 && no<=100)heads.push({idx:i,no,line:lines[i]});
+      }
     }
     for(let hi=0;hi<heads.length;hi++){
       const h=heads[hi], next=heads[hi+1];
@@ -550,31 +581,116 @@ function questionRegionsFromPage(tc,viewport,pageNo){
           }
         }
       }
+      const topY=h.line.y+16;
+      const bottomY=next?next.line.y+8:H*0.045;
+      const regionItems=col.items.filter(it=>it.y<=topY && it.y>=bottomY);
       regions.set(h.no,{
         pageNo,column:col.name,
-        x0:col.x0,x1:col.x1,
-        topY:h.line.y+14,
-        bottomY:next?next.line.y+8:H*0.045,
-        gap
+        x0:col.x0+5,x1:col.x1-5,
+        topY,bottomY,gap,
+        items:regionItems,
+        pageHeight:H
       });
     }
   }
   return regions;
 }
 
+function pageLayoutForFallback(tc,viewport,pageNo){
+  const W=viewport.width,H=viewport.height;
+  const raw=(tc.items||[]).map(it=>({
+    text:String(it.str||'').trim(),
+    x:Number(it.transform?.[4]||0),
+    y:Number(it.transform?.[5]||0),
+    w:Number(it.width||0),
+    h:Math.max(7,Math.abs(Number(it.transform?.[3]||0))||8)
+  })).filter(it=>it.text && it.y>H*0.04 && it.y<H*0.96);
+
+  const defs=[
+    {name:'left',x0:0,x1:W*0.505,items:raw.filter(it=>(it.x+it.w/2)<W*0.505)},
+    {name:'right',x0:W*0.495,x1:W,items:raw.filter(it=>(it.x+it.w/2)>=W*0.495)}
+  ];
+  return {
+    pageNo,W,H,
+    cols:defs.map(c=>({...c,lines:linesFromPdfItems(c.items)}))
+  };
+}
+function compactMatchText(s){
+  return String(s||'')
+    .replace(/[\\s\\p{P}\\p{S}]+/gu,'')
+    .replace(/문\\d+/g,'')
+    .toLowerCase();
+}
+function fallbackRegionForQuestion(bundle,q){
+  const target=compactMatchText(q.question);
+  if(target.length<6)return null;
+  const key=target.slice(0,Math.min(18,target.length));
+  let best=null;
+
+  for(const pg of (bundle.pageLayouts||[])){
+    for(const col of pg.cols){
+      const lines=col.lines||[];
+      for(let i=0;i<lines.length;i++){
+        const lt=compactMatchText(lines[i].text);
+        if(!lt)continue;
+        const score =
+          lt.includes(key) ? 100 :
+          key.includes(lt) && lt.length>=8 ? 80 :
+          (lt.slice(0,10)===key.slice(0,10) ? 70 : 0);
+        if(score && (!best || score>best.score)){
+          best={score,pg,col,i};
+        }
+      }
+    }
+  }
+  if(!best)return null;
+
+  const {pg,col,i}=best;
+  const lines=col.lines;
+
+  // 질문 첫 줄 바로 위에 번호만 따로 떨어져 있으면 함께 포함.
+  let startIdx=i;
+  for(let k=Math.max(0,i-2);k<i;k++){
+    const t=lines[k].text.trim();
+    const m=t.match(/^\\s*(?:문\\s*)?(\\d{1,3})\\s*[.．)]?\\s*$/);
+    if(m && +m[1]===+q.no){startIdx=k;break}
+  }
+
+  let endIdx=lines.length;
+  for(let j=i+1;j<lines.length;j++){
+    const t=lines[j].text;
+    const m=t.match(/^\\s*(?:문\\s*)?(\\d{1,3})(?:\\s*[.．)]\\s*|\\s+(?=[가-힣A-Za-z「『“'\\[]))/)
+          || t.match(/^\\s*(?:문\\s*)?(\\d{1,3})\\s*$/);
+    if(m && +m[1]!==+q.no && +m[1]>=1 && +m[1]<=100){
+      endIdx=j;break;
+    }
+  }
+
+  const topY=lines[startIdx].y+18;
+  const bottomY=endIdx<lines.length ? lines[endIdx].y+8 : pg.H*0.045;
+  const items=col.items.filter(it=>it.y<=topY && it.y>=bottomY);
+
+  return {
+    pageNo:pg.pageNo,column:col.name,
+    x0:col.x0+5,x1:col.x1-5,
+    topY,bottomY,items,pageHeight:pg.H,
+    fallback:true
+  };
+}
 async function extractPdfBundle(file){
   const buf=await file.arrayBuffer();
   const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  const pages=[],regions=new Map();
+  const pages=[],regions=new Map(),pageLayouts=[];
   for(let i=1;i<=pdf.numPages;i++){
     const page=await pdf.getPage(i);
     const viewport=page.getViewport({scale:1});
     const tc=await page.getTextContent();
     pages.push(extractPageLayoutText(tc,viewport));
+    pageLayouts.push(pageLayoutForFallback(tc,viewport,i));
     const r=questionRegionsFromPage(tc,viewport,i);
     r.forEach((v,k)=>regions.set(k,v));
   }
-  return {pdf,text:pages.join('\n'),regions};
+  return {pdf,text:pages.join('\\n'),regions,pageLayouts};
 }
 
 async function makeViewGapBlob(pdf,region){
@@ -600,6 +716,61 @@ async function makeViewGapBlob(pdf,region){
   crop.width=w; crop.height=h;
   crop.getContext('2d',{alpha:false}).drawImage(canvas,sx,sy,w,h,0,0,w,h);
   return await new Promise(res=>crop.toBlob(res,'image/webp',0.86));
+}
+
+
+function normalizeChoiceGlyph(ch){
+  const map={
+    '①':'①','②':'②','③':'③','④':'④','⑤':'⑤',
+    '❶':'①','❷':'②','❸':'③','❹':'④','❺':'⑤',
+    '➊':'①','➋':'②','➌':'③','➍':'④','➎':'⑤'
+  };
+  return map[ch]||'';
+}
+
+async function makeOriginalQuestionBlob(pdf,region){
+  if(!region)return null;
+  const page=await pdf.getPage(region.pageNo);
+  const scale=2.15;
+  const vp=page.getViewport({scale});
+  const full=document.createElement('canvas');
+  full.width=Math.ceil(vp.width);full.height=Math.ceil(vp.height);
+  const ctx=full.getContext('2d',{alpha:false});
+  await page.render({canvasContext:ctx,viewport:vp}).promise;
+
+  const H=region.pageHeight||vp.height/scale;
+  const sx=Math.max(0,Math.floor(region.x0*scale));
+  const ex=Math.min(full.width,Math.ceil(region.x1*scale));
+  const sy=Math.max(0,Math.floor((H-region.topY)*scale));
+  const ey=Math.min(full.height,Math.ceil((H-region.bottomY)*scale));
+  const w=Math.max(1,ex-sx),h=Math.max(1,ey-sy);
+  if(w<120||h<55)return null;
+
+  const crop=document.createElement('canvas');
+  crop.width=w;crop.height=h;
+  const c=crop.getContext('2d',{alpha:false});
+  c.fillStyle='#fff';c.fillRect(0,0,w,h);
+  c.drawImage(full,sx,sy,w,h,0,0,w,h);
+
+  // 모든 선택지 번호를 흰색으로 지운 뒤 일반 ①②③④⑤로 다시 그린다.
+  // 원본 PDF에서 검게 표시된 정답 번호가 학생용 문제지에 노출되는 것을 방지한다.
+  const choiceRx=/^[①②③④⑤❶❷❸❹❺➊➋➌➍➎]$/;
+  for(const it of (region.items||[])){
+    const raw=String(it.text||'').trim();
+    if(!choiceRx.test(raw))continue;
+    const normal=normalizeChoiceGlyph(raw);
+    if(!normal)continue;
+    const localX=(it.x-region.x0)*scale;
+    const baselineY=(region.topY-it.y)*scale;
+    const fontPx=Math.max(18,Math.min(34,(it.h||9)*scale*1.35));
+    c.fillStyle='#fff';
+    c.fillRect(localX-5,baselineY-fontPx*0.95,fontPx*1.25,fontPx*1.25);
+    c.fillStyle='#000';
+    c.font=`${fontPx}px Arial, "Noto Sans KR", sans-serif`;
+    c.textBaseline='alphabetic';
+    c.fillText(normal,localX,baselineY+1);
+  }
+  return await new Promise(res=>crop.toBlob(res,'image/webp',0.9));
 }
 
 async function uploadViewAsset(id,blob){
@@ -791,19 +962,22 @@ $('#analyzePdfs').onclick=async()=>{
       for(const x of parts){
         const q=parseQuestionChunk(x);
         let v=validateParsedQuestion(q);
-        let viewBlob=null,viewPreviewUrl='',viewRescued=false;
+        let region=bundle.regions.get(q.no);
+        if(!region)region=fallbackRegionForQuestion(bundle,q);
+        let originalQuestionBlob=null,originalQuestionPreviewUrl='';
+        if(region){
+          originalQuestionBlob=await makeOriginalQuestionBlob(bundle.pdf,region);
+          if(originalQuestionBlob)originalQuestionPreviewUrl=URL.createObjectURL(originalQuestionBlob);
+        }
 
-        if(v.issues.includes('보기 본문 누락 의심')){
-          const region=bundle.regions.get(q.no);
-          viewBlob=await makeViewGapBlob(bundle.pdf,region);
-          if(viewBlob){
-            viewPreviewUrl=URL.createObjectURL(viewBlob);
-            viewRescued=true;
-            v={
-              ok:v.issues.filter(s=>s!=='보기 본문 누락 의심').length===0,
-              issues:v.issues.filter(s=>s!=='보기 본문 누락 의심')
-            };
-          }
+        // 원문 이미지가 정상 확보되면 보기 누락/선택지 순서 오류는 출력 단계에서 원문 이미지로 대체 가능.
+        if(originalQuestionBlob){
+          v={
+            ok:v.issues.filter(s=>!['보기 본문 누락 의심','선택지 순서 오류','선택지 0개만 감지','선택지 1개만 감지','선택지 2개만 감지','선택지 3개만 감지'].some(k=>s.startsWith(k))).length===0,
+            issues:v.issues.filter(s=>!['보기 본문 누락 의심','선택지 순서 오류'].includes(s) && !/^선택지 [0-3]개만 감지$/.test(s))
+          };
+        }else if(v.issues.includes('보기 본문 누락 의심')){
+          v={ok:false,issues:[...v.issues,'원문 영역 자동복구 실패']};
         }
 
         batchParsed.push({
@@ -815,7 +989,7 @@ $('#analyzePdfs').onclick=async()=>{
           explanation:'',explanationStatus:'작성 대기',
           status:v.ok?'현행화 검수 필요':'분석 실패',
           structureIssues:v.issues,verifiedAt:'',
-          viewBlob,viewPreviewUrl,viewRescued,
+          originalQuestionBlob,originalQuestionPreviewUrl,
           ...q,checked:v.ok
         });
       }
@@ -830,56 +1004,137 @@ $('#analyzePdfs').onclick=async()=>{
     setTimeout(()=>$('#pdfProgress').classList.add('hidden'),500);
   }
 };
-function renderBatchPreview(){const existing=new Set(problems.map(duplicateKey));let dup=0,need=0;batchParsed.forEach(p=>{p.duplicate=existing.has(duplicateKey(p));if(p.duplicate){p.checked=false;dup++}if(!p.answer)need++});$('#batchSummary').innerHTML=`<span class="pill">선택 파일 ${selectedPdfFiles.length}개</span><span class="pill">감지 문항 ${batchParsed.length}개</span><span class="pill">정답 확인 필요 ${need}개</span><span class="pill">기존 중복 ${dup}개</span>`;$('#batchBody').innerHTML=batchParsed.map((p,i)=>`<tr style="${!p.answer?'background:#fffbeb':''}"><td><input type="checkbox" data-i="${i}" class="bCheck" ${p.checked?'checked':''} ${p.duplicate?'disabled':''}></td><td>${esc(p.sourceFile)}</td><td><select class="preview-meta bSub" data-i="${i}">${SUBJECTS.map(s=>`<option ${s===p.subject?'selected':''}>${s}</option>`).join('')}</select></td><td><input class="preview-meta bEx" data-i="${i}" value="${esc(p.exam)}"></td><td><input class="preview-meta bYr" data-i="${i}" type="number" value="${esc(p.year)}"></td><td>${p.no}</td><td class="qprev"><b>${esc(p.question.slice(0,120))}${p.question.length>120?'…':''}</b>${p.viewPreviewUrl?`<div class="view-rescued-badge">🖼 &lt;보기&gt; 원문 복구</div><div style="margin-top:4px"><img src="${p.viewPreviewUrl}" style="max-width:260px;max-height:150px;border:1px solid #cbd5e1"></div>`:''}<div class="source-tag">${esc((p.choices||'').slice(0,160))}</div></td><td><input class="preview-answer bAns" data-i="${i}" value="${esc(p.answer)}" placeholder="③"></td><td>${p.structureIssues?.length?`<span class="warn-text">구조 오류</span><div class="source-tag">${esc(p.structureIssues.join(' · '))}</div>`:p.duplicate?'<span class="warn-text">중복 제외</span>':p.answer?'<span class="ok-text">정답 감지</span>':'<span class="warn-text">확인 필요</span>'}</td></tr>`).join('')||'<tr><td colspan="9"><div class="empty">문항 번호를 찾지 못했습니다. PDF가 이미지 스캔본이면 텍스트 추출이 되지 않을 수 있습니다.</div></td></tr>';$$('.bCheck').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].checked=e.target.checked);$$('.bSub').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].subject=e.target.value);$$('.bEx').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].exam=e.target.value.trim());$$('.bYr').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].year=+e.target.value||'');$$('.bAns').forEach(x=>x.oninput=e=>{batchParsed[+e.target.dataset.i].answer=e.target.value.trim();});}
+function renderBatchPreview(){
+  const existingByKey=new Map(problems.map(p=>[duplicateKey(p),p]));
+  let dup=0,repair=0,need=0;
+  batchParsed.forEach(p=>{
+    const old=existingByKey.get(duplicateKey(p));
+    p.duplicate=!!old;
+    p.existingId=old?.id||'';
+    p.repairExisting=!!(old && p.originalQuestionBlob);
+    if(p.duplicate)dup++;
+    if(p.repairExisting)repair++;
+    if(!p.answer)need++;
+    // 기존 문항이어도 새 원문 이미지가 있으면 기본 체크: "복구 등록" 대상으로 둔다.
+    if(p.duplicate && !p.repairExisting)p.checked=false;
+    if(p.repairExisting)p.checked=true;
+  });
+
+  $('#batchSummary').innerHTML=
+    `<span class="pill">선택 파일 ${selectedPdfFiles.length}개</span>`+
+    `<span class="pill">감지 문항 ${batchParsed.length}개</span>`+
+    `<span class="pill">정답 확인 필요 ${need}개</span>`+
+    `<span class="pill">기존 중복 ${dup}개</span>`+
+    `<span class="pill">원문 복구 가능 ${repair}개</span>`;
+
+  $('#batchBody').innerHTML=batchParsed.map((p,i)=>`<tr style="${!p.answer?'background:#fffbeb':''}">
+    <td><input type="checkbox" data-i="${i}" class="bCheck" ${p.checked?'checked':''} ${p.duplicate&&!p.repairExisting?'disabled':''}></td>
+    <td>${esc(p.sourceFile)}</td>
+    <td><select class="preview-meta bSub" data-i="${i}">${SUBJECTS.map(s=>`<option ${s===p.subject?'selected':''}>${s}</option>`).join('')}</select></td>
+    <td><input class="preview-meta bEx" data-i="${i}" value="${esc(p.exam)}"></td>
+    <td><input class="preview-meta bYr" data-i="${i}" type="number" value="${esc(p.year)}"></td>
+    <td>${p.no}</td>
+    <td class="qprev">
+      <b>${esc(p.question.slice(0,120))}${p.question.length>120?'…':''}</b>
+      ${p.originalQuestionPreviewUrl?`<div class="view-rescued-badge">🖼 문제 원문 보존 · 보기 포함</div><div style="margin-top:4px"><img src="${p.originalQuestionPreviewUrl}" style="max-width:320px;max-height:220px;border:1px solid #cbd5e1"></div>`:''}
+      <div class="source-tag">${esc((p.choices||'').slice(0,160))}</div>
+    </td>
+    <td><input class="preview-answer bAns" data-i="${i}" value="${esc(p.answer)}" placeholder="③"></td>
+    <td>
+      ${p.repairExisting?'<span class="ok-text">기존 오류문항 원문 복구</span>':
+        p.structureIssues?.length?`<span class="warn-text">구조 오류</span><div class="source-tag">${esc(p.structureIssues.join(' · '))}</div>`:
+        p.duplicate?'<span class="warn-text">기존 중복</span>':
+        p.answer?'<span class="ok-text">정답 감지</span>':'<span class="warn-text">확인 필요</span>'}
+    </td>
+  </tr>`).join('')||'<tr><td colspan="9"><div class="empty">문항 번호를 찾지 못했습니다.</div></td></tr>';
+
+  $$('.bCheck').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].checked=e.target.checked);
+  $$('.bSub').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].subject=e.target.value);
+  $$('.bEx').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].exam=e.target.value.trim());
+  $$('.bYr').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].year=+e.target.value||'');
+  $$('.bAns').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].answer=e.target.value.trim());
+}
 $('#registerBatch').onclick=async()=>{
-  const picked=batchParsed.filter(p=>p.checked&&!p.duplicate);
-  if(picked.some(p=>p.structureIssues?.length)){
-    alert('보기·선택지·페이지 구조 오류가 있는 문항은 등록할 수 없습니다. 해당 문항을 선택 해제해주세요.');
+  const picked=batchParsed.filter(p=>p.checked && (!p.duplicate || p.repairExisting));
+
+  if(picked.some(p=>p.structureIssues?.length && !p.originalQuestionBlob)){
+    alert('원문 이미지가 확보되지 않은 구조 오류 문항은 등록할 수 없습니다.');
     return;
   }
-  if(!picked.length){alert('등록할 문항이 없습니다.');return}
+  if(!picked.length){alert('등록 또는 복구할 문항이 없습니다.');return}
 
-  const missing=picked.filter(p=>!p.subject||!p.exam||!p.year||!p.question||!p.answer);
-  if(missing.length){
-    if(!confirm(`${missing.length}개 문항에 과목/시험/연도/정답 중 빈 값이 있습니다. 빈 문항은 제외하고 나머지만 등록할까요?`))return;
+  const valid=picked.filter(p=>p.subject&&p.exam&&p.year&&p.answer&&p.originalQuestionBlob);
+  if(!valid.length){
+    alert('원문 이미지와 정답이 확인된 문항이 없습니다.');
+    return;
   }
-  const valid=picked.filter(p=>p.subject&&p.exam&&p.year&&p.question&&p.answer);
-  const btn=$('#registerBatch');
-  if(btn){btn.disabled=true;btn.textContent='문제은행 등록 중...';}
 
+  const btn=$('#registerBatch');
+  if(btn){btn.disabled=true;btn.textContent='원문 문제 복구 등록 중...';}
+
+  let repaired=0,created=0;
   try{
     for(let i=0;i<valid.length;i++){
       const p=valid[i];
-      if(p.viewBlob){
-        if(btn)btn.textContent=`<보기> 원문 저장 중... ${i+1}/${valid.length}`;
-        p.viewImageUrl=await uploadViewAsset(p.id,p.viewBlob);
+      // 기존 중복이면 기존 ID를 그대로 사용해서 출제이력/해설 연결을 보존한다.
+      const targetId=p.repairExisting && p.existingId ? p.existingId : p.id;
+      if(btn)btn.textContent=`원문 저장 중... ${i+1}/${valid.length}`;
+      p.originalQuestionImageUrl=await uploadViewAsset(targetId+'-full',p.originalQuestionBlob);
+
+      if(p.repairExisting && p.existingId){
+        const idx=problems.findIndex(q=>String(q.id)===String(p.existingId));
+        if(idx>=0){
+          const old=problems[idx];
+          problems[idx]={
+            ...old,
+            subject:p.subject,exam:p.exam,year:+p.year,no:p.no,
+            unit:p.unit||old.unit,subunit:p.subunit||old.subunit,
+            answer:p.answer||old.answer,
+            // 검색/중복 판정용 텍스트는 최신 추출본으로 갱신
+            question:p.question||old.question,
+            choices:p.choices||old.choices,
+            originalQuestionImageUrl:p.originalQuestionImageUrl,
+            originalQuestionPreserved:true,
+            sourceFile:p.sourceFile,
+            sourceRepairedAt:new Date().toISOString(),
+            updatedAt:new Date().toISOString()
+          };
+          repaired++;
+        }
+      }else{
+        problems.push({
+          id:targetId,subject:p.subject,exam:p.exam,year:+p.year,no:p.no,
+          unit:p.unit,subunit:p.subunit,type:p.type,answer:p.answer,
+          question:p.question,choices:p.choices,
+          originalQuestionImageUrl:p.originalQuestionImageUrl,
+          originalQuestionPreserved:true,
+          explanation:p.explanation||'',
+          explanationStatus:p.explanationStatus||'작성 대기',
+          answerSource:p.answerSource||'',sourceFile:p.sourceFile,
+          status:p.status||'현행화 검수 필요',verifiedAt:p.verifiedAt||'',
+          updatedAt:new Date().toISOString()
+        });
+        created++;
       }
     }
 
-    problems.push(...valid.map(p=>({
-      id:p.id,subject:p.subject,exam:p.exam,year:+p.year,no:p.no,
-      unit:p.unit,subunit:p.subunit,type:p.type,answer:p.answer,
-      question:p.question,choices:p.choices,
-      viewImageUrl:p.viewImageUrl||'',
-      viewRescued:!!p.viewImageUrl,
-      explanation:p.explanation||'',
-      explanationStatus:p.explanationStatus||'작성 대기',
-      answerSource:p.answerSource||'',sourceFile:p.sourceFile,
-      status:p.status||'현행화 검수 필요',verifiedAt:p.verifiedAt||'',
-      updatedAt:new Date().toISOString()
-    })));
+    save();
+    renderBank();refreshFilters();fillSubjects();
 
-    save();renderBank();refreshFilters();fillSubjects();
-    alert(`${valid.length}개 문항을 문제은행에 등록했습니다.${valid.filter(p=>p.viewImageUrl).length?`\n<보기> 원문 복구: ${valid.filter(p=>p.viewImageUrl).length}개`:''}${picked.length-valid.length?`\n${picked.length-valid.length}개는 정보 부족으로 제외했습니다.`:''}`);
+    alert(
+      `원문 문제 등록 완료\n`+
+      `기존 오류문항 복구: ${repaired}개\n`+
+      `신규 등록: ${created}개\n\n`+
+      `※ 기존 문항 ID를 유지하므로 출제이력과 기존 해설은 그대로 보존됩니다.`
+    );
     closeBatch();
   }catch(e){
     console.error(e);
-    alert('등록 중 오류가 발생했습니다.\n'+(e.message||e));
+    alert('원문 문제 복구 중 오류가 발생했습니다.\n'+(e.message||e));
   }finally{
     if(btn){btn.disabled=false;btn.textContent='선택 문항 문제은행 등록';}
   }
 };
-
 
 function renderHistory(){if(!history.length){$('#historyList').innerHTML='<div class="empty">아직 출제 이력이 없습니다.</div>';return}$('#historyList').innerHTML=history.map(h=>`<div class="qcard"><div class="qhead"><b>${esc(h.title)} · ${esc(h.subject)}</b><span class="qmeta">${new Date(h.createdAt).toLocaleString('ko-KR')}</span></div><div style="margin-top:10px"><span class="pill">${h.problemIds.length}문항</span>${h.filters.exam?`<span class="pill">${esc(h.filters.exam)}</span>`:''}${h.filters.year?`<span class="pill">${esc(h.filters.year)}</span>`:''}${h.filters.unit?`<span class="pill">${esc(h.filters.unit)}</span>`:''}</div></div>`).join('')}
 $('#clearHistory').onclick=()=>{if(confirm('출제 이력을 모두 삭제할까요?')){history=[];save();renderHistory();renderBank()}};
@@ -1043,7 +1298,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.6 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.9 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -1126,7 +1381,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.6 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.9 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
