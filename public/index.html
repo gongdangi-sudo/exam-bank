@@ -406,8 +406,81 @@ $('#pdfFiles').onchange=e=>setPdfFiles(e.target.files);$('#clearPdfs').onclick=(
 function setPdfFiles(list){const arr=[...list].filter(f=>f.type==='application/pdf'||f.name.toLowerCase().endsWith('.pdf'));const map=new Map(selectedPdfFiles.map(f=>[f.name+'|'+f.size,f]));arr.forEach(f=>map.set(f.name+'|'+f.size,f));selectedPdfFiles=[...map.values()];renderPdfFiles();}
 function renderPdfFiles(){$('#pdfFileList').innerHTML=selectedPdfFiles.map(f=>`<div class="upload-file"><span>📄 ${esc(f.name)}</span><span>${(f.size/1024/1024).toFixed(2)} MB</span></div>`).join('')||'<div class="help">선택된 PDF가 없습니다.</div>';}
 function detectMeta(name){const stem=name.replace(/\.pdf$/i,'');let year='';const ym=stem.match(/(?:20)?(\d{2})\s*년?/);if(ym){const n=+ym[1];year=n<100?2000+n:n}const exams=['국가직','지방직','서울시','법원직','국회직','군무원','경찰','소방'];const exam=exams.find(x=>stem.includes(x))||'';const subject=SUBJECTS.find(x=>stem.includes(x))||'';return {year,exam,subject};}
-function lineText(items){let out=[],lastY=null,line='';for(const it of items){const y=Math.round(it.transform?.[5]||0);const t=(it.str||'').trim();if(!t)continue;if(lastY===null||Math.abs(y-lastY)<=2){line+=(line?' ':'')+t}else{if(line)out.push(line);line=t}lastY=y}if(line)out.push(line);return out.join('\n');}
-async function extractPdfText(file){const buf=await file.arrayBuffer();const pdf=await pdfjsLib.getDocument({data:buf}).promise;let pages=[];for(let i=1;i<=pdf.numPages;i++){const page=await pdf.getPage(i);const tc=await page.getTextContent();pages.push(lineText(tc.items));}return pages.join('\n');}
+function joinPdfLine(items){
+  items.sort((a,b)=>a.x-b.x);
+  let s='';
+  for(const it of items){
+    const t=String(it.text||'').trim();
+    if(!t)continue;
+    if(!s){s=t;continue}
+    // 한글/영문/숫자 사이에는 공백, 문장부호 앞에는 불필요한 공백 억제
+    if(/^[,.)\]}>%:;!?]/.test(t)) s+=t;
+    else if(/[([{<]$/.test(s)) s+=t;
+    else s+=' '+t;
+  }
+  return s.trim();
+}
+function linesFromPdfItems(items,yTol=2.6){
+  const sorted=items.slice().sort((a,b)=>b.y-a.y||a.x-b.x);
+  const lines=[];
+  for(const it of sorted){
+    let line=lines.find(l=>Math.abs(l.y-it.y)<=yTol);
+    if(!line){line={y:it.y,items:[]};lines.push(line)}
+    line.items.push(it);
+  }
+  return lines.sort((a,b)=>b.y-a.y).map(l=>({
+    y:l.y,
+    x:Math.min(...l.items.map(i=>i.x)),
+    text:joinPdfLine(l.items)
+  })).filter(l=>l.text);
+}
+function extractPageLayoutText(tc,viewport){
+  const W=viewport.width,H=viewport.height;
+  const normalized=(tc.items||[]).map(it=>({
+    text:it.str||'',
+    x:Number(it.transform?.[4]||0),
+    y:Number(it.transform?.[5]||0),
+    w:Number(it.width||0),
+    h:Math.abs(Number(it.transform?.[3]||0))||8
+  })).filter(it=>String(it.text).trim());
+
+  // 페이지 최상단/최하단의 헤더·푸터는 본문 문항 분리에서 제외.
+  const body=normalized.filter(it=>it.y>H*0.045 && it.y<H*0.955);
+  const left=body.filter(it=>it.x<W*0.49);
+  const right=body.filter(it=>it.x>=W*0.51);
+  const center=body.filter(it=>it.x>=W*0.49&&it.x<W*0.51);
+
+  const leftChars=left.reduce((n,it)=>n+String(it.text).length,0);
+  const rightChars=right.reduce((n,it)=>n+String(it.text).length,0);
+  const total=leftChars+rightChars+center.reduce((n,it)=>n+String(it.text).length,0);
+
+  // 두 열에 각각 충분한 텍스트가 있으면 2단으로 판정.
+  const twoColumn=total>0 && leftChars/total>0.28 && rightChars/total>0.28;
+
+  if(twoColumn){
+    // 중앙선 주변 텍스트는 시작 x 기준 가장 가까운 열에 배정.
+    for(const it of center){
+      (it.x<W*0.5?left:right).push(it);
+    }
+    const lt=linesFromPdfItems(left).map(x=>x.text).join('\n');
+    const rt=linesFromPdfItems(right).map(x=>x.text).join('\n');
+    return lt+'\n'+rt;
+  }
+
+  return linesFromPdfItems(body).map(x=>x.text).join('\n');
+}
+async function extractPdfText(file){
+  const buf=await file.arrayBuffer();
+  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
+  const pages=[];
+  for(let i=1;i<=pdf.numPages;i++){
+    const page=await pdf.getPage(i);
+    const viewport=page.getViewport({scale:1});
+    const tc=await page.getTextContent();
+    pages.push(extractPageLayoutText(tc,viewport));
+  }
+  return pages.join('\n');
+}
 function splitQuestions(text){text=text.replace(/\r/g,'\n').replace(/[ \t]+\n/g,'\n');const rx=/(?:^|\n)\s*(?:문\s*)?(\d{1,3})\s*[\.．\)]\s*/gm;let ms=[...text.matchAll(rx)];if(!ms.length){const rx2=/(?:^|\n)\s*(\d{1,3})\s+([가-힣A-Za-z｢『“\[])/gm;ms=[...text.matchAll(rx2)]}const chunks=[];for(let i=0;i<ms.length;i++){const no=+ms[i][1];const start=ms[i].index+ms[i][0].length;const end=i+1<ms.length?ms[i+1].index:text.length;let chunk=text.slice(start,end).trim();if(chunk.length>8)chunks.push({no,chunk})}return chunks;}
 function circled(v){const m={'1':'①','2':'②','3':'③','4':'④','5':'⑤'};return m[v]||v}
 const DARK_ANSWER_MAP={'❶':'①','❷':'②','❸':'③','❹':'④','❺':'⑤','➊':'①','➋':'②','➌':'③','➍':'④','➎':'⑤'};
@@ -468,6 +541,9 @@ function cleanSourceNoise(t){
 
   // OCR 잔여물/공백
   s=s.replace(/제\s*[①②③④⑤1-5]?\s*선자?문제집/gi,' ');
+  s=s.replace(/\b\d+\s*과목\s*[:：]\s*과목\s*구분\s*없음\b/gi,' ');
+  s=s.replace(/\b과목\s*구분\s*없음\b/gi,' ');
+  s=s.replace(/\b\d+\s*과목\s*[:：][^\n]{0,40}/gi,' ');
   return s.replace(/[ \t]{2,}/g,' ')
           .replace(/\n[ \t]+/g,'\n')
           .replace(/[ \t]+\n/g,'\n')
@@ -475,6 +551,41 @@ function cleanSourceNoise(t){
           .trim();
 }
 function parseQuestionChunk(o){const raw=cleanSourceNoise(o.chunk);const answer=detectAnswer(raw);const answerSource=detectAnswerSource(raw);let c=cleanAnswerMarks(raw);const cm=c.search(/[①②③④⑤]/);let question=cm>=0?c.slice(0,cm).trim():c.trim();let choices=cm>=0?c.slice(cm).trim():'';question=cleanSourceNoise(question);choices=cleanSourceNoise(choices);return {no:o.no,question,choices,answer,answerSource};}
+
+
+function validateParsedQuestion(p){
+  const q=String(p.question||'');
+  const c=String(p.choices||'');
+  const marks=[...c.matchAll(/[①②③④⑤]/g)].map(m=>m[0]);
+  const unique=[...new Set(marks)];
+  const issues=[];
+
+  // 일반 객관식은 최소 4개 선택지를 요구.
+  if(unique.length<4) issues.push(`선택지 ${unique.length}개만 감지`);
+
+  // 선택지 순서가 ①→②→③→④ 형태인지 확인.
+  const order='①②③④⑤';
+  let last=-1;
+  for(const m of marks){
+    const idx=order.indexOf(m);
+    if(idx<last){issues.push('선택지 순서 오류');break}
+    last=idx;
+  }
+
+  // <보기>/ㄱㄴㄷㄹ형 문항에서 보기 본문이 통째로 유실된 경우 차단.
+  const asksView=/[<〈＜]\s*보기|보기\s*[1ⅠI]?|옳은\s*것만.*고르면|모두\s*고르면/i.test(q);
+  const hasViewBody=/[ㄱ-ㄹ]\s*[.、)]/.test(q)||/[ㄱ-ㄹ]\s+/.test(q);
+  const comboChoices=/[ㄱ-ㄹ]/.test(c);
+  if(asksView && comboChoices && !hasViewBody) issues.push('보기 본문 누락 의심');
+
+  // 페이지 헤더/메타 정보가 남아 있으면 출제 차단.
+  if(/과목\s*구분\s*없음|전자문제집\s*CBT|comcbt\.com/i.test(q+' '+c)) issues.push('페이지 안내문 혼입');
+
+  // 너무 짧은 문항은 파싱 실패 가능성.
+  if(q.replace(/\s/g,'').length<12) issues.push('문제 본문 너무 짧음');
+
+  return {ok:issues.length===0,issues};
+}
 
 function repairExistingSourceNoise(){
   let changed=0;
@@ -518,9 +629,21 @@ document.addEventListener('click',e=>{
 });
 
 function duplicateKey(p){return (p.subject+'|'+p.exam+'|'+p.year+'|'+(p.question||'')).replace(/\s+/g,'').toLowerCase()}
-$('#analyzePdfs').onclick=async()=>{if(!selectedPdfFiles.length){alert('PDF 파일을 먼저 선택해주세요.');return}if(!window.pdfjsLib){alert('PDF 분석 라이브러리를 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');return}batchParsed=[];$('#batchResult').classList.add('hidden');$('#pdfProgress').classList.remove('hidden');const bar=$('#pdfProgress i');try{for(let fi=0;fi<selectedPdfFiles.length;fi++){const f=selectedPdfFiles[fi];bar.style.width=Math.round(fi/selectedPdfFiles.length*100)+'%';const meta=detectMeta(f.name);const text=await extractPdfText(f);const parts=splitQuestions(text);parts.forEach(x=>{const q=parseQuestionChunk(x);batchParsed.push({id:uid(),sourceFile:f.name,subject:meta.subject||$('#bSubject').value,exam:meta.exam||$('#bExam').value.trim(),year:meta.year||(+$('#bYear').value||''),unit:$('#bUnit').value.trim(),subunit:'',type:'',explanation:'',explanationStatus:'작성 대기',status:'현행화 검수 필요',verifiedAt:'',...q,checked:true})})}bar.style.width='100%';renderBatchPreview();$('#batchResult').classList.remove('hidden')}catch(err){console.error(err);alert('PDF 분석 중 오류가 발생했습니다. 텍스트형 PDF인지 확인해주세요.')}finally{setTimeout(()=>$('#pdfProgress').classList.add('hidden'),500)}};
-function renderBatchPreview(){const existing=new Set(problems.map(duplicateKey));let dup=0,need=0;batchParsed.forEach(p=>{p.duplicate=existing.has(duplicateKey(p));if(p.duplicate){p.checked=false;dup++}if(!p.answer)need++});$('#batchSummary').innerHTML=`<span class="pill">선택 파일 ${selectedPdfFiles.length}개</span><span class="pill">감지 문항 ${batchParsed.length}개</span><span class="pill">정답 확인 필요 ${need}개</span><span class="pill">기존 중복 ${dup}개</span>`;$('#batchBody').innerHTML=batchParsed.map((p,i)=>`<tr style="${!p.answer?'background:#fffbeb':''}"><td><input type="checkbox" data-i="${i}" class="bCheck" ${p.checked?'checked':''} ${p.duplicate?'disabled':''}></td><td>${esc(p.sourceFile)}</td><td><select class="preview-meta bSub" data-i="${i}">${SUBJECTS.map(s=>`<option ${s===p.subject?'selected':''}>${s}</option>`).join('')}</select></td><td><input class="preview-meta bEx" data-i="${i}" value="${esc(p.exam)}"></td><td><input class="preview-meta bYr" data-i="${i}" type="number" value="${esc(p.year)}"></td><td>${p.no}</td><td class="qprev"><b>${esc(p.question.slice(0,120))}${p.question.length>120?'…':''}</b><div class="source-tag">${esc((p.choices||'').slice(0,160))}</div></td><td><input class="preview-answer bAns" data-i="${i}" value="${esc(p.answer)}" placeholder="③"></td><td>${p.duplicate?'<span class="warn-text">중복 제외</span>':p.answer?'<span class="ok-text">정답 감지</span>':'<span class="warn-text">확인 필요</span>'}</td></tr>`).join('')||'<tr><td colspan="9"><div class="empty">문항 번호를 찾지 못했습니다. PDF가 이미지 스캔본이면 텍스트 추출이 되지 않을 수 있습니다.</div></td></tr>';$$('.bCheck').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].checked=e.target.checked);$$('.bSub').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].subject=e.target.value);$$('.bEx').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].exam=e.target.value.trim());$$('.bYr').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].year=+e.target.value||'');$$('.bAns').forEach(x=>x.oninput=e=>{batchParsed[+e.target.dataset.i].answer=e.target.value.trim();});}
-$('#registerBatch').onclick=()=>{const picked=batchParsed.filter(p=>p.checked&&!p.duplicate);if(!picked.length){alert('등록할 문항이 없습니다.');return}const missing=picked.filter(p=>!p.subject||!p.exam||!p.year||!p.question||!p.answer);if(missing.length){if(!confirm(`${missing.length}개 문항에 과목/시험/연도/정답 중 빈 값이 있습니다. 빈 문항은 제외하고 나머지만 등록할까요?`))return}const valid=picked.filter(p=>p.subject&&p.exam&&p.year&&p.question&&p.answer);problems.push(...valid.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:+p.year,no:p.no,unit:p.unit,subunit:p.subunit,type:p.type,answer:p.answer,question:p.question,choices:p.choices,explanation:p.explanation||'',explanationStatus:p.explanationStatus||'작성 대기',answerSource:p.answerSource||'',sourceFile:p.sourceFile,status:p.status||'현행화 검수 필요',verifiedAt:p.verifiedAt||'',updatedAt:new Date().toISOString()})));save();renderBank();refreshFilters();fillSubjects();alert(`${valid.length}개 문항을 문제은행에 등록했습니다.${picked.length-valid.length?`\n${picked.length-valid.length}개는 정보 부족으로 제외했습니다.`:''}`);closeBatch();};
+$('#analyzePdfs').onclick=async()=>{if(!selectedPdfFiles.length){alert('PDF 파일을 먼저 선택해주세요.');return}if(!window.pdfjsLib){alert('PDF 분석 라이브러리를 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');return}batchParsed=[];$('#batchResult').classList.add('hidden');$('#pdfProgress').classList.remove('hidden');const bar=$('#pdfProgress i');try{for(let fi=0;fi<selectedPdfFiles.length;fi++){const f=selectedPdfFiles[fi];bar.style.width=Math.round(fi/selectedPdfFiles.length*100)+'%';const meta=detectMeta(f.name);const text=await extractPdfText(f);const parts=splitQuestions(text);parts.forEach(x=>{
+  const q=parseQuestionChunk(x);
+  const v=validateParsedQuestion(q);
+  batchParsed.push({
+    id:uid(),sourceFile:f.name,subject:meta.subject||$('#bSubject').value,
+    exam:meta.exam||$('#bExam').value.trim(),year:meta.year||(+$('#bYear').value||''),
+    unit:$('#bUnit').value.trim(),subunit:'',type:'',explanation:'',
+    explanationStatus:'작성 대기',
+    status:v.ok?'현행화 검수 필요':'분석 실패',
+    structureIssues:v.issues,
+    verifiedAt:'',...q,checked:v.ok
+  })
+})}bar.style.width='100%';renderBatchPreview();$('#batchResult').classList.remove('hidden')}catch(err){console.error(err);alert('PDF 분석 중 오류가 발생했습니다. 텍스트형 PDF인지 확인해주세요.')}finally{setTimeout(()=>$('#pdfProgress').classList.add('hidden'),500)}};
+function renderBatchPreview(){const existing=new Set(problems.map(duplicateKey));let dup=0,need=0;batchParsed.forEach(p=>{p.duplicate=existing.has(duplicateKey(p));if(p.duplicate){p.checked=false;dup++}if(!p.answer)need++});$('#batchSummary').innerHTML=`<span class="pill">선택 파일 ${selectedPdfFiles.length}개</span><span class="pill">감지 문항 ${batchParsed.length}개</span><span class="pill">정답 확인 필요 ${need}개</span><span class="pill">기존 중복 ${dup}개</span>`;$('#batchBody').innerHTML=batchParsed.map((p,i)=>`<tr style="${!p.answer?'background:#fffbeb':''}"><td><input type="checkbox" data-i="${i}" class="bCheck" ${p.checked?'checked':''} ${p.duplicate?'disabled':''}></td><td>${esc(p.sourceFile)}</td><td><select class="preview-meta bSub" data-i="${i}">${SUBJECTS.map(s=>`<option ${s===p.subject?'selected':''}>${s}</option>`).join('')}</select></td><td><input class="preview-meta bEx" data-i="${i}" value="${esc(p.exam)}"></td><td><input class="preview-meta bYr" data-i="${i}" type="number" value="${esc(p.year)}"></td><td>${p.no}</td><td class="qprev"><b>${esc(p.question.slice(0,120))}${p.question.length>120?'…':''}</b><div class="source-tag">${esc((p.choices||'').slice(0,160))}</div></td><td><input class="preview-answer bAns" data-i="${i}" value="${esc(p.answer)}" placeholder="③"></td><td>${p.structureIssues?.length?`<span class="warn-text">구조 오류</span><div class="source-tag">${esc(p.structureIssues.join(' · '))}</div>`:p.duplicate?'<span class="warn-text">중복 제외</span>':p.answer?'<span class="ok-text">정답 감지</span>':'<span class="warn-text">확인 필요</span>'}</td></tr>`).join('')||'<tr><td colspan="9"><div class="empty">문항 번호를 찾지 못했습니다. PDF가 이미지 스캔본이면 텍스트 추출이 되지 않을 수 있습니다.</div></td></tr>';$$('.bCheck').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].checked=e.target.checked);$$('.bSub').forEach(x=>x.onchange=e=>batchParsed[+e.target.dataset.i].subject=e.target.value);$$('.bEx').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].exam=e.target.value.trim());$$('.bYr').forEach(x=>x.oninput=e=>batchParsed[+e.target.dataset.i].year=+e.target.value||'');$$('.bAns').forEach(x=>x.oninput=e=>{batchParsed[+e.target.dataset.i].answer=e.target.value.trim();});}
+$('#registerBatch').onclick=()=>{const picked=batchParsed.filter(p=>p.checked&&!p.duplicate);if(picked.some(p=>p.structureIssues?.length)){alert('보기·선택지·페이지 구조 오류가 있는 문항은 등록할 수 없습니다. 해당 문항을 선택 해제해주세요.');return}if(!picked.length){alert('등록할 문항이 없습니다.');return}const missing=picked.filter(p=>!p.subject||!p.exam||!p.year||!p.question||!p.answer);if(missing.length){if(!confirm(`${missing.length}개 문항에 과목/시험/연도/정답 중 빈 값이 있습니다. 빈 문항은 제외하고 나머지만 등록할까요?`))return}const valid=picked.filter(p=>p.subject&&p.exam&&p.year&&p.question&&p.answer);problems.push(...valid.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:+p.year,no:p.no,unit:p.unit,subunit:p.subunit,type:p.type,answer:p.answer,question:p.question,choices:p.choices,explanation:p.explanation||'',explanationStatus:p.explanationStatus||'작성 대기',answerSource:p.answerSource||'',sourceFile:p.sourceFile,status:p.status||'현행화 검수 필요',verifiedAt:p.verifiedAt||'',updatedAt:new Date().toISOString()})));save();renderBank();refreshFilters();fillSubjects();alert(`${valid.length}개 문항을 문제은행에 등록했습니다.${picked.length-valid.length?`\n${picked.length-valid.length}개는 정보 부족으로 제외했습니다.`:''}`);closeBatch();};
 
 function renderHistory(){if(!history.length){$('#historyList').innerHTML='<div class="empty">아직 출제 이력이 없습니다.</div>';return}$('#historyList').innerHTML=history.map(h=>`<div class="qcard"><div class="qhead"><b>${esc(h.title)} · ${esc(h.subject)}</b><span class="qmeta">${new Date(h.createdAt).toLocaleString('ko-KR')}</span></div><div style="margin-top:10px"><span class="pill">${h.problemIds.length}문항</span>${h.filters.exam?`<span class="pill">${esc(h.filters.exam)}</span>`:''}${h.filters.year?`<span class="pill">${esc(h.filters.year)}</span>`:''}${h.filters.unit?`<span class="pill">${esc(h.filters.unit)}</span>`:''}</div></div>`).join('')}
 $('#clearHistory').onclick=()=>{if(confirm('출제 이력을 모두 삭제할까요?')){history=[];save();renderHistory();renderBank()}};
@@ -551,7 +674,7 @@ $('#generateBtn').onclick=()=>{const subject=$('#fSubject').value,exam=$('#fExam
 const oldRenderBatchPreview=renderBatchPreview;
 renderBatchPreview=function(){oldRenderBatchPreview();batchParsed.forEach((p,i)=>{if(!p.answer)p.status='정답 확인 필요';else if(!p.status)p.status='출제 가능'});const rows=$$('#batchBody tr');rows.forEach((tr,i)=>{if(!batchParsed[i])return;const td=document.createElement('td');td.innerHTML=`<select class="preview-meta bStatus" data-i="${i}"><option ${batchParsed[i].status==='현행화 검수 필요'?'selected':''}>현행화 검수 필요</option><option ${batchParsed[i].status==='정답 확인 필요'?'selected':''}>정답 확인 필요</option><option>출제 가능</option><option>현행화 완료</option><option>분석 실패</option><option>중복 제외</option></select>`;tr.appendChild(td)});$$('.bStatus').forEach(x=>x.onchange=e=>{const p=batchParsed[+e.target.dataset.i];p.status=e.target.value;if(['출제 가능','현행화 완료'].includes(p.status))p.verifiedAt=new Date().toISOString()});const head=$('#batchBody')?.closest('table')?.querySelector('thead tr');if(head&&!head.querySelector('.statusHead')){const th=document.createElement('th');th.className='statusHead';th.textContent='검수상태';head.appendChild(th)}};
 const oldRegister=$('#registerBatch').onclick;
-$('#registerBatch').onclick=()=>{if(!selectedPdfFiles.length||!batchParsed.length){alert('선택한 전체 PDF 분석을 먼저 완료해주세요.');return}const picked=batchParsed.filter(p=>p.checked&&!p.duplicate);if(picked.some(p=>p.status==='정답 확인 필요'||!p.answer)){alert('정답을 확인하지 못한 문항이 선택되어 있습니다. 정답 확인 후 등록하거나 선택 해제해주세요.');return}oldRegister();};
+$('#registerBatch').onclick=()=>{if(!selectedPdfFiles.length||!batchParsed.length){alert('선택한 전체 PDF 분석을 먼저 완료해주세요.');return}const picked=batchParsed.filter(p=>p.checked&&!p.duplicate);if(picked.some(p=>p.structureIssues?.length)){alert('보기·선택지·페이지 구조 오류가 있는 문항은 등록할 수 없습니다. 해당 문항을 선택 해제해주세요.');return}if(picked.some(p=>p.status==='정답 확인 필요'||!p.answer)){alert('정답을 확인하지 못한 문항이 선택되어 있습니다. 정답 확인 후 등록하거나 선택 해제해주세요.');return}oldRegister();};
 
 function downloadJson(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 $('#explainExportBtn').onclick=()=>{
@@ -684,7 +807,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.4 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.5 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -767,7 +890,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.4 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.5 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
