@@ -515,7 +515,7 @@ function assetUrl(u){
 }
 function materialDisclaimerHTML(){return `<div class="material-disclaimer">본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</div>`;}
 function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-sheet problem-sheet" id="problemSheet"><div class="sheet-head"><div><div class="sheet-title">${esc(m.title)}</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="paper-q">${p.originalQuestionImageUrl
-  ? `${p.sourceMode==='officialOriginal'?`<div class="paper-q-title">문 ${i+1}.</div>`:''}<div class="original-question-wrap"><img src="${esc(assetUrl(p.originalQuestionImageUrl))}" alt="문 ${i+1} 원문기출" onerror="this.outerHTML=`<div style=&quot;padding:10px;border:1px solid #ef4444;color:#b91c1c;font-size:12px&quot;>원문 이미지 불러오기 실패 · 문제은행에서 원본 PDF로 다시 등록하거나 관리자에게 문의해주세요.</div>`"></div>`
+  ? `${p.sourceMode==='officialOriginal'?`<div class="paper-q-title">문 ${i+1}.</div>`:''}<div class="original-question-wrap"><img src="${esc(assetUrl(p.originalQuestionImageUrl))}" alt="문 ${i+1} 원문기출" onerror="this.onerror=null;this.style.display='none';this.nextElementSibling.style.display='block'"><div style="display:none;padding:10px;border:1px solid #ef4444;color:#b91c1c;font-size:12px">원문 이미지 불러오기 실패 · 문제은행에서 원본 PDF로 다시 등록하거나 관리자에게 문의해주세요.</div></div>`
   : `<div class="paper-q-title">문 ${i+1}. ${esc(cleanSourceNoise(p.question))}</div>${p.viewImageUrl?`<div class="view-image-wrap"><img src="${esc(assetUrl(p.viewImageUrl))}" alt="보기 원문"></div>`:''}<div class="paper-q-choices">${esc(cleanSourceNoise(p.choices||''))}</div>`
 }</div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i)=>`<div><span class="n">${i+1}</span> ${esc(p.answer)}</div>`).join('');return `<section class="exam-sheet solution-sheet" id="solutionSheet"><div class="sheet-head"><div><div class="sheet-title">매일 확인 테스트 해설</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="answer-grid">${cells}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="solution-item"><div class="sol-no">문 ${i+1}.</div><div class="sol-answer">[정답] ${esc(p.answer)}</div><div class="sol-label">[해설]</div><div class="sol-body">${(p.editedExplanation||p.originalExplanation||p.explanation)?esc(p.editedExplanation||p.originalExplanation||p.explanation):'<div class="missing-explanation">※ 상세 해설 미작성<br><span>문제은행에서 ‘상세 해설용 JSON 내보내기’ 또는 위의 ‘현재 출제문항 상세 해설 요청’을 사용하세요.</span></div>'}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
@@ -541,7 +541,8 @@ $('#closeOfficial').onclick=closeOfficialModal;
 $('#cancelOfficial').onclick=closeOfficialModal;
 $('#clearOfficial').onclick=()=>{officialParsed=[];$('#oProblemPdf').value='';$('#oAnswerPdf').value='';$('#officialResult').classList.add('hidden');};
 $('#analyzeOfficial').onclick=analyzeOfficialSource;
-$('#registerOfficial').onclick=registerOfficialSource;$('#closeBatch').onclick=closeBatch;$('#cancelBatch').onclick=closeBatch;
+$('#registerOfficial').onclick=registerOfficialSource;
+initOfficialSubjectSelect();$('#closeBatch').onclick=closeBatch;$('#cancelBatch').onclick=closeBatch;
 $('#pdfDrop').onclick=()=>$('#pdfFiles').click();
 $('#pdfDrop').ondragover=e=>{e.preventDefault();$('#pdfDrop').classList.add('drag')};$('#pdfDrop').ondragleave=()=>$('#pdfDrop').classList.remove('drag');$('#pdfDrop').ondrop=e=>{e.preventDefault();$('#pdfDrop').classList.remove('drag');setPdfFiles(e.dataTransfer.files)};
 $('#pdfFiles').onchange=e=>setPdfFiles(e.target.files);$('#clearPdfs').onclick=()=>{selectedPdfFiles=[];batchParsed=[];$('#pdfFiles').value='';$('#pdfFileList').innerHTML='';$('#batchResult').classList.add('hidden')};
@@ -1271,6 +1272,14 @@ if(!$("#fDate").value){const now=new Date();$("#fDate").value=`${now.getFullYear
 
 
 // ===== 공식 원본 문제 + 공식 정답표 등록 v20 =====
+
+function initOfficialSubjectSelect(){
+  const el=$('#oSubject');
+  if(el && !el.options.length){
+    el.innerHTML=SUBJECTS.map(x=>`<option>${x}</option>`).join('');
+  }
+}
+
 let officialParsed=[];
 let officialProblemDoc=null;
 
@@ -1665,7 +1674,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v20 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v20.1 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -1748,7 +1757,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v20 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v20.1 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
