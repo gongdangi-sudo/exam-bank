@@ -17,3 +17,4 @@ D1
 
 주의
 - GitHub 저장소를 삭제해도 Cloudflare D1 데이터베이스 exam-bank-db는 별도 자원이므로 자동 삭제되지 않습니다.
+Cloudflare deploy
