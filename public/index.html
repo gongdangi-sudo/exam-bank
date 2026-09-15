@@ -14,7 +14,86 @@
     .upload-drop{border:2px dashed #93c5fd;background:#f8fbff;border-radius:16px;padding:28px;text-align:center;cursor:pointer}.upload-drop.drag{background:#eff6ff;border-color:#315efb}.upload-drop b{display:block;font-size:17px;margin-bottom:7px}.upload-drop span{color:var(--muted);font-size:13px}.upload-list{margin-top:14px;display:grid;gap:8px}.upload-file{display:flex;justify-content:space-between;gap:12px;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px}.ok-text{color:var(--ok);font-weight:700}.warn-text{color:#b45309;font-weight:700}.batch-summary{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.batch-summary .pill{font-size:12px;padding:6px 9px}.preview-answer{width:64px!important;padding:7px!important}.preview-meta{width:100px!important;padding:7px!important}.progress{height:8px;background:#e5e7eb;border-radius:999px;overflow:hidden;margin-top:12px}.progress>i{display:block;height:100%;width:0;background:var(--brand);transition:.2s}.batch-table td{vertical-align:middle}.batch-table .qprev{min-width:300px;max-width:520px;white-space:normal;line-height:1.45}.source-tag{font-size:11px;color:#6b7280}.btn.success{background:#dcfce7;color:#166534}.btn.warn{background:#fef3c7;color:#92400e}.variant-tag{display:inline-block;margin-left:6px;padding:2px 7px;border-radius:999px;background:#eef2ff;color:#3730a3;font-size:10px;font-weight:700}
     @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}.app{grid-template-columns:1fr}.side{height:auto;position:static}.nav{display:flex;gap:6px;overflow:auto}.nav button{white-space:nowrap}.main{padding:20px}}
     @media(max-width:620px){.grid,.form-grid,.two,.stat-row{grid-template-columns:1fr}.top{align-items:flex-start;gap:12px;flex-direction:column}}
-    @media print{body{background:#fff}.side,.top,.no-print,.actions,.notice{display:none!important}.app{display:block}.main{padding:0;max-width:none}.panel{box-shadow:none;border:0;padding:0;margin:0}.exam-sheet{border:1.5px solid #1473e6;margin:0;max-width:none;min-height:275mm;padding:12mm 13mm 10mm;page-break-after:always}.paper-columns{column-gap:10mm}.paper-q{font-size:10.2pt}.solution-item{font-size:9.4pt}.sheet-logo{position:relative}.only-screen{display:none!important}@page{size:A4;margin:8mm}}
+    @media print{
+  body{background:#fff}
+  .side,.top,.no-print,.actions,.notice{display:none!important}
+  .app{display:block}
+  .main{padding:0;max-width:none}
+  .panel{box-shadow:none;border:0;padding:0;margin:0}
+  .exam-sheet{
+    border:1.5px solid #1473e6;
+    margin:0;
+    max-width:none;
+    min-height:0;
+    height:auto;
+    padding:10mm 11mm 10mm;
+    page-break-after:auto;
+    break-after:auto;
+    overflow:visible;
+  }
+
+  /* 문제지는 2단 형식을 유지하되 한 장에 억지로 맞추지 않음 */
+  .problem-sheet .paper-columns{
+    column-count:2;
+    column-gap:9mm;
+    column-rule:1.5px dotted #67aaf9;
+    column-fill:auto;
+  }
+
+  /* 해설지는 상세 해설이 길어지므로 1단으로 자연스럽게 여러 페이지 사용 */
+  .solution-sheet .paper-columns{
+    column-count:1;
+    column-rule:none;
+  }
+
+  .paper-q{
+    font-size:11pt;
+    line-height:1.58;
+    break-inside:avoid-page;
+    page-break-inside:avoid;
+    margin-bottom:7mm;
+  }
+  .paper-q-title,.paper-q-choices{
+    white-space:pre-wrap;
+    overflow:visible;
+    max-height:none;
+  }
+
+  .solution-item{
+    font-size:10.5pt;
+    line-height:1.65;
+    margin-bottom:8mm;
+    break-inside:auto;
+    page-break-inside:auto;
+  }
+  .solution-item .sol-no,
+  .solution-item .sol-answer,
+  .solution-item .sol-label{
+    break-after:avoid;
+    page-break-after:avoid;
+  }
+  .solution-item .sol-body{
+    white-space:pre-wrap;
+    overflow:visible;
+    max-height:none;
+  }
+
+  .answer-grid{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+  .sheet-head,.subject-ribbon{
+    break-after:avoid;
+    page-break-after:avoid;
+  }
+  .sheet-logo,.material-disclaimer{
+    position:relative;
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+  .only-screen{display:none!important}
+  @page{size:A4;margin:8mm}
+}
 
     /* 해설 편집실 */
     .explain-toolbar{display:grid;grid-template-columns:1fr 1fr 2fr;gap:12px;align-items:end}
@@ -307,7 +386,7 @@ function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i
 function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const payload={schema:'exam-bank-explanations-v2',scope:'current-set',instructions:'문제 원문과 보기는 절대 수정하지 않는다. 각 문항마다 [정답 근거] → [보기별 해설] → [핵심 정리] 순서로 아주 자세한 해설을 작성한다. 보기별 해설은 ①부터 마지막 보기까지 각각 (O)/(X)를 명시하고 최소 1~3문장으로 설명한다. 법령·제도·판례 문제는 현행 시행 기준과 최신 판례를 확인하고, 기간·숫자·기관·절차·요건을 정확히 검증한다. 과거 기준과 현행 기준이 다르면 차이를 명시한다. 불확실하면 추측하지 말고 [검수 필요]와 사유를 적는다. 결과는 각 item의 explanation 필드에 완성된 해설 전체를 넣는다.',items:currentSet.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,choices:p.choices,answer:p.answer,answerSource:p.answerSource||'',explanation:p.explanation||''}))};downloadJson('현재출제문항_상세해설작성용.json',payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=()=>window.print();$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const payload={schema:'exam-bank-explanations-v2',scope:'current-set',instructions:'문제 원문과 보기는 절대 수정하지 않는다. 각 문항마다 [정답 근거] → [보기별 해설] → [핵심 정리] 순서로 아주 자세한 해설을 작성한다. 보기별 해설은 ①부터 마지막 보기까지 각각 (O)/(X)를 명시하고 최소 1~3문장으로 설명한다. 법령·제도·판례 문제는 현행 시행 기준과 최신 판례를 확인하고, 기간·숫자·기관·절차·요건을 정확히 검증한다. 과거 기준과 현행 기준이 다르면 차이를 명시한다. 불확실하면 추측하지 말고 [검수 필요]와 사유를 적는다. 결과는 각 item의 explanation 필드에 완성된 해설 전체를 넣는다.',items:currentSet.map(p=>({id:p.id,subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,choices:p.choices,answer:p.answer,answerSource:p.answerSource||'',explanation:p.explanation||''}))};downloadJson('현재출제문항_상세해설작성용.json',payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=()=>window.print();$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 function exportWord(mode='problem'){if(!currentSet.length)return;const m=sheetMeta();const body=mode==='solution'?solutionSheetHTML():problemSheetHTML();const css=`body{font-family:'Malgun Gothic';color:#111}.exam-sheet{border:1px solid #1473e6;padding:20px}.sheet-head{display:flex;justify-content:space-between}.sheet-title{font-weight:bold;font-size:18pt}.subject-ribbon{text-align:center;font-weight:bold;margin:15px}.paper-q,.solution-item{margin:0 0 14px;line-height:1.5}.paper-q-title,.sol-no,.sol-answer,.sol-label{font-weight:bold}.paper-q-choices,.sol-body{white-space:pre-wrap}.answer-grid{margin:10px 0}.sheet-logo{text-align:right;font-weight:bold}.material-disclaimer{margin-top:18px;padding-top:10px;border-top:1px solid #cbd5e1;font-size:9pt;line-height:1.55;color:#64748b;text-align:left}`;const html=`<html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'});downloadBlob(blob,(m.subject||'시험')+(mode==='solution'?'_해설':'_문제')+'.doc');}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
@@ -605,7 +684,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.3 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.4 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -688,7 +767,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.3 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.4 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
