@@ -382,7 +382,7 @@
 
     <div class="notice" style="margin-top:14px">
       <b>권장 방식:</b> 인사혁신처 등에서 배포한 <b>문제 원본 PDF</b>와 <b>정답표 PDF</b>를 각각 올립니다.
-      문제 본문·&lt;보기&gt;·선택지는 좌표 기반으로 텍스트 구조화합니다. 텍스트 구조화가 불확실한 표·그림·특수문항만 원본 이미지로 예외 처리합니다.
+      문제 본문·&lt;보기&gt;·선택지는 좌표 기반으로 텍스트 구조화합니다. <b>일반 객관식·ㄱㄴㄷ 보기형·○ 보기형·(가)(나)형은 텍스트를 우선</b>하고, 표·그림처럼 실제로 텍스트 보존이 어려운 문항만 원본 이미지로 예외 처리합니다.
     </div>
 
     <div class="form-grid" style="margin-top:16px">
@@ -1391,7 +1391,10 @@ async function parseOfficialAnswers(file,subject,book){
 
 function officialQuestionRegions(tc,viewport,pageNo){
   const W=viewport.width,H=viewport.height;
-  const body=rawPdfItems(tc).filter(it=>it.y>H*0.035&&it.y<H*0.965);
+  // 공식 시험지는 페이지 맨 아래까지 선택지가 배치되는 경우가 많습니다.
+  // 기존 3.5% 하단 컷은 ④번 선택지를 잘라내어 텍스트 파싱을 실패시켰습니다.
+  // 하단 0.8%까지만 제외하고, 상단 헤더는 기존처럼 제외합니다.
+  const body=rawPdfItems(tc).filter(it=>it.y>H*0.008&&it.y<H*0.965);
   const cols=[
     {name:'left',x0:0,x1:W*0.505,items:body.filter(it=>(it.x+it.w/2)<W*0.505)},
     {name:'right',x0:W*0.495,x1:W,items:body.filter(it=>(it.x+it.w/2)>=W*0.495)}
@@ -1570,7 +1573,7 @@ function renderOfficialPreview(){
              ${p.viewText?`<div class="official-view-box">${esc(p.viewText)}</div>`:''}
              <div class="official-choice-list">${esc(p.choices)}</div>
            </div>`
-        : `<span class="parse-fallback">이미지 예외 처리 · ${esc(p.parseReason)}</span>
+        : `<span class="parse-fallback">이미지 예외 처리(텍스트 구조화 실패) · ${esc(p.parseReason)}</span>
            ${p.previewUrl?`<img class="official-preview-img" src="${p.previewUrl}">`:''}`
       }
     </td>
@@ -1829,7 +1832,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.1 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -1912,7 +1915,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.1 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
