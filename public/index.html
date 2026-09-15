@@ -25,21 +25,20 @@
   .main{padding:0!important;max-width:none!important}
   .panel{box-shadow:none!important;border:0!important;padding:0!important;margin:0!important}
 
-  /* 본문은 브라우저가 자연스럽게 여러 페이지로 나눔 */
+  /* 페이지마다 충분한 위/아래 여백을 확보하고, 내용은 자연스럽게 다음 장으로 흐름 */
   .exam-sheet{
     border:0!important;
     margin:0!important;
     max-width:none!important;
     min-height:0!important;
     height:auto!important;
-    padding:5mm 7mm 2mm!important;
+    padding:0!important;
     overflow:visible!important;
     page-break-after:auto!important;
     break-after:auto!important;
   }
 
-  /* 실제 양식의 외곽선/하단고지는 body 직속 fixed 요소로 반복.
-     fragmented .exam-sheet 내부 fixed 요소는 페이지 2에서 상단으로 튀는 문제가 있어 사용하지 않음 */
+  /* 각 페이지 외곽 프레임 */
   #printPageFrame{
     display:block!important;
     position:fixed!important;
@@ -53,22 +52,23 @@
     z-index:9990!important;
   }
 
+  /* 각 페이지 하단 고지문 + 로고 */
   #printRepeatFooter{
     display:flex!important;
     position:fixed!important;
-    left:7mm!important;
-    right:7mm!important;
-    bottom:1.5mm!important;
+    left:10mm!important;
+    right:10mm!important;
+    bottom:2mm!important;
     min-height:13mm!important;
     box-sizing:border-box!important;
     border-top:0.6px solid #cbd5e1!important;
     background:#fff!important;
     z-index:9991!important;
-    padding-top:2.2mm!important;
+    padding-top:2.3mm!important;
     align-items:flex-start!important;
-    gap:4mm!important;
-    font-size:7.6pt!important;
-    line-height:1.35!important;
+    gap:5mm!important;
+    font-size:7.8pt!important;
+    line-height:1.4!important;
     color:#64748b!important;
   }
   #printRepeatFooter .print-footer-text{
@@ -85,56 +85,81 @@
     font-weight:700!important;
     color:#111827!important;
     white-space:nowrap!important;
-    font-size:9pt!important;
+    font-size:9.2pt!important;
   }
   #printRepeatFooter .print-footer-logo b{
     color:#1473e6!important;
     font-size:13pt!important;
   }
 
-  /* 원래 sheet 내부 로고/고지문은 인쇄에서는 숨김 */
   .sheet-logo,.material-disclaimer{display:none!important}
 
-  /* 첫 장 헤더는 기존 화면 양식 그대로 */
-  .sheet-head,.subject-ribbon,.answer-grid{
+  /* 첫 장 상단 요소는 기존 양식 유지 */
+  .sheet-head{
+    margin-bottom:7mm!important;
+    break-after:avoid!important;
+    page-break-after:avoid!important;
+  }
+  .subject-ribbon{
+    margin-bottom:5mm!important;
+    break-after:avoid!important;
+    page-break-after:avoid!important;
+  }
+  .answer-grid{
+    margin-bottom:6mm!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
     break-after:avoid!important;
     page-break-after:avoid!important;
   }
 
-  /* 문제지/해설지 모두 2단 유지 */
+  /* 문제/해설 모두 2단 유지, 단 사이를 넓혀 가독성 확보 */
   .problem-sheet .paper-columns,
   .solution-sheet .paper-columns{
     column-count:2!important;
-    column-gap:9mm!important;
-    column-rule:1.5px dotted #67aaf9!important;
+    column-gap:11mm!important;
+    column-rule:1.3px dotted #67aaf9!important;
     column-fill:auto!important;
   }
 
   .paper-q{
-    font-size:10pt!important;
-    line-height:1.55!important;
+    font-size:10.4pt!important;
+    line-height:1.68!important;
     break-inside:avoid-column!important;
     page-break-inside:avoid!important;
-    margin-bottom:5mm!important;
+    margin-bottom:6.5mm!important;
+  }
+  .paper-q-title{
+    font-weight:700!important;
+    margin-bottom:2.2mm!important;
   }
   .paper-q-title,.paper-q-choices{
     white-space:pre-wrap!important;
     overflow:visible!important;
     max-height:none!important;
+    word-break:keep-all!important;
+    overflow-wrap:break-word!important;
+  }
+  .paper-q-choices{
+    line-height:1.65!important;
   }
 
   .solution-item{
-    font-size:9.4pt!important;
-    line-height:1.58!important;
-    margin-bottom:5mm!important;
+    font-size:10pt!important;
+    line-height:1.68!important;
+    margin-bottom:7mm!important;
     break-inside:avoid-column!important;
     page-break-inside:auto!important;
   }
-  .solution-item .sol-no,
+  .solution-item .sol-no{
+    font-weight:700!important;
+    margin-bottom:1.5mm!important;
+  }
   .solution-item .sol-answer,
   .solution-item .sol-label{
     break-after:avoid!important;
     page-break-after:avoid!important;
+    margin-bottom:1.2mm!important;
   }
   .solution-item .sol-body{
     white-space:pre-wrap!important;
@@ -146,10 +171,11 @@
 
   .only-screen{display:none!important}
 
-  /* 하단 반복 고지문 공간 확보 */
+  /* 모든 페이지 상단을 더 넉넉하게 확보.
+     하단은 사이트 고지문/로고 전용 공간 */
   @page{
     size:A4;
-    margin:8mm 8mm 20mm;
+    margin:14mm 10mm 22mm 10mm;
   }
 }
 
@@ -660,7 +686,14 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창의 <u>머리글 및 바닥글</u>은 반드시 꺼주세요. URL·1/3 같은 브라우저 문구가 출력되지 않습니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=()=>{ensurePrintDecorations();window.print();};$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창의 <u>머리글 및 바닥글</u>을 반드시 꺼주세요. 아래 URL·페이지번호는 브라우저가 추가하는 항목이라 사이트 양식에서는 사용하지 않습니다.<br><b>※ 가독성:</b> 각 페이지 상단 여백과 문항 간격을 넉넉하게 두고, 해설은 줄이지 않고 다음 페이지로 자연스럽게 이어집니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=()=>{
+  ensurePrintDecorations();
+  if(!sessionStorage.getItem('examBankPrintHeaderNotice')){
+    alert('인쇄/PDF 저장 시 Chrome의 [머리글 및 바닥글] 옵션을 반드시 꺼주세요.\n그래야 아래 URL과 페이지번호(예: 2/2)가 출력되지 않습니다.');
+    sessionStorage.setItem('examBankPrintHeaderNotice','1');
+  }
+  window.print();
+};$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 function exportWord(mode='problem'){if(!currentSet.length)return;const m=sheetMeta();const body=mode==='solution'?solutionSheetHTML():problemSheetHTML();const css=`body{font-family:'Malgun Gothic';color:#111}.exam-sheet{border:1px solid #1473e6;padding:20px}.sheet-head{display:flex;justify-content:space-between}.sheet-title{font-weight:bold;font-size:18pt}.subject-ribbon{text-align:center;font-weight:bold;margin:15px}.paper-q,.solution-item{margin:0 0 14px;line-height:1.5}.paper-q-title,.sol-no,.sol-answer,.sol-label{font-weight:bold}.paper-q-choices,.sol-body{white-space:pre-wrap}.answer-grid{margin:10px 0}.sheet-logo{text-align:right;font-weight:bold}.material-disclaimer{margin-top:18px;padding-top:10px;border-top:1px solid #cbd5e1;font-size:9pt;line-height:1.55;color:#64748b;text-align:left}`;const html=`<html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'});downloadBlob(blob,(m.subject||'시험')+(mode==='solution'?'_해설':'_문제')+'.doc');}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
@@ -2001,7 +2034,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.2.5 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.2.6 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -2084,7 +2117,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.2.5 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.2.6 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
