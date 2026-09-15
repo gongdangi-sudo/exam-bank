@@ -1119,15 +1119,15 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){syncOutputSubject();const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> HTML을 .doc로 저장하지 않고 <u>실제 DOCX(Open XML)</u> 파일로 생성합니다. Word에서 표·보기·2단·페이지 테두리가 안정적으로 유지됩니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> 실제 DOCX의 <u>Word 기본 2단 섹션</u>으로 생성합니다. 보기 박스도 큰 표가 아닌 문단 테두리 방식으로 만들어 열 침범·첫 장 공백·페이지 깨짐을 방지합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 function docxEsc(s){
   return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&apos;');
 }
 function docxRun(text,{bold=false,size=18,color='000000'}={}){
   return `<w:r><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:hAnsi="Malgun Gothic" w:eastAsia="Malgun Gothic"/>${bold?'<w:b/>':''}<w:color w:val="${color}"/><w:sz w:val="${size}"/><w:szCs w:val="${size}"/></w:rPr><w:t xml:space="preserve">${docxEsc(text)}</w:t></w:r>`;
 }
-function docxP(text,{bold=false,size=18,color='000000',align='',after=50,before=0,keep=false,line=280}={}){
-  const pPr=`<w:pPr>${align?`<w:jc w:val="${align}"/>`:''}${keep?'<w:keepNext/>':''}<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/></w:pPr>`;
+function docxP(text,{bold=false,size=18,color='000000',align='',after=50,before=0,keep=false,keepLines=false,line=280}={}){
+  const pPr=`<w:pPr>${align?`<w:jc w:val="${align}"/>`:''}${keep?'<w:keepNext/>':''}${keepLines?'<w:keepLines/>':''}<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/></w:pPr>`;
   return `<w:p>${pPr}${docxRun(text,{bold,size,color})}</w:p>`;
 }
 function docxLines(text,opts={}){
@@ -1137,8 +1137,22 @@ function docxTc(content,{width=5000,shade='',borderLeft='',borderRight='',pad=90
   const borders=(borderLeft||borderRight)?`<w:tcBorders>${borderLeft?`<w:left w:val="${borderLeft}" w:sz="6" w:color="67AAF9"/>`:''}${borderRight?`<w:right w:val="${borderRight}" w:sz="6" w:color="67AAF9"/>`:''}</w:tcBorders>`:'';
   return `<w:tc><w:tcPr><w:tcW w:w="${width}" w:type="pct"/><w:vAlign w:val="top"/>${shade?`<w:shd w:fill="${shade}"/>`:''}${borders}<w:tcMar><w:top w:w="${pad}" w:type="dxa"/><w:start w:w="${pad}" w:type="dxa"/><w:bottom w:w="${pad}" w:type="dxa"/><w:end w:w="${pad}" w:type="dxa"/></w:tcMar></w:tcPr>${content}</w:tc>`;
 }
-function docxViewTable(text){
-  return `<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="pct"/><w:tblBorders><w:top w:val="single" w:sz="6" w:color="777777"/><w:left w:val="single" w:sz="6" w:color="777777"/><w:bottom w:val="single" w:sz="6" w:color="777777"/><w:right w:val="single" w:sz="6" w:color="777777"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="4200"/></w:tblGrid><w:tr>${docxTc(docxLines(text,{size:17,after:15,line:255}),{width:10000,pad:80})}</w:tr></w:tbl>`;
+function docxViewBox(text){
+  const lines=String(text||'').split(/\r?\n/).filter(x=>x.trim());
+  const runs=lines.map((line,i)=>
+    `${docxRun(line,{size:17})}${i<lines.length-1?'<w:r><w:br/></w:r>':''}`
+  ).join('');
+  return `<w:p><w:pPr>
+    <w:keepLines/>
+    <w:spacing w:before="55" w:after="70" w:line="255" w:lineRule="auto"/>
+    <w:ind w:left="90" w:right="90"/>
+    <w:pBdr>
+      <w:top w:val="single" w:sz="6" w:space="4" w:color="777777"/>
+      <w:left w:val="single" w:sz="6" w:space="4" w:color="777777"/>
+      <w:bottom w:val="single" w:sz="6" w:space="4" w:color="777777"/>
+      <w:right w:val="single" w:sz="6" w:space="4" w:color="777777"/>
+    </w:pBdr>
+  </w:pPr>${runs}</w:p>`;
 }
 function docxDrawing(img){
   if(!img)return '';
@@ -1148,8 +1162,8 @@ function docxProblemXml(p,i,img){
   if(img){
     return docxP(`문 ${i+1}.`,{bold:true,size:19,after:45,keep:true})+docxDrawing(img);
   }
-  const view=p.viewText?docxViewTable(p.viewText):'';
-  return docxP(`문 ${i+1}. ${p.question||''}`,{bold:true,size:19,after:45,keep:true,line:270})+view+docxLines(p.choices||'',{size:17,after:18,line:255})+docxP('',{size:17,after:90});
+  const view=p.viewText?docxViewBox(p.viewText):'';
+  return docxP(`문 ${i+1}. ${p.question||''}`,{bold:true,size:19,after:45,keep:true,keepLines:true,line:270})+view+docxLines(p.choices||'',{size:17,after:18,line:255})+docxP('',{size:17,after:90});
 }
 function docxSolutionXml(p,i){
   const exp=String(p.editedExplanation||p.originalExplanation||p.explanation||'※ 상세 해설 미작성');
@@ -1180,8 +1194,21 @@ async function docxImageFromUrl(url,idx){
     return {bytes,name:`image${idx}.png`,rid:`rIdImg${idx}`,cx,cy,docPrId:100+idx};
   }catch(e){console.warn('DOCX image embed skipped',e);return null;}
 }
-function docxSectPr(){
-  return `<w:sectPr><w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="794" w:right="680" w:bottom="1360" w:left="680" w:header="0" w:footer="360" w:gutter="0"/><w:pgBorders w:offsetFrom="page"><w:top w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:left w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:bottom w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:right w:val="single" w:sz="10" w:space="18" w:color="1473E6"/></w:pgBorders></w:sectPr>`;
+function docxSectionProps({cols=1,continuous=false}={}){
+  const colXml=cols===2
+    ? '<w:cols w:num="2" w:space="425" w:sep="1"/>'
+    : '<w:cols w:num="1"/>';
+  return `<w:sectPr>${continuous?'<w:type w:val="continuous"/>':''}<w:footerReference w:type="default" r:id="rIdFooter"/><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="680" w:right="680" w:bottom="1260" w:left="680" w:header="0" w:footer="360" w:gutter="0"/>${colXml}<w:pgBorders w:offsetFrom="page"><w:top w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:left w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:bottom w:val="single" w:sz="10" w:space="18" w:color="1473E6"/><w:right w:val="single" w:sz="10" w:space="18" w:color="1473E6"/></w:pgBorders></w:sectPr>`;
+}
+function docxContinuousTwoColumnBreak(){
+  // 이 문단까지는 1단. 이후 본문은 최종 sectPr의 2단 설정을 사용.
+  return `<w:p><w:pPr>${docxSectionProps({cols:1,continuous:true})}</w:pPr></w:p>`;
+}
+function docxFinalTwoColumnSectPr(){
+  return docxSectionProps({cols:2,continuous:false});
+}
+function docxColumnBreak(){
+  return '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr><w:r><w:br w:type="column"/></w:r></w:p>';
 }
 function docxHeaderXml(m,isSolution){
   const title=isSolution?'매일 확인 테스트 해설':'공단기 관리반 매일 확인 테스트';
@@ -1197,15 +1224,17 @@ function docxAnswerGridXml(){
   const cells=currentSet.map((p,i)=>docxTc(docxP(`${i+1} ${p.answer||''}`,{bold:false,size:15,align:'center',after:0}),{width:1000,pad:25})).join('');
   return `<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="pct"/><w:tblBorders><w:top w:val="single" w:sz="6" w:color="333333"/><w:left w:val="single" w:sz="6" w:color="333333"/><w:bottom w:val="single" w:sz="6" w:color="333333"/><w:right w:val="single" w:sz="6" w:color="333333"/><w:insideV w:val="single" w:sz="4" w:color="333333"/><w:insideH w:val="nil"/></w:tblBorders></w:tblPr><w:tblGrid>${currentSet.map(()=>'<w:gridCol w:w="920"/>').join('')}</w:tblGrid><w:tr>${cells}</w:tr></w:tbl>${docxP('',{size:8,after:70})}`;
 }
-function docxQuestionTableXml(mode,imageMap){
-  const rows=[];
-  for(let r=0;r<5;r++){
-    const lp=currentSet[r],rp=currentSet[r+5];
-    const left=lp?(mode==='solution'?docxSolutionXml(lp,r):docxProblemXml(lp,r,imageMap.get(r))):docxP('');
-    const right=rp?(mode==='solution'?docxSolutionXml(rp,r+5):docxProblemXml(rp,r+5,imageMap.get(r+5))):docxP('');
-    rows.push(`<w:tr>${docxTc(left,{width:5000,borderRight:'dotted',pad:85})}${docxTc(right,{width:5000,pad:85})}</w:tr>`);
-  }
-  return `<w:tbl><w:tblPr><w:tblW w:w="10000" w:type="pct"/><w:tblLayout w:type="fixed"/><w:tblBorders><w:top w:val="nil"/><w:left w:val="nil"/><w:bottom w:val="nil"/><w:right w:val="nil"/><w:insideH w:val="nil"/><w:insideV w:val="nil"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="4600"/><w:gridCol w:w="4600"/></w:tblGrid>${rows.join('')}</w:tbl>`;
+function docxQuestionFlowXml(mode,imageMap){
+  let out='';
+  currentSet.forEach((p,i)=>{
+    out += mode==='solution'
+      ? docxSolutionXml(p,i)
+      : docxProblemXml(p,i,imageMap.get(i));
+    // 시험지 번호 1~5 / 6~10 그룹을 유지하되, Word가 페이지를 넘기면
+    // 5번 이후 새 열/다음 페이지에서 6번을 시작한다.
+    if(i===4)out += docxColumnBreak();
+  });
+  return out;
 }
 function docxStylesXml(){
   return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Malgun Gothic" w:hAnsi="Malgun Gothic" w:eastAsia="Malgun Gothic"/><w:sz w:val="18"/><w:szCs w:val="18"/><w:lang w:eastAsia="ko-KR"/></w:rPr></w:rPrDefault><w:pPrDefault><w:pPr><w:spacing w:after="0"/></w:pPr></w:pPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style></w:styles>`;
@@ -1239,12 +1268,12 @@ async function exportWord(mode='problem'){
       }
     }
   }
-  const body=docxHeaderXml(m,isSolution)+(isSolution?docxAnswerGridXml():'')+docxQuestionTableXml(mode,imageMap)+docxSectPr();
+  const body=docxHeaderXml(m,isSolution)+(isSolution?docxAnswerGridXml():'')+docxContinuousTwoColumnBreak()+docxQuestionFlowXml(mode,imageMap)+docxFinalTwoColumnSectPr();
   const documentXml=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing" xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><w:body>${body}</w:body></w:document>`;
   const contentTypes=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Default Extension="png" ContentType="image/png"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/><Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`;
   const packageRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`;
   const docRels=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdStyles" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/><Relationship Id="rIdSettings" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/><Relationship Id="rIdFooter" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>${imageRels.join('')}</Relationships>`;
-  const settings=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:zoom w:percent="90"/><w:defaultTabStop w:val="720"/><w:compat/></w:settings>`;
+  const settings=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:zoom w:percent="90"/><w:defaultTabStop w:val="720"/><w:doNotTrackMoves/><w:doNotTrackFormatting/><w:compat><w:compatSetting w:name="compatibilityMode" w:uri="http://schemas.microsoft.com/office/word" w:val="15"/></w:compat></w:settings>`;
   const core=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${docxEsc(m.subject||'')} ${isSolution?'해설':'문제'}</dc:title><dc:creator>공단기학원</dc:creator><cp:lastModifiedBy>공단기학원</cp:lastModifiedBy><dcterms:created xsi:type="dcterms:W3CDTF">${new Date().toISOString()}</dcterms:created></cp:coreProperties>`;
   const app=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><Application>exam-bank</Application></Properties>`;
   zip.file('[Content_Types].xml',contentTypes);
@@ -2951,7 +2980,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.5.2 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.7.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -3034,7 +3063,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.5.2 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.7.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
