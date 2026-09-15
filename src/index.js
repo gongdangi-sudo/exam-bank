@@ -5,24 +5,20 @@ function json(data,status=200){
   });
 }
 async function ensure(env){
-  await env.DB.exec(`
-    CREATE TABLE IF NOT EXISTS app_state(
-      key TEXT PRIMARY KEY,
-      value TEXT NOT NULL DEFAULT '[]',
-      updated_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS problems(
-      id TEXT PRIMARY KEY,
-      data TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS view_assets(
-      id TEXT PRIMARY KEY,
-      image BLOB NOT NULL,
-      mime_type TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    );
-  `);
+  // D1 exec()는 줄 단위로 SQL을 나눠 처리할 수 있어
+  // 여러 줄 CREATE TABLE을 넣으면 'incomplete input' 오류가 날 수 있습니다.
+  // 각 DDL을 완전한 한 문장으로 prepare().run() 처리합니다.
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS app_state (key TEXT PRIMARY KEY, value TEXT NOT NULL DEFAULT '[]', updated_at TEXT NOT NULL)"
+  ).run();
+
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS problems (id TEXT PRIMARY KEY, data TEXT NOT NULL, updated_at TEXT NOT NULL)"
+  ).run();
+
+  await env.DB.prepare(
+    "CREATE TABLE IF NOT EXISTS view_assets (id TEXT PRIMARY KEY, image BLOB NOT NULL, mime_type TEXT NOT NULL, updated_at TEXT NOT NULL)"
+  ).run();
 }
 async function readProblems(env){
   const rows=await env.DB.prepare("SELECT data FROM problems ORDER BY id").all();
