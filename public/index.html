@@ -40,18 +40,21 @@
     column-fill:auto;
   }
 
-  /* 해설지는 상세 해설이 길어지므로 1단으로 자연스럽게 여러 페이지 사용 */
+  /* 해설지도 화면 미리보기와 동일하게 2단 유지.
+     내용이 길면 한 장에 억지로 맞추지 않고 다음 페이지로 자연스럽게 이어짐 */
   .solution-sheet .paper-columns{
-    column-count:1;
-    column-rule:none;
+    column-count:2;
+    column-gap:9mm;
+    column-rule:1.5px dotted #67aaf9;
+    column-fill:auto;
   }
 
   .paper-q{
-    font-size:11pt;
-    line-height:1.58;
-    break-inside:avoid-page;
+    font-size:10pt;
+    line-height:1.55;
+    break-inside:avoid-column;
     page-break-inside:avoid;
-    margin-bottom:7mm;
+    margin-bottom:5mm;
   }
   .paper-q-title,.paper-q-choices{
     white-space:pre-wrap;
@@ -60,10 +63,10 @@
   }
 
   .solution-item{
-    font-size:10.5pt;
-    line-height:1.65;
-    margin-bottom:8mm;
-    break-inside:auto;
+    font-size:9.4pt;
+    line-height:1.58;
+    margin-bottom:5mm;
+    break-inside:avoid-column;
     page-break-inside:auto;
   }
   .solution-item .sol-no,
@@ -227,6 +230,19 @@
     margin:2.5mm 0 3mm;
     break-inside:avoid;
     page-break-inside:avoid;
+  }
+}
+
+
+@media print{
+  .solution-sheet .sol-body{
+    white-space:pre-wrap !important;
+    word-break:keep-all;
+    overflow-wrap:break-word;
+  }
+  .solution-sheet .solution-item{
+    orphans:3;
+    widows:3;
   }
 }
 
@@ -1871,7 +1887,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.2.1 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.2.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -1954,7 +1970,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.2.1 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.2.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
