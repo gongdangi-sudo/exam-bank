@@ -15,218 +15,235 @@
     @media(max-width:1000px){.grid{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:repeat(2,1fr)}.app{grid-template-columns:1fr}.side{height:auto;position:static}.nav{display:flex;gap:6px;overflow:auto}.nav button{white-space:nowrap}.main{padding:20px}}
     @media(max-width:620px){.grid,.form-grid,.two,.stat-row{grid-template-columns:1fr}.top{align-items:flex-start;gap:12px;flex-direction:column}}
     @media print{
-  html,body,.exam-sheet,.sheet-title,.subject-ribbon,.answer-grid,.paper-q-box{
+  @page{size:A4;margin:0}
+
+  html,body{
+    margin:0!important;
+    padding:0!important;
+    background:#fff!important;
     -webkit-print-color-adjust:exact!important;
     print-color-adjust:exact!important;
   }
 
-  body{
-    background:#fff!important;
-    margin:0!important;
-  }
+  /* 기존 화면은 인쇄하지 않고, JS가 만든 A4 페이지들만 인쇄 */
+  body > *:not(#printPages){display:none!important}
+  #printPages{display:block!important}
 
-  .side,.top,.no-print,.actions,.notice{display:none!important}
-  .app{display:block!important}
-  .main{padding:0!important;max-width:none!important}
-  .panel{box-shadow:none!important;border:0!important;padding:0!important;margin:0!important}
-
-  /* 본문은 화면 양식을 최대한 그대로 유지 */
-  .exam-sheet{
+  .print-page{
+    width:210mm!important;
+    height:297mm!important;
+    position:relative!important;
+    box-sizing:border-box!important;
     background:#fff!important;
-    border:0!important;
-    margin:0!important;
-    max-width:none!important;
-    min-height:0!important;
-    height:auto!important;
-    padding:0!important;
-    color:#111!important;
+    overflow:hidden!important;
+    break-after:page!important;
+    page-break-after:always!important;
     font-family:"Malgun Gothic","Noto Sans KR",sans-serif!important;
-    overflow:visible!important;
+    color:#111!important;
+  }
+  .print-page:last-child{
+    break-after:auto!important;
+    page-break-after:auto!important;
   }
 
-  /* 각 A4 페이지 동일 파란 외곽선 */
-  #printPageFrame{
-    display:block!important;
-    position:fixed!important;
-    top:4mm!important;
-    left:5mm!important;
-    right:5mm!important;
-    bottom:4mm!important;
+  /* 파란 문제/해설 영역 */
+  .print-frame{
+    position:absolute!important;
+    left:8mm!important;
+    right:8mm!important;
+    top:8mm!important;
+    bottom:23mm!important;
     border:1.5px solid #1473e6!important;
     box-sizing:border-box!important;
-    pointer-events:none!important;
-    z-index:9990!important;
+    background:#fff!important;
+  }
+  .print-inner{
+    height:100%!important;
+    box-sizing:border-box!important;
+    padding:8mm 9mm 7mm!important;
+    display:flex!important;
+    flex-direction:column!important;
+    min-height:0!important;
   }
 
-  /* 첫 장 제목/날짜/과목은 화면 양식 그대로 */
-  .sheet-head{
+  /* 각 페이지 상단: 같은 공단기 양식 유지 */
+  .print-page .sheet-head{
     display:grid!important;
     grid-template-columns:1fr auto!important;
     align-items:start!important;
-    gap:16px!important;
-    margin-bottom:6mm!important;
-    break-after:avoid!important;
-    page-break-after:avoid!important;
+    gap:12px!important;
+    margin:0 0 5mm!important;
+    flex:0 0 auto!important;
   }
-  .sheet-title{
+  .print-page .sheet-title{
     display:inline-block!important;
     background:#0667e8!important;
     color:#fff!important;
-    border:0!important;
     font-weight:800!important;
-    font-size:19px!important;
-    letter-spacing:.08em!important;
-    padding:9px 16px!important;
+    font-size:17px!important;
+    letter-spacing:.06em!important;
+    padding:7px 13px!important;
+    border:0!important;
   }
-  .solution-sheet .sheet-title{
+  .print-page.solution .sheet-title{
     background:#fff!important;
     color:#0667e8!important;
-    border:2px solid #0667e8!important;
+    border:1.7px solid #0667e8!important;
   }
-  .sheet-info{
-    font-size:10pt!important;
-    line-height:1.7!important;
+  .print-page .sheet-info{
+    font-size:8.5pt!important;
+    line-height:1.5!important;
     text-align:right!important;
     white-space:nowrap!important;
   }
-  .subject-ribbon{
+  .print-page .subject-ribbon{
     width:max-content!important;
-    margin:0 auto 5mm!important;
-    font-weight:800!important;
+    margin:0 auto 4mm!important;
     color:#0667e8!important;
-    border-top:1.6px solid #333!important;
-    border-bottom:1.6px solid #333!important;
-    padding:3px 14px!important;
-    font-size:15pt!important;
-    break-after:avoid!important;
-    page-break-after:avoid!important;
+    font-weight:800!important;
+    border-top:1.4px solid #333!important;
+    border-bottom:1.4px solid #333!important;
+    padding:2px 12px!important;
+    font-size:12pt!important;
+    flex:0 0 auto!important;
   }
-  .answer-grid{
+  .print-page .answer-grid{
     display:grid!important;
     grid-template-columns:repeat(10,1fr)!important;
     border:1px solid #333!important;
-    margin:0 0 6mm!important;
-    break-inside:avoid!important;
-    page-break-inside:avoid!important;
+    margin:0 0 5mm!important;
+    flex:0 0 auto!important;
   }
-  .answer-grid div{
+  .print-page .answer-grid div{
     border-right:1px solid #333!important;
     text-align:center!important;
-    padding:3px 2px!important;
-    font-size:9pt!important;
+    padding:2px 1px!important;
+    font-size:8.3pt!important;
   }
-  .answer-grid div:last-child{border-right:0!important}
-  .answer-grid .n{background:#dff0ff!important;font-weight:700!important}
-
-  /* 문제/해설 2단 양식 */
-  .problem-sheet .paper-columns,
-  .solution-sheet .paper-columns{
-    column-count:2!important;
-    column-gap:10mm!important;
-    column-rule:1.5px dotted #67aaf9!important;
-    column-fill:auto!important;
+  .print-page .answer-grid div:last-child{border-right:0!important}
+  .print-page .answer-grid .n{
+    background:#dff0ff!important;
+    font-weight:700!important;
   }
 
-  .paper-q{
-    font-size:10pt!important;
-    line-height:1.58!important;
-    break-inside:avoid-column!important;
+  /* 2단은 각 페이지에서 독립적으로 고정 */
+  .print-cols{
+    flex:1 1 auto!important;
+    min-height:0!important;
+    display:grid!important;
+    grid-template-columns:1fr 1fr!important;
+    gap:10mm!important;
+    position:relative!important;
+    overflow:hidden!important;
+  }
+  .print-cols::after{
+    content:""!important;
+    position:absolute!important;
+    top:0!important;
+    bottom:0!important;
+    left:50%!important;
+    border-left:1.3px dotted #67aaf9!important;
+    pointer-events:none!important;
+  }
+  .print-col{
+    min-height:0!important;
+    height:100%!important;
+    overflow:hidden!important;
+    box-sizing:border-box!important;
+  }
+
+  /* 문제/해설 항목 */
+  .print-page .paper-q{
+    font-size:9.5pt!important;
+    line-height:1.56!important;
+    margin:0 0 5mm!important;
+    break-inside:avoid!important;
     page-break-inside:avoid!important;
-    margin:0 0 5.5mm!important;
   }
-  .paper-q-title{
+  .print-page .paper-q-title{
     font-weight:800!important;
-    margin-bottom:1.6mm!important;
+    margin-bottom:1.4mm!important;
     white-space:pre-wrap!important;
+    word-break:keep-all!important;
   }
-  .paper-q-choices{
+  .print-page .paper-q-choices{
     white-space:pre-wrap!important;
-    line-height:1.58!important;
+    line-height:1.55!important;
+    word-break:keep-all!important;
   }
-  .paper-q-box,
-  .official-view-box{
+  .print-page .paper-q-box,
+  .print-page .official-view-box{
     border:1px solid #777!important;
-    padding:2.5mm 3mm!important;
-    margin:2mm 0 2.5mm!important;
+    padding:2.2mm 2.8mm!important;
+    margin:1.8mm 0 2.2mm!important;
     white-space:pre-wrap!important;
     background:#fff!important;
-    break-inside:avoid!important;
   }
 
-  .solution-item{
-    font-size:9.5pt!important;
-    line-height:1.58!important;
-    margin:0 0 5.5mm!important;
-    break-inside:avoid-column!important;
-    page-break-inside:auto!important;
+  .print-page .solution-item{
+    font-size:9pt!important;
+    line-height:1.52!important;
+    margin:0 0 5mm!important;
+    break-inside:avoid!important;
+    page-break-inside:avoid!important;
   }
-  .solution-item .sol-no{
+  .print-page .solution-item .sol-no{
     font-weight:800!important;
-    margin-bottom:1mm!important;
+    margin-bottom:.8mm!important;
   }
-  .solution-item .sol-answer,
-  .solution-item .sol-label{
+  .print-page .solution-item .sol-answer,
+  .print-page .solution-item .sol-label{
     font-weight:700!important;
-    margin-bottom:1mm!important;
-    break-after:avoid!important;
-    page-break-after:avoid!important;
+    margin-bottom:.8mm!important;
   }
-  .solution-item .sol-body{
+  .print-page .solution-item .sol-body{
     white-space:pre-wrap!important;
     word-break:keep-all!important;
     overflow-wrap:break-word!important;
-    overflow:visible!important;
-    max-height:none!important;
   }
 
-  /* 본문 내부의 기존 footer는 숨기고, 페이지마다 별도 footer를 반복 */
-  .sheet-logo,.material-disclaimer{display:none!important}
-
-  #printRepeatFooter{
-    display:flex!important;
-    position:fixed!important;
+  /* 프레임 밖 하단 고지문 */
+  .print-page-footer{
+    position:absolute!important;
     left:10mm!important;
     right:10mm!important;
-    bottom:6mm!important;
-    min-height:10mm!important;
-    border-top:.6px solid #cbd5e1!important;
-    background:#fff!important;
-    z-index:9991!important;
-    padding-top:2mm!important;
+    bottom:4mm!important;
+    min-height:13mm!important;
+    display:flex!important;
     align-items:flex-start!important;
-    gap:4mm!important;
-    color:#64748b!important;
-    font-size:7.4pt!important;
-    line-height:1.35!important;
+    gap:5mm!important;
     box-sizing:border-box!important;
+    padding-top:2mm!important;
+    border-top:.6px solid #cbd5e1!important;
+    color:#64748b!important;
+    background:#fff!important;
+    font-size:7.2pt!important;
+    line-height:1.35!important;
   }
-  #printRepeatFooter .print-footer-text{
+  .print-page-footer .footer-text{
     flex:1 1 auto!important;
     word-break:keep-all!important;
   }
-  #printRepeatFooter .print-footer-type{
+  .print-page-footer .footer-type{
     font-weight:700!important;
     color:#334155!important;
   }
-  #printRepeatFooter .print-footer-logo{
+  .print-page-footer .footer-logo{
     flex:0 0 auto!important;
     white-space:nowrap!important;
-    font-weight:700!important;
     color:#111827!important;
+    font-weight:700!important;
     font-size:8.5pt!important;
   }
-  #printRepeatFooter .print-footer-logo b{
+  .print-page-footer .footer-logo b{
     color:#1473e6!important;
     font-size:12pt!important;
   }
 
-  .only-screen{display:none!important}
-
-  /* 페이지마다 동일하게 충분한 상단/하단 공간 확보 */
-  @page{
-    size:A4;
-    margin:16mm 12mm 24mm 12mm;
-  }
+  /* 두 번째 장부터도 상단 여유 유지하되 헤더는 약간 컴팩트 */
+  .print-page.cont .sheet-head{margin-bottom:3mm!important}
+  .print-page.cont .sheet-title{font-size:14px!important;padding:5px 10px!important}
+  .print-page.cont .subject-ribbon{font-size:10.5pt!important;margin-bottom:3mm!important}
 }
 
     /* 해설 편집실 */
@@ -380,6 +397,150 @@
 
 #printPageFrame,#printRepeatFooter{display:none}
 
+
+.zip-support-ok{color:#047857;font-weight:700}
+.zip-support-no{color:#9ca3af;font-weight:700}
+.zip-registering{background:#eff6ff!important}
+
+
+#printPages{display:none}
+#printPages.print-measure{
+  display:block;
+  position:absolute;
+  left:-10000px;
+  top:0;
+  visibility:hidden;
+  pointer-events:none;
+  z-index:-1;
+}
+
+
+/* v22.3: 인쇄 전 A4 측정용. 화면 밖에서 실제 인쇄 크기와 동일하게 계산한다. */
+#printPages.print-measure{
+  display:block!important;
+  position:absolute!important;
+  left:-12000px!important;
+  top:0!important;
+  visibility:hidden!important;
+  pointer-events:none!important;
+  width:210mm!important;
+}
+#printPages.print-measure .print-page{
+  width:210mm!important;
+  height:297mm!important;
+  position:relative!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+  overflow:hidden!important;
+  font-family:"Malgun Gothic","Noto Sans KR",sans-serif!important;
+  color:#111!important;
+}
+#printPages.print-measure .print-frame{
+  position:absolute!important;
+  left:8mm!important;
+  right:8mm!important;
+  top:8mm!important;
+  bottom:23mm!important;
+  border:1.5px solid #1473e6!important;
+  box-sizing:border-box!important;
+  background:#fff!important;
+}
+#printPages.print-measure .print-inner{
+  height:100%!important;
+  box-sizing:border-box!important;
+  padding:8mm 9mm 7mm!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+#printPages.print-measure .sheet-head{
+  display:grid!important;
+  grid-template-columns:1fr auto!important;
+  align-items:start!important;
+  gap:12px!important;
+  margin:0 0 5mm!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .sheet-title{
+  display:inline-block!important;
+  font-weight:800!important;
+  font-size:17px!important;
+  letter-spacing:.06em!important;
+  padding:7px 13px!important;
+}
+#printPages.print-measure .sheet-info{
+  font-size:8.5pt!important;
+  line-height:1.5!important;
+  text-align:right!important;
+  white-space:nowrap!important;
+}
+#printPages.print-measure .subject-ribbon{
+  width:max-content!important;
+  margin:0 auto 4mm!important;
+  font-weight:800!important;
+  padding:2px 12px!important;
+  font-size:12pt!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .answer-grid{
+  display:grid!important;
+  grid-template-columns:repeat(10,1fr)!important;
+  margin:0 0 5mm!important;
+  flex:0 0 auto!important;
+}
+#printPages.print-measure .print-cols{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10mm!important;
+  position:relative!important;
+  overflow:hidden!important;
+}
+#printPages.print-measure .print-col{
+  min-height:0!important;
+  height:100%!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+}
+#printPages.print-measure .paper-q{
+  font-size:9.5pt!important;
+  line-height:1.56!important;
+  margin:0 0 5mm!important;
+}
+#printPages.print-measure .paper-q-title{
+  font-weight:800!important;
+  margin-bottom:1.4mm!important;
+  white-space:pre-wrap!important;
+  word-break:keep-all!important;
+}
+#printPages.print-measure .paper-q-choices{
+  white-space:pre-wrap!important;
+  line-height:1.55!important;
+  word-break:keep-all!important;
+}
+#printPages.print-measure .paper-q-box,
+#printPages.print-measure .official-view-box{
+  border:1px solid #777!important;
+  padding:2.2mm 2.8mm!important;
+  margin:1.8mm 0 2.2mm!important;
+  white-space:pre-wrap!important;
+  background:#fff!important;
+}
+#printPages.print-measure .solution-item{
+  font-size:9pt!important;
+  line-height:1.52!important;
+  margin:0 0 5mm!important;
+}
+#printPages.print-measure .solution-item .sol-body{
+  white-space:pre-wrap!important;
+  word-break:keep-all!important;
+  overflow-wrap:break-word!important;
+}
+#printPages.print-measure .print-page.cont .sheet-head{margin-bottom:3mm!important}
+#printPages.print-measure .print-page.cont .sheet-title{font-size:14px!important;padding:5px 10px!important}
+#printPages.print-measure .print-page.cont .subject-ribbon{font-size:10.5pt!important;margin-bottom:3mm!important}
+
 </style>
 </head>
 <body>
@@ -429,8 +590,8 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
-        <div class="notice" style="margin-top:14px"><b>권장:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div class="table-wrap"><table><thead><tr><th>ID</th><th>과목</th><th>시험</th><th>연도</th><th>번호</th><th>단원</th><th>문제</th><th>관리</th></tr></thead><tbody id="bankBody"></tbody></table></div>
       </div>
     </section>
@@ -520,6 +681,58 @@
 </div>
 
 
+
+<div id="zipImportModal" class="modal hidden">
+  <div class="modal-box" style="max-width:1280px">
+    <div class="modal-head">
+      <div>
+        <h3>시험문제 ZIP 자동분리</h3>
+        <div class="help">ZIP 안의 PDF를 과목별로 자동 분리하고, 공식 정답표의 같은 과목·책형 정답과 연결합니다.</div>
+      </div>
+      <button class="close" id="closeZipImport">×</button>
+    </div>
+
+    <div class="notice" style="margin-top:14px">
+      <b>ZIP 규칙:</b> <code>행정학개론_가.pdf</code>, <code>행정법총론_가.pdf</code>처럼 <b>과목명_책형.pdf</b>이면 자동 인식합니다.
+      같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다.<br>
+      <b>지원 과목은 자동 선택</b>하고, 나머지 과목은 목록에만 표시합니다.
+    </div>
+
+    <div class="form-grid">
+      <div class="field"><label>시험 구분 *</label><input id="zExam" value="국가직" placeholder="예: 국가직"></div>
+      <div class="field"><label>연도 *</label><input id="zYear" type="number" value="2026"></div>
+      <div class="field"><label>시험문제 ZIP *</label><input id="zQuestionZip" type="file" accept=".zip,application/zip"></div>
+      <div class="field"><label>공식 정답표 PDF *</label><input id="zAnswerPdf" type="file" accept=".pdf,application/pdf"></div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="scanQuestionZip">ZIP 과목 자동분리</button>
+      <button class="btn ghost" id="selectSupportedZip">지원 과목만 선택</button>
+      <button class="btn ghost" id="clearZipImport">초기화</button>
+    </div>
+    <div class="progress hidden" id="zipImportProgress"><i></i></div>
+
+    <div id="zipImportResult" class="hidden">
+      <div class="batch-summary" id="zipImportSummary"></div>
+      <div class="table-wrap" style="max-height:55vh">
+        <table class="batch-table">
+          <thead>
+            <tr>
+              <th>등록</th><th>ZIP 파일</th><th>원본 과목</th><th>문제은행 과목</th>
+              <th>책형</th><th>정답표</th><th>상태</th>
+            </tr>
+          </thead>
+          <tbody id="zipImportBody"></tbody>
+        </table>
+      </div>
+      <div class="actions" style="position:sticky;bottom:0;background:#fff;padding:12px 0 2px">
+        <button class="btn primary" id="registerZipSubjects">선택 과목 일괄 등록</button>
+        <button class="btn ghost" id="cancelZipImport">닫기</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="officialModal" class="modal hidden">
   <div class="modal-box" style="max-width:1180px">
     <div class="modal-head">
@@ -597,6 +810,7 @@
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
 const SUBJECTS=['행정학','행정법','교육학','세법','회계학','형법','형사소송법','교정학','국어','영어'];
 const K_PROBLEMS='examBankProblemsV1', K_HISTORY='examBankHistoryV1';
@@ -706,6 +920,141 @@ function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-she
 }</div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i)=>`<div><span class="n">${i+1}</span> ${esc(p.answer)}</div>`).join('');return `<section class="exam-sheet solution-sheet" id="solutionSheet"><div class="sheet-head"><div><div class="sheet-title">매일 확인 테스트 해설</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="answer-grid">${cells}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="solution-item"><div class="sol-no">문 ${i+1}.</div><div class="sol-answer">[정답] ${esc(p.answer)}</div><div class="sol-label">[해설]</div><div class="sol-body">${(p.editedExplanation||p.originalExplanation||p.explanation)?esc(p.editedExplanation||p.originalExplanation||p.explanation):'<div class="missing-explanation">※ 상세 해설 미작성<br><span>문제은행에서 ‘상세 해설용 JSON 내보내기’ 또는 위의 ‘현재 출제문항 상세 해설 요청’을 사용하세요.</span></div>'}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 
+
+function printFooterHTML(mode){
+  return `<div class="print-page-footer">
+    <div class="footer-text"><span class="footer-type">[${mode==='solution'?'해설지':'문제지'}] </span>`+
+      `본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. `+
+      `AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</div>
+    <div class="footer-logo"><b>D</b> 공단기학원</div>
+  </div>`;
+}
+function createStablePrintPage(sourceSheet,mode,isFirst){
+  const page=document.createElement('section');
+  page.className=`print-page ${mode}${isFirst?'':' cont'}`;
+
+  const frame=document.createElement('div');
+  frame.className='print-frame';
+  const inner=document.createElement('div');
+  inner.className='print-inner';
+
+  const head=sourceSheet.querySelector('.sheet-head')?.cloneNode(true);
+  const subject=sourceSheet.querySelector('.subject-ribbon')?.cloneNode(true);
+  const answers=sourceSheet.querySelector('.answer-grid')?.cloneNode(true);
+
+  if(head)inner.appendChild(head);
+  if(subject)inner.appendChild(subject);
+  if(isFirst && answers)inner.appendChild(answers);
+
+  const cols=document.createElement('div');
+  cols.className='print-cols';
+  cols.innerHTML='<div class="print-col"></div><div class="print-col"></div>';
+  inner.appendChild(cols);
+  frame.appendChild(inner);
+  page.appendChild(frame);
+  page.insertAdjacentHTML('beforeend',printFooterHTML(mode));
+  return page;
+}
+async function waitCloneImages(el){
+  const imgs=[...el.querySelectorAll('img')];
+  await Promise.all(imgs.map(img=>{
+    if(img.complete)return Promise.resolve();
+    return new Promise(res=>{
+      img.addEventListener('load',res,{once:true});
+      img.addEventListener('error',res,{once:true});
+      setTimeout(res,2500);
+    });
+  }));
+}
+async function buildStablePrintPages(){
+  document.getElementById('printPages')?.remove();
+
+  const sourceSheet=document.querySelector('#generated .exam-sheet');
+  if(!sourceSheet)throw new Error('인쇄할 문제지/해설지를 찾지 못했습니다.');
+
+  const mode=sourceSheet.classList.contains('solution-sheet')?'solution':'problem';
+  const itemSelector=mode==='solution'?'.paper-columns > .solution-item':'.paper-columns > .paper-q';
+  const sourceItems=[...sourceSheet.querySelectorAll(itemSelector)];
+  if(!sourceItems.length)throw new Error('인쇄할 문항이 없습니다.');
+
+  const pages=document.createElement('div');
+  pages.id='printPages';
+  pages.className='print-measure';
+  document.body.appendChild(pages);
+
+  const settle=()=>new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
+  const fits=async(col,el)=>{
+    await settle();
+    const cr=col.getBoundingClientRect();
+    const er=el.getBoundingClientRect();
+    return er.bottom <= cr.bottom + 0.8;
+  };
+
+  let page=createStablePrintPage(sourceSheet,mode,true);
+  pages.appendChild(page);
+  await settle();
+
+  let colIdx=0;
+  let col=page.querySelectorAll('.print-col')[0];
+
+  for(const srcItem of sourceItems){
+    let clone=srcItem.cloneNode(true);
+    col.appendChild(clone);
+    await waitCloneImages(clone);
+
+    if(!(await fits(col,clone))){
+      clone.remove();
+
+      if(colIdx===0){
+        colIdx=1;
+        col=page.querySelectorAll('.print-col')[1];
+      }else{
+        page=createStablePrintPage(sourceSheet,mode,false);
+        pages.appendChild(page);
+        await settle();
+        colIdx=0;
+        col=page.querySelectorAll('.print-col')[0];
+      }
+
+      clone=srcItem.cloneNode(true);
+      col.appendChild(clone);
+      await waitCloneImages(clone);
+
+      // 한 항목 자체가 한 열보다 큰 경우만 아주 소폭 축소.
+      // 그래도 넘치면 overflow를 숨기지 않고 문항 내부 글자 크기만 추가로 줄인다.
+      if(!(await fits(col,clone))){
+        clone.classList.add('print-oversize');
+        clone.style.fontSize=mode==='solution'?'8.3pt':'8.8pt';
+        clone.style.lineHeight='1.42';
+        await settle();
+
+        if(!(await fits(col,clone))){
+          clone.style.fontSize=mode==='solution'?'7.8pt':'8.3pt';
+          clone.style.lineHeight='1.36';
+          await settle();
+        }
+      }
+    }
+  }
+
+  await settle();
+  pages.classList.remove('print-measure');
+  return pages;
+}
+async function printStableCurrentSheet(){
+  try{
+    await buildStablePrintPages();
+    alert('인쇄창에서 [더보기 설정] → [머리글 및 바닥글]을 OFF로 해주세요.\\nURL·날짜·1/2는 Chrome이 넣는 항목입니다.');
+    window.print();
+  }catch(e){
+    console.error(e);
+    alert('인쇄용 페이지 생성 중 오류가 발생했습니다.\\n'+(e.message||e));
+  }
+}
+window.addEventListener('afterprint',()=>{
+  document.getElementById('printPages')?.remove();
+});
+
 function ensurePrintDecorations(){
   let frame=document.getElementById('printPageFrame');
   if(!frame){
@@ -736,12 +1085,111 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식·하단 안내문을 유지하며 자연스럽게 이어집니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=()=>{
-  ensurePrintDecorations();
-  alert('인쇄창에서 [더보기 설정] → [머리글 및 바닥글]을 반드시 OFF로 해주세요.\n지금 보이는 URL·날짜·1/2는 Chrome이 추가하는 항목입니다.');
-  window.print();
-};$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
-function exportWord(mode='problem'){if(!currentSet.length)return;const m=sheetMeta();const body=mode==='solution'?solutionSheetHTML():problemSheetHTML();const css=`body{font-family:'Malgun Gothic';color:#111}.exam-sheet{border:1px solid #1473e6;padding:20px}.sheet-head{display:flex;justify-content:space-between}.sheet-title{font-weight:bold;font-size:18pt}.subject-ribbon{text-align:center;font-weight:bold;margin:15px}.paper-q,.solution-item{margin:0 0 14px;line-height:1.5}.paper-q-title,.sol-no,.sol-answer,.sol-label{font-weight:bold}.paper-q-choices,.sol-body{white-space:pre-wrap}.answer-grid{margin:10px 0}.sheet-logo{text-align:right;font-weight:bold}.material-disclaimer{margin-top:18px;padding-top:10px;border-top:1px solid #cbd5e1;font-size:9pt;line-height:1.55;color:#64748b;text-align:left}`;const html=`<html><head><meta charset="utf-8"><style>${css}</style></head><body>${body}</body></html>`;const blob=new Blob(['\ufeff',html],{type:'application/msword'});downloadBlob(blob,(m.subject||'시험')+(mode==='solution'?'_해설':'_문제')+'.doc');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> Word용 파일도 표 기반 2단 공단기 양식으로 생성합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+function wordEsc(s){
+  return esc(String(s||''));
+}
+function wordMultiline(s){
+  return String(s||'').split(/\r?\n/).map(line=>`<div class="wline">${wordEsc(line)}</div>`).join('');
+}
+function wordProblemBlock(p,i){
+  if(p.sourceMode==='officialImageFallback' && p.fallbackImageUrl){
+    return `<div class="wq"><div class="wqtitle">문 ${i+1}.</div><div><img src="${wordEsc(location.origin+p.fallbackImageUrl)}" style="max-width:100%;height:auto"></div></div>`;
+  }
+  if(p.originalQuestionImageUrl){
+    return `<div class="wq"><div class="wqtitle">문 ${i+1}.</div><div><img src="${wordEsc(location.origin+p.originalQuestionImageUrl)}" style="max-width:100%;height:auto"></div></div>`;
+  }
+  const view=p.viewText?`<table class="wview" cellspacing="0" cellpadding="0"><tr><td>${wordMultiline(p.viewText)}</td></tr></table>`:'';
+  return `<div class="wq">
+    <div class="wqtitle">문 ${i+1}. ${wordEsc(p.question||'')}</div>
+    ${view}
+    <div class="wchoices">${wordMultiline(p.choices||'')}</div>
+  </div>`;
+}
+function wordSolutionBlock(p,i){
+  const exp=p.editedExplanation||p.originalExplanation||p.explanation||'※ 상세 해설 미작성';
+  return `<div class="wsol">
+    <div class="wqtitle">문 ${i+1}.</div>
+    <div class="wlabel">[정답] ${wordEsc(p.answer||'')}</div>
+    <div class="wlabel">[해설]</div>
+    <div class="wexplain">${wordMultiline(exp)}</div>
+  </div>`;
+}
+function wordAnswerGrid(){
+  return `<table class="wanswers" cellspacing="0" cellpadding="0"><tr>${currentSet.map((p,i)=>`<td><b>${i+1}</b> ${wordEsc(p.answer||'')}</td>`).join('')}</tr></table>`;
+}
+function wordTwoColumns(mode){
+  const left=currentSet.slice(0,5);
+  const right=currentSet.slice(5,10);
+  const render=mode==='solution'?wordSolutionBlock:wordProblemBlock;
+  return `<table class="wcols" cellspacing="0" cellpadding="0"><tr>
+    <td class="wcol wleft">${left.map((p,i)=>render(p,i)).join('')}</td>
+    <td class="wcol wright">${right.map((p,i)=>render(p,i+5)).join('')}</td>
+  </tr></table>`;
+}
+function exportWord(mode='problem'){
+  if(!currentSet.length)return;
+  const m=sheetMeta();
+  const isSolution=mode==='solution';
+  const title=isSolution?'매일 확인 테스트 해설':'공단기 관리반 매일 확인 테스트';
+
+  const css=`
+    @page Section1{size:595.3pt 841.9pt;margin:34pt 34pt 54pt 34pt;mso-footer:f1;}
+    div.Section1{page:Section1;}
+    body{font-family:"Malgun Gothic",sans-serif;color:#111;font-size:9.5pt;}
+    table{border-collapse:collapse;}
+    .outer{width:100%;border:1.4pt solid #1473e6;}
+    .outertd{padding:18pt 20pt 14pt 20pt;}
+    .head{width:100%;margin-bottom:10pt;}
+    .title{display:inline-block;font-weight:700;font-size:16pt;padding:6pt 11pt;${isSolution?'color:#0667e8;border:1.5pt solid #0667e8;':'color:#fff;background:#0667e8;'}}
+    .date{text-align:right;font-size:8.5pt;white-space:nowrap;}
+    .subject{text-align:center;font-weight:700;color:#0667e8;font-size:12pt;margin:8pt 0 8pt 0;}
+    .subject span{border-top:1pt solid #333;border-bottom:1pt solid #333;padding:2pt 10pt;}
+    .wanswers{width:100%;border:1pt solid #333;margin:0 0 10pt 0;}
+    .wanswers td{width:10%;border-right:1pt solid #333;text-align:center;padding:2pt 1pt;font-size:8pt;}
+    .wanswers td:last-child{border-right:0;}
+    .wcols{width:100%;table-layout:fixed;}
+    .wcol{width:50%;vertical-align:top;padding:0 10pt;}
+    .wleft{border-right:1pt dotted #67aaf9;padding-left:0;}
+    .wright{padding-right:0;}
+    .wq,.wsol{margin:0 0 12pt 0;page-break-inside:avoid;}
+    .wqtitle{font-weight:700;margin:0 0 4pt 0;line-height:1.45;}
+    .wchoices,.wexplain{line-height:1.5;}
+    .wview{width:100%;border:1pt solid #777;margin:5pt 0 6pt 0;}
+    .wview td{padding:6pt 7pt;}
+    .wline{margin:0 0 2pt 0;}
+    .wlabel{font-weight:700;margin:2pt 0;}
+    .footerNote{font-size:7.5pt;color:#64748b;border-top:.5pt solid #cbd5e1;padding-top:5pt;}
+    .footerLogo{font-size:8.5pt;font-weight:700;text-align:right;white-space:nowrap;}
+    .blueD{color:#1473e6;font-size:12pt;font-weight:700;}
+  `;
+
+  const body=`<div class="Section1">
+    <table class="outer" cellspacing="0" cellpadding="0"><tr><td class="outertd">
+      <table class="head" cellspacing="0" cellpadding="0"><tr>
+        <td><span class="title">${wordEsc(title)}</span></td>
+        <td class="date">${m.date?`날짜: ${wordEsc(m.date)}`:''}</td>
+      </tr></table>
+      <div class="subject"><span>${wordEsc(m.subject||'')}${currentSet[0]?.unit?` · ${wordEsc(currentSet[0].unit)}`:''}</span></div>
+      ${isSolution?wordAnswerGrid():''}
+      ${wordTwoColumns(mode)}
+    </td></tr></table>
+  </div>
+  <div style="mso-element:footer" id="f1">
+    <table width="100%" cellspacing="0" cellpadding="0"><tr>
+      <td class="footerNote">[${isSolution?'해설지':'문제지'}] 본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</td>
+      <td class="footerLogo"><span class="blueD">D</span> 공단기학원</td>
+    </tr></table>
+  </div>`;
+
+  const doc=`<!DOCTYPE html><html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
+  <head><meta charset="utf-8">
+  <xml><w:WordDocument><w:View>Print</w:View><w:Zoom>90</w:Zoom><w:DoNotOptimizeForBrowser/></w:WordDocument></xml>
+  <style>${css}</style></head><body>${body}</body></html>`;
+
+  const blob=new Blob(['\ufeff',doc],{type:'application/msword;charset=utf-8'});
+  downloadBlob(blob,(m.subject||'시험')+(isSolution?'_해설':'_문제')+'.doc');
+}
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
 function openModal(p=null){$('#modalTitle').textContent=p?'문제 수정':'문제 등록';$('#pId').value=p?.id||'';$('#pSubject').value=p?.subject||SUBJECTS[0];$('#pExam').value=p?.exam||'';$('#pYear').value=p?.year||'';$('#pNo').value=p?.no||'';$('#pUnit').value=p?.unit||'';$('#pSubunit').value=p?.subunit||'';$('#pType').value=p?.type||'';$('#pAnswer').value=p?.answer||'';$('#pQuestion').value=p?.question||'';$('#pChoices').value=p?.choices||'';$('#pExplanation').value=p?.explanation||'';$('#modal').classList.remove('hidden')}
@@ -755,6 +1203,13 @@ function openBatch(){selectedPdfFiles=[];batchParsed=[];$('#pdfFiles').value='';
 function closeBatch(){$('#batchModal').classList.add('hidden');}
 $('#batchPdfBtn').onclick=openBatch;
 $('#officialImportBtn').onclick=openOfficialModal;
+$('#zipImportBtn').onclick=openZipImportModal;
+$('#closeZipImport').onclick=closeZipImportModal;
+$('#cancelZipImport').onclick=closeZipImportModal;
+$('#clearZipImport').onclick=clearZipImport;
+$('#scanQuestionZip').onclick=scanQuestionZip;
+$('#selectSupportedZip').onclick=selectSupportedZipSubjects;
+$('#registerZipSubjects').onclick=registerZipSubjects;
 $('#closeOfficial').onclick=closeOfficialModal;
 $('#cancelOfficial').onclick=closeOfficialModal;
 $('#clearOfficial').onclick=()=>{officialParsed=[];$('#oProblemPdf').value='';$('#oAnswerPdf').value='';$('#officialResult').classList.add('hidden');};
@@ -1900,6 +2355,352 @@ function closeOfficialModal(){
   officialParsed.forEach(x=>{try{if(x.previewUrl)URL.revokeObjectURL(x.previewUrl)}catch{}});
   officialParsed=[];
 }
+
+// ===== 시험문제 ZIP 자동분리 v22 =====
+let zipSubjectRows=[];
+let zipAnswerMap=new Map();
+
+const ZIP_SUBJECT_MAP={
+  '행정학개론':'행정학',
+  '행정법총론':'행정법',
+  '행정법개론':'행정법',
+  '교육학개론':'교육학',
+  '교정학개론':'교정학',
+  '세법개론':'세법',
+  '회계학':'회계학',
+  '형법':'형법',
+  '형법총론':'형법',
+  '형사소송법':'형사소송법',
+  '형사소송법개론':'형사소송법',
+  '국어':'국어',
+  '영어':'영어'
+};
+const ZIP_PREFERRED_SOURCE={
+  '행정학':'행정학개론',
+  '행정법':'행정법총론',
+  '교육학':'교육학개론',
+  '교정학':'교정학개론',
+  '세법':'세법개론',
+  '회계학':'회계학',
+  '형법':'형법',
+  '형사소송법':'형사소송법',
+  '국어':'국어',
+  '영어':'영어'
+};
+
+function decodeHashUnicodeName(name){
+  return String(name||'').replace(/#U([0-9A-Fa-f]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
+}
+function normalizeZipSubject(s){
+  return String(s||'')
+    .replace(/_/g,' ')
+    .replace(/ㆍ/g,'·')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function zipAnswerKey(subject,book){
+  return normalizeZipSubject(subject)+'|'+String(book||'').trim();
+}
+async function parseAllOfficialAnswerRows(file){
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const map=new Map();
+
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const tc=await page.getTextContent();
+    const lines=rawLines(rawPdfItems(tc),3.0);
+
+    for(const line of lines){
+      const texts=line.items.map(x=>String(x.text||'').trim()).filter(Boolean);
+      if(texts.length<22)continue;
+
+      const bookIdx=texts.findIndex((t,i)=>i>0 && /^[가-하]$/.test(t));
+      if(bookIdx<2)continue;
+
+      const rowNo=texts[0];
+      if(!/^\d+$/.test(rowNo))continue;
+
+      const sourceSubject=normalizeZipSubject(texts.slice(1,bookIdx).join(' '));
+      const book=texts[bookIdx];
+      const nums=texts.slice(bookIdx+1).filter(t=>/^[1-5]$/.test(t)).map(Number);
+      if(nums.length>=20){
+        map.set(zipAnswerKey(sourceSubject,book),nums.slice(0,20));
+      }
+    }
+  }
+  return map;
+}
+
+function zipRowStatus(row){
+  if(!row.appSubject)return '<span class="zip-support-no">현재 문제은행 미지원</span>';
+  if(!row.answers)return '<span class="warn-text">정답표 미매칭</span>';
+  return '<span class="zip-support-ok">자동 등록 가능</span>';
+}
+function renderZipImportRows(){
+  const supported=zipSubjectRows.filter(x=>x.appSubject).length;
+  const answerMatched=zipSubjectRows.filter(x=>x.answers).length;
+  const selected=zipSubjectRows.filter(x=>x.checked).length;
+
+  $('#zipImportSummary').innerHTML=
+    `<span class="pill">PDF ${zipSubjectRows.length}개</span>`+
+    `<span class="pill">지원 과목 ${supported}개</span>`+
+    `<span class="pill">정답 연결 ${answerMatched}개</span>`+
+    `<span class="pill">등록 선택 ${selected}개</span>`;
+
+  $('#zipImportBody').innerHTML=zipSubjectRows.map((r,i)=>`<tr id="zipRow${i}">
+    <td><input type="checkbox" class="zCheck" data-i="${i}" ${r.checked?'checked':''} ${!r.appSubject||!r.answers?'disabled':''}></td>
+    <td>${esc(r.fileName)}</td>
+    <td><b>${esc(r.sourceSubject)}</b></td>
+    <td>${r.appSubject?`<b>${esc(r.appSubject)}</b>`:'-'}</td>
+    <td>${esc(r.book)}</td>
+    <td>${r.answers?'<span class="ok-text">1~20 연결</span>':'<span class="warn-text">없음</span>'}</td>
+    <td>${zipRowStatus(r)}</td>
+  </tr>`).join('');
+
+  $$('.zCheck').forEach(x=>x.onchange=e=>{
+    zipSubjectRows[+e.target.dataset.i].checked=e.target.checked;
+    renderZipImportRows();
+  });
+}
+
+async function scanQuestionZip(){
+  const zipFile=$('#zQuestionZip').files[0];
+  const answerFile=$('#zAnswerPdf').files[0];
+  if(!zipFile||!answerFile){
+    alert('시험문제 ZIP과 공식 정답표 PDF를 모두 선택해주세요.');
+    return;
+  }
+  if(typeof JSZip==='undefined'){
+    alert('ZIP 모듈을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');
+    return;
+  }
+
+  const progress=$('#zipImportProgress'),bar=progress.querySelector('i');
+  progress.classList.remove('hidden');bar.style.width='5%';
+  $('#zipImportResult').classList.add('hidden');
+
+  try{
+    zipAnswerMap=await parseAllOfficialAnswerRows(answerFile);
+    bar.style.width='25%';
+
+    const zip=await JSZip.loadAsync(zipFile);
+    const rows=[];
+    const entries=Object.values(zip.files).filter(e=>!e.dir);
+
+    for(const entry of entries){
+      const decoded=decodeHashUnicodeName(entry.name);
+      const base=decoded.split('/').pop();
+      if(!/\.pdf$/i.test(base))continue;
+
+      const m=base.match(/^(.+)_([가-하])\.pdf$/i);
+      if(!m)continue;
+
+      const sourceSubject=normalizeZipSubject(m[1]);
+      const book=m[2];
+      const appSubject=ZIP_SUBJECT_MAP[sourceSubject]||'';
+      const answers=zipAnswerMap.get(zipAnswerKey(sourceSubject,book))||null;
+
+      // 같은 앱 과목에 여러 원본과목이 있으면 대표 과목만 기본 선택
+      const preferred=appSubject && ZIP_PREFERRED_SOURCE[appSubject]===sourceSubject;
+      const checked=!!(appSubject&&answers&&preferred);
+
+      rows.push({
+        entry,
+        rawName:entry.name,
+        fileName:base,
+        sourceSubject,appSubject,book,answers,checked,
+        parsed:null
+      });
+    }
+
+    zipSubjectRows=rows.sort((a,b)=>a.sourceSubject.localeCompare(b.sourceSubject,'ko'));
+    bar.style.width='100%';
+    renderZipImportRows();
+    $('#zipImportResult').classList.remove('hidden');
+
+    if(!zipSubjectRows.length){
+      alert('ZIP 안에서 과목명_책형.pdf 형식의 PDF를 찾지 못했습니다.');
+    }
+  }catch(e){
+    console.error(e);
+    alert('ZIP 자동분리 중 오류가 발생했습니다.\n'+(e.message||e));
+  }finally{
+    setTimeout(()=>progress.classList.add('hidden'),500);
+  }
+}
+
+async function zipEntryToFile(row){
+  const blob=await row.entry.async('blob');
+  return new File([blob],row.fileName,{type:'application/pdf'});
+}
+async function parseOneZipSubject(row,exam,year,progressCb){
+  const file=await zipEntryToFile(row);
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const regions=[];
+
+  for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const vp=page.getViewport({scale:1});
+    const tc=await page.getTextContent();
+    regions.push(...officialQuestionRegions(tc,vp,p));
+  }
+  regions.sort((a,b)=>a.no-b.no);
+
+  const rows=[];
+  for(let i=0;i<regions.length;i++){
+    const region=regions[i];
+    const parsed=parseOfficialStructured(region);
+    let fallbackImageUrl='';
+    let sourceMode='officialText';
+
+    if(!parsed.ok){
+      sourceMode='officialImageFallback';
+      const blob=await makeOfficialFallbackCrop(pdf,region);
+      if(blob){
+        const idBase=`ZIP-${row.sourceSubject}-${exam}-${year}-${row.book}-${region.no}`;
+        fallbackImageUrl=await uploadViewAsset(idBase+'-fallback',blob);
+      }
+    }
+
+    const id=`ZIP-${row.sourceSubject}-${exam}-${year}-${row.book}-${region.no}`;
+    rows.push({
+      id,
+      subject:row.appSubject,
+      sourceSubject:row.sourceSubject,
+      exam,year,no:region.no,
+      unit:'',subunit:'',type:'원문기출',
+      answer:circledAnswer(row.answers?.[region.no-1]),
+      answerSource:'공식 정답표',
+      question:parsed.stem,
+      viewText:parsed.viewText||'',
+      choices:parsed.choicesText||'',
+      choicesData:parsed.choices||[],
+      rawOriginalText:parsed.rawOriginalText||'',
+      fallbackImageUrl,
+      sourceMode,
+      sourceBook:row.book,
+      sourceProblemFile:row.fileName,
+      sourceAnswerFile:$('#zAnswerPdf').files[0]?.name||'',
+      explanation:'',
+      explanationStatus:'작성 대기',
+      status:'출제 가능',
+      updatedAt:new Date().toISOString()
+    });
+
+    if(progressCb)progressCb(i+1,regions.length);
+  }
+  return rows;
+}
+
+async function registerZipSubjects(){
+  const selected=zipSubjectRows.filter(r=>r.checked&&r.appSubject&&r.answers);
+  if(!selected.length){
+    alert('등록할 지원 과목을 선택해주세요.');
+    return;
+  }
+  const exam=$('#zExam').value.trim();
+  const year=+$('#zYear').value;
+  if(!exam||!year){
+    alert('시험 구분과 연도를 확인해주세요.');
+    return;
+  }
+
+  const btn=$('#registerZipSubjects');
+  const progress=$('#zipImportProgress'),bar=progress.querySelector('i');
+  btn.disabled=true;
+  progress.classList.remove('hidden');
+
+  let allRows=[];
+  try{
+    for(let si=0;si<selected.length;si++){
+      const row=selected[si];
+      const tr=$('#zipRow'+zipSubjectRows.indexOf(row));
+      if(tr)tr.classList.add('zip-registering');
+
+      btn.textContent=`${row.sourceSubject} 분석 중... (${si+1}/${selected.length})`;
+
+      const rows=await parseOneZipSubject(row,exam,year,(done,total)=>{
+        const overall=(si+(done/Math.max(1,total)))/selected.length;
+        bar.style.width=Math.round(overall*85)+'%';
+      });
+      allRows.push(...rows);
+
+      if(tr)tr.classList.remove('zip-registering');
+    }
+
+    if(!allRows.length)throw new Error('등록 가능한 문항을 찾지 못했습니다.');
+
+    // 50문항씩 D1 저장
+    for(let i=0;i<allRows.length;i+=50){
+      btn.textContent=`D1 저장 중... ${Math.min(i+50,allRows.length)}/${allRows.length}`;
+      const r=await fetch('/api/problems/bulk',{
+        method:'PUT',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({problems:allRows.slice(i,i+50)})
+      });
+      if(!r.ok)throw new Error(await r.text());
+      bar.style.width=(85+Math.round(15*Math.min(i+50,allRows.length)/allRows.length))+'%';
+    }
+
+    const map=new Map(problems.map(p=>[String(p.id),p]));
+    allRows.forEach(p=>map.set(String(p.id),p));
+    problems=[...map.values()];
+    try{
+      if(JSON.stringify(problems).length<2500000){
+        localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
+      }
+    }catch(e){}
+
+    renderBank();refreshFilters();fillSubjects();
+    bar.style.width='100%';
+
+    const textCount=allRows.filter(p=>p.sourceMode==='officialText').length;
+    const imageCount=allRows.filter(p=>p.sourceMode==='officialImageFallback').length;
+    alert(
+      `ZIP 자동분리 등록 완료\n`+
+      `과목: ${selected.length}개\n`+
+      `문항: ${allRows.length}개\n`+
+      `텍스트 구조: ${textCount}개\n`+
+      `이미지 예외: ${imageCount}개\n`+
+      `정답: 공식 정답표 자동 연결`
+    );
+    closeZipImportModal();
+  }catch(e){
+    console.error(e);
+    alert('ZIP 일괄 등록 중 오류가 발생했습니다.\n'+(e.message||e));
+  }finally{
+    btn.disabled=false;
+    btn.textContent='선택 과목 일괄 등록';
+    setTimeout(()=>progress.classList.add('hidden'),700);
+  }
+}
+
+function selectSupportedZipSubjects(){
+  zipSubjectRows.forEach(r=>{
+    r.checked=!!(r.appSubject&&r.answers&&ZIP_PREFERRED_SOURCE[r.appSubject]===r.sourceSubject);
+  });
+  renderZipImportRows();
+}
+function openZipImportModal(){
+  zipSubjectRows=[];
+  zipAnswerMap=new Map();
+  $('#zipImportModal').classList.remove('hidden');
+  $('#zipImportResult').classList.add('hidden');
+}
+function closeZipImportModal(){
+  $('#zipImportModal').classList.add('hidden');
+  zipSubjectRows=[];
+  zipAnswerMap=new Map();
+}
+function clearZipImport(){
+  zipSubjectRows=[];
+  zipAnswerMap=new Map();
+  $('#zQuestionZip').value='';
+  $('#zAnswerPdf').value='';
+  $('#zipImportBody').innerHTML='';
+  $('#zipImportResult').classList.add('hidden');
+}
+
 // ===== 현재 출제 10문항 JSON 해설 확정 적용 v16.1 =====
 function currentExamRows(){
   if(Array.isArray(currentSet)&&currentSet.length)return currentSet;
@@ -2081,7 +2882,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v21.2.7 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.3.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -2164,7 +2965,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v21.2.7 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.3.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
