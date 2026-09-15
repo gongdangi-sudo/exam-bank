@@ -528,51 +528,61 @@ async function persistExplanationUpdates(items){
 }
 async function applyExplanationJsonStrict(file){
   const set=currentExamRows();
-  if(!set.length){alert('먼저 문제 10문항을 출제해주세요.');return}
+  if(!set.length){alert('먼저 문제를 출제해주세요.');return}
   let raw;
   try{raw=JSON.parse(await file.text())}catch(e){alert('JSON 파일 형식이 올바르지 않습니다.');return}
   const incoming=flattenExplanationJson(raw);
   if(!incoming.length){alert('JSON에서 상세 해설을 찾지 못했습니다.');return}
 
-  const byId=new Map(incoming.filter(x=>x.id).map(x=>[x.id,x]));
-  const used=new Set(), updates=[];
-  let idMatched=0,noMatched=0,missing=0;
+  // 데일리 테스트 JSON은 "현재 출제 순서 1~10"이 기준이다.
+  // 문제은행의 원본 no(예: 17번, 42번)와 시험지 슬롯번호(1~10)를 혼동하지 않는다.
+  if(incoming.length!==set.length){
+    alert(`JSON 문항 수가 현재 시험과 다릅니다.\n현재 시험: ${set.length}문항\nJSON 해설: ${incoming.length}개\n\n정확히 같은 시험의 JSON을 올려주세요.`);
+    return;
+  }
 
-  set.forEach((p,idx)=>{
-    let hit=null;
+  // ID가 들어 있는 JSON은 ID 검증을 우선한다.
+  const incomingIds=incoming.map(x=>x.id).filter(Boolean);
+  const currentIds=set.map(p=>String(p.id||'')).filter(Boolean);
+  if(incomingIds.length===incoming.length && currentIds.length===set.length){
+    const same=new Set(currentIds);
+    const mismatch=incomingIds.filter(id=>!same.has(id));
+    if(mismatch.length){
+      alert(`다른 시험 JSON으로 확인되어 적용하지 않았습니다.\nID 불일치: ${mismatch.length}개`);
+      return;
+    }
+  }
+
+  const byId=new Map(incoming.filter(x=>x.id).map(x=>[x.id,x]));
+  const used=new Set(),updates=[];
+  let idMatched=0,orderMatched=0;
+
+  set.forEach((p,slot)=>{
     const pid=String(p.id||'');
-    if(pid && byId.has(pid)){hit=byId.get(pid);idMatched++}
+    let hit=(pid&&byId.has(pid))?byId.get(pid):null;
+    if(hit){idMatched++;used.add(hit.index)}
     if(!hit){
-      const pno=String(p.no??idx+1).replace(/[^\dA-Za-z]/g,'');
-      hit=incoming.find(x=>!used.has(x.index)&&x.no&&x.no===pno);
-      if(hit)noMatched++;
+      // 남은 JSON 중 같은 슬롯을 우선 사용하고, 이미 사용됐으면 첫 미사용 항목.
+      hit=(!used.has(slot)?incoming[slot]:null) || incoming.find(x=>!used.has(x.index));
+      orderMatched++;
+      used.add(hit.index);
     }
-    // 마지막 안전장치: JSON이 현재 시험과 정확히 같은 개수이고 ID/번호가 전혀 없는 구형 JSON일 때만 순서 허용
-    if(!hit && incoming.length===set.length && incoming.every(x=>!x.id&&!x.no)){
-      hit=incoming[idx];
-    }
-    if(!hit){missing++;return}
-    used.add(hit.index);
-    // 현재 출제 세트 자체에 즉시 반영한다.
-    p.explanation=hit.explanation;
-    p.editedExplanation=hit.explanation;
+
+    const text=hit.explanation;
+    p.explanation=text;
+    p.editedExplanation=text;
     p.explanationStatus='작성 완료';
     p.explanationUpdatedAt=new Date().toISOString();
 
     const bank=problems.find(q=>String(q.id)===pid);
     if(bank){
-      bank.explanation=hit.explanation;
-      bank.editedExplanation=hit.explanation;
+      bank.explanation=text;
+      bank.editedExplanation=text;
       bank.explanationStatus='작성 완료';
       bank.explanationUpdatedAt=p.explanationUpdatedAt;
       updates.push(bank);
     }else updates.push(p);
   });
-
-  if(missing){
-    alert(`JSON 검증 실패\n현재 시험: ${set.length}문항\nJSON 해설: ${incoming.length}개\nID 일치: ${idMatched}개\n번호 일치: ${noMatched}개\n미일치: ${missing}개\n\n다른 시험 JSON일 수 있어 적용하지 않았습니다.`);
-    return;
-  }
 
   try{
     save();
@@ -581,10 +591,9 @@ async function applyExplanationJsonStrict(file){
   const d1ok=await persistExplanationUpdates(updates);
   try{
     renderGenerated('solution');
-    // 렌더 직후에도 현재 세트의 해설이 실제 DOM에 들어갔는지 확인한다.
     requestAnimationFrame(()=>renderGenerated('solution'));
   }catch(e){console.error(e)}
-  alert(`해설 적용 완료\nJSON 인식: ${incoming.length}개\n현재 시험 매칭: ${set.length}/${set.length}\n해설 적용: ${set.length}/${set.length}\nD1 저장: ${d1ok?'완료':'현재 화면 적용 완료 · D1 저장 확인 필요'}`);
+  alert(`해설 적용 완료\n현재 시험: ${set.length}문항\nJSON 해설: ${incoming.length}개\nID 매칭: ${idMatched}개\n출제순서 매칭: ${orderMatched}개\n해설 적용: ${set.length}/${set.length}\nD1 저장: ${d1ok?'완료':'현재 화면 적용 완료 · D1 저장 확인 필요'}`);
 }
 function installStrictExplanationImporter(){
   const btn=$('#applyCurrentExplanationJsonBtn'),input=$('#currentExplanationJsonFile');
@@ -596,7 +605,7 @@ function installStrictExplanationImporter(){
   ni.onchange=async()=>{const f=ni.files?.[0];if(f)await applyExplanationJsonStrict(f);ni.value='';};
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.2 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16.3 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -679,7 +688,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.2 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16.3 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
