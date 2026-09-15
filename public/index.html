@@ -903,14 +903,48 @@ function recentIds(days){if(!days)return new Set();const cut=Date.now()-days*864
 function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
 $('#generateBtn').onclick=()=>{const subject=$('#fSubject').value, exam=$('#fExam').value, year=$('#fYear').value, unit=$('#fUnit').value, count=Math.max(1,+$('#fCount').value||10), days=+$ ('#fExclude').value;const excluded=recentIds(days);let pool=problems.filter(p=>p.subject===subject&&(!exam||p.exam===exam)&&(!year||String(p.year)===year)&&(!unit||p.unit===unit)&&!excluded.has(p.id));const order=$('#fOrder').value;if(order==='random')shuffle(pool);if(order==='yearDesc')pool.sort((a,b)=>(b.year||0)-(a.year||0));if(order==='yearAsc')pool.sort((a,b)=>(a.year||0)-(b.year||0));currentSet=pool.slice(0,count);if(!currentSet.length){$('#generated').innerHTML=`<div class="empty"><b>출제 가능한 문제가 없습니다.</b><br><br>문제은행 등록 여부와 최근 출제 제외 조건을 확인해주세요.</div>`;return}history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,days},problemIds:currentSet.map(p=>p.id)});history=history.slice(0,200);save();renderGenerated('problem');renderBank();fillSubjects();}
 function koDate(v){if(!v)return '';const d=new Date(v+'T00:00:00');const w=['일','월','화','수','목','금','토'][d.getDay()];return `${d.getFullYear()}. ${String(d.getMonth()+1).padStart(2,'0')}. ${String(d.getDate()).padStart(2,'0')}.(${w})`}
-function sheetMeta(){return {title:$('#fTitle').value||'공단기 관리반 매일 확인 테스트',author:$('#fAuthor').value.trim(),date:koDate($('#fDate').value),subject:$('#fSubject').value}}
+function currentSetSubject(){
+  const subjects=[...new Set(
+    (currentSet||[])
+      .map(p=>String(p?.subject||'').trim())
+      .filter(Boolean)
+  )];
+  if(subjects.length===1)return subjects[0];
+  if(subjects.length>1)return '혼합';
+  return $('#fSubject')?.value||'';
+}
+function currentSetUnit(){
+  const units=[...new Set(
+    (currentSet||[])
+      .map(p=>String(p?.unit||'').trim())
+      .filter(Boolean)
+  )];
+  return units.length===1?units[0]:'';
+}
+function syncOutputSubject(){
+  const actual=currentSetSubject();
+  const el=$('#fSubject');
+  if(el && actual && [...el.options].some(o=>o.value===actual)){
+    el.value=actual;
+  }
+  return actual;
+}
+function sheetMeta(){
+  return {
+    title:$('#fTitle').value||'공단기 관리반 매일 확인 테스트',
+    author:$('#fAuthor').value.trim(),
+    date:koDate($('#fDate').value),
+    // 출력 과목은 필터 드롭다운이 아니라 실제 현재 출제 문항을 기준으로 결정
+    subject:currentSetSubject()
+  };
+}
 function assetUrl(u){
   const s=String(u||'');
   if(!s)return '';
   return s+(s.includes('?')?'&':'?')+'assetv=1691';
 }
 function materialDisclaimerHTML(){return `<div class="material-disclaimer">본 자료는 인사혁신처 기출 원문을 바탕으로 AI를 활용하여 초안을 작성하였으며, 합격생의 검토 과정을 거쳤습니다. AI 생성물의 특성상 일부 오류가 있을 수 있으니 학습 보조 자료로 활용하시기 바랍니다.</div>`;}
-function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-sheet problem-sheet" id="problemSheet"><div class="sheet-head"><div><div class="sheet-title">${esc(m.title)}</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="paper-q">${p.sourceMode==='officialText'
+function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-sheet problem-sheet" id="problemSheet"><div class="sheet-head"><div><div class="sheet-title">${esc(m.title)}</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSetUnit()?` · ${esc(currentSetUnit())}`:''}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="paper-q">${p.sourceMode==='officialText'
   ? `<div class="paper-q-title">문 ${i+1}. ${esc(p.question||'')}</div>${p.viewText?`<div class="official-view-box">${esc(p.viewText)}</div>`:''}<div class="paper-q-choices">${esc(p.choices||'')}</div>`
   : p.sourceMode==='officialImageFallback' && p.fallbackImageUrl
     ? `<div class="paper-q-title">문 ${i+1}.</div><div class="original-question-wrap"><img src="${esc(assetUrl(p.fallbackImageUrl))}" alt="문 ${i+1} 원문 예외"></div>`
@@ -918,7 +952,7 @@ function problemSheetHTML(){const m=sheetMeta();return `<section class="exam-she
       ? `<div class="original-question-wrap"><img src="${esc(assetUrl(p.originalQuestionImageUrl))}" alt="문 ${i+1} 원문기출"></div>`
       : `<div class="paper-q-title">문 ${i+1}. ${esc(cleanSourceNoise(p.question))}</div>${p.viewImageUrl?`<div class="view-image-wrap"><img src="${esc(assetUrl(p.viewImageUrl))}" alt="보기 원문"></div>`:''}<div class="paper-q-choices">${esc(cleanSourceNoise(p.choices||''))}</div>`
 }</div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
-function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i)=>`<div><span class="n">${i+1}</span> ${esc(p.answer)}</div>`).join('');return `<section class="exam-sheet solution-sheet" id="solutionSheet"><div class="sheet-head"><div><div class="sheet-title">매일 확인 테스트 해설</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSet[0]?.unit?` · ${esc(currentSet[0].unit)}`:''}</div><div class="answer-grid">${cells}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="solution-item"><div class="sol-no">문 ${i+1}.</div><div class="sol-answer">[정답] ${esc(p.answer)}</div><div class="sol-label">[해설]</div><div class="sol-body">${(p.editedExplanation||p.originalExplanation||p.explanation)?esc(p.editedExplanation||p.originalExplanation||p.explanation):'<div class="missing-explanation">※ 상세 해설 미작성<br><span>문제은행에서 ‘상세 해설용 JSON 내보내기’ 또는 위의 ‘현재 출제문항 상세 해설 요청’을 사용하세요.</span></div>'}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
+function solutionSheetHTML(){const m=sheetMeta();const cells=currentSet.map((p,i)=>`<div><span class="n">${i+1}</span> ${esc(p.answer)}</div>`).join('');return `<section class="exam-sheet solution-sheet" id="solutionSheet"><div class="sheet-head"><div><div class="sheet-title">매일 확인 테스트 해설</div></div><div class="sheet-info">${m.author?`출제자: ${esc(m.author)}<br>`:''}${m.date?`날짜: ${esc(m.date)}`:''}</div></div><div class="subject-ribbon">${esc(m.subject)}${currentSetUnit()?` · ${esc(currentSetUnit())}`:''}</div><div class="answer-grid">${cells}</div><div class="paper-columns">${currentSet.map((p,i)=>`<div class="solution-item"><div class="sol-no">문 ${i+1}.</div><div class="sol-answer">[정답] ${esc(p.answer)}</div><div class="sol-label">[해설]</div><div class="sol-body">${(p.editedExplanation||p.originalExplanation||p.explanation)?esc(p.editedExplanation||p.originalExplanation||p.explanation):'<div class="missing-explanation">※ 상세 해설 미작성<br><span>문제은행에서 ‘상세 해설용 JSON 내보내기’ 또는 위의 ‘현재 출제문항 상세 해설 요청’을 사용하세요.</span></div>'}</div></div>`).join('')}</div><div class="sheet-logo"><b>D</b>공단기학원</div>${materialDisclaimerHTML()}</section>`}
 
 
 function printFooterHTML(mode){
@@ -1082,10 +1116,10 @@ function ensurePrintDecorations(){
 }
 window.addEventListener('beforeprint',ensurePrintDecorations);
 
-function renderGenerated(mode='problem'){const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
+function renderGenerated(mode='problem'){syncOutputSubject();const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> Word용 파일도 표 기반 2단 공단기 양식으로 생성합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word용</button><button class="btn ghost" id="wordSolution">해설지 Word용</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word:</b> Word용 파일도 표 기반 2단 공단기 양식으로 생성합니다. 실제 출제된 문항의 과목을 자동 판별하여 제목/파일명에 사용합니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 function wordEsc(s){
   return esc(String(s||''));
 }
@@ -1170,7 +1204,7 @@ function exportWord(mode='problem'){
         <td><span class="title">${wordEsc(title)}</span></td>
         <td class="date">${m.date?`날짜: ${wordEsc(m.date)}`:''}</td>
       </tr></table>
-      <div class="subject"><span>${wordEsc(m.subject||'')}${currentSet[0]?.unit?` · ${wordEsc(currentSet[0].unit)}`:''}</span></div>
+      <div class="subject"><span>${wordEsc(m.subject||'')}${currentSetUnit()?` · ${wordEsc(currentSetUnit())}`:''}</span></div>
       ${isSolution?wordAnswerGrid():''}
       ${wordTwoColumns(mode)}
     </td></tr></table>
@@ -1188,7 +1222,7 @@ function exportWord(mode='problem'){
   <style>${css}</style></head><body>${body}</body></html>`;
 
   const blob=new Blob(['\ufeff',doc],{type:'application/msword;charset=utf-8'});
-  downloadBlob(blob,(m.subject||'시험')+(isSolution?'_해설':'_문제')+'.doc');
+  downloadBlob(blob,(currentSetSubject()||m.subject||'시험')+(isSolution?'_해설':'_문제')+'.doc');
 }
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
@@ -2882,7 +2916,7 @@ function installStrictExplanationImporter(){
   };
 }
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.3.2 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v22.4.2 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -2965,7 +2999,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.3.2 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v22.4.2 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
