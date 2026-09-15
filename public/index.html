@@ -236,48 +236,40 @@ async function pushCloudState(){
     console.error('Cloud save failed',e); setCloudStatus('⚠ D1 저장 실패 · 로컬 보관 중',false);
   }finally{cloudSaving=false;}
 }
-function queueCloudSave(){
-  clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(pushCloudState,700);
-}
+function queueCloudSave(){ /* v17: 대용량 전체 동기화 중지 */ }
 function save(){
-  // 화면 반응은 즉시: 브라우저 로컬 캐시
-  localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
-  localStorage.setItem(K_HISTORY,JSON.stringify(history));
-  // D1 저장은 백그라운드 디바운스
-  queueCloudSave();
+  try{
+    const small=JSON.stringify(problems);
+    if(small.length<1800000)localStorage.setItem(K_PROBLEMS,small);
+    localStorage.setItem(K_HISTORY,JSON.stringify(history));
+  }catch(e){console.warn('대용량 로컬 캐시 생략',e);}
 }
 async function bootstrapCloudState(){
-  setCloudStatus('☁ D1 데이터 불러오는 중');
+  setCloudStatus('☁ D1 연결 확인 중');
   try{
-    const r=await fetch('/api/state',{cache:'no-store'});
-    if(!r.ok) throw new Error(await r.text());
+    const r=await fetch('/api/meta',{cache:'no-store'});
+    if(!r.ok)throw new Error(await r.text());
     const d=await r.json();
-    const remoteProblems=Array.isArray(d.problems)?d.problems:[];
-    const remoteHistory=Array.isArray(d.history)?d.history:[];
-    if(remoteProblems.length || remoteHistory.length){
-      problems=remoteProblems; history=remoteHistory;
-      localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
-      localStorage.setItem(K_HISTORY,JSON.stringify(history));
-      const repaired=repairExistingSourceNoise();
-      setCloudStatus(`☁ D1 연결 · 문제 ${problems.length.toLocaleString()}개${repaired?` · 오류정리 ${repaired}개`:''}`);
-    }else if(problems.length || history.length){
-      // 기존 GitHub/localStorage 자료를 처음 한 번 D1로 자동 이전
-      repairExistingSourceNoise();
-      await pushCloudState();
-      setCloudStatus(`☁ 기존 자료 D1 이전 · 문제 ${problems.length.toLocaleString()}개`);
-    }else{
-      cloudReady=true; setCloudStatus('☁ D1 연결 · 빈 문제은행');
-    }
-    try{renderBank();}catch(e){}
-    try{refreshFilters();}catch(e){}
-    try{fillSubjects();}catch(e){}
-    try{renderHistory();}catch(e){}
-    try{renderExplanationEditor();}catch(e){}
+    cloudReady=true;
+    setCloudStatus(`☁ D1 연결 · 문제 ${Number(d.total||0).toLocaleString()}개`);
+    window.examBankMeta=d;
   }catch(e){
-    console.error('Cloud bootstrap failed',e);
-    setCloudStatus('⚠ D1 연결 실패 · 로컬 모드',false);
+    console.error(e);
+    setCloudStatus('⚠ D1 연결 실패 · 로컬 캐시 사용',false);
   }
+}
+async function apiProblemPage(subject='',q='',page=1,pageSize=50){
+  const x=new URLSearchParams({subject,q,page:String(page),pageSize:String(pageSize)});
+  const r=await fetch('/api/problems?'+x,{cache:'no-store'});
+  if(!r.ok)throw new Error(await r.text());
+  return r.json();
+}
+async function apiCandidates(filters={}){
+  const x=new URLSearchParams();
+  Object.entries(filters).forEach(([k,v])=>{if(v!==''&&v!=null)x.set(k,String(v));});
+  const r=await fetch('/api/candidates?'+x,{cache:'no-store'});
+  if(!r.ok)throw new Error(await r.text());
+  return (await r.json()).problems||[];
 }
 function uid(){return 'Q'+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase()}
 function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page).classList.remove('hidden');$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const map={home:['과목 선택','과목을 선택해 기출문제 출제를 시작하세요.'],make:['문제 출제','등록된 문제은행에서 조건에 맞는 문제만 출제합니다.'],bank:['문제은행','기출문제 원문·정답·검수상태를 등록·관리합니다.'],explanations:['해설 편집','원본 해설·수정본을 확인하고 최종 사용 해설을 편집합니다.'],language:['국어·영어 자료 등록','문제편 PDF와 해설편 PDF를 세트로 등록하고 문항코드로 자동 매칭합니다.'],history:['출제 이력','최근 사용한 문제 세트를 확인합니다.'],rules:['출제 규칙','업로드 기출 전용·중복 금지·현행성 검증 규칙입니다.']};$('#pageTitle').textContent=map[page][0];$('#pageDesc').textContent=map[page][1];if(page==='bank')renderBank();if(page==='explanations')renderExplanationEditor();if(page==='language')renderLanguagePage();if(page==='history')renderHistory();if(page==='rules')
@@ -490,7 +482,7 @@ if(!$("#fDate").value){const now=new Date();$("#fDate").value=`${now.getFullYear
 
 
 
-// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v16 =====
+// ===== 현재 출제 10문항 해설 JSON 바로 적용 Cloudflare v17 =====
 function normalizeExplanationImportPayload(raw){
   let arr=[];
   if(Array.isArray(raw)) arr=raw;
@@ -575,7 +567,7 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v16 =====
+// ===== 국어·영어 문제+해설 세트 등록 Cloudflare v17 =====
 let languageParsed = [];
 function renderLanguagePage(){
   const r=$('#langResult');
