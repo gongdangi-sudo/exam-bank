@@ -36,26 +36,46 @@ export default{
     }
 
     if(u.pathname==='/api/health')return json({ok:true,service:'exam-bank'});
+    if(u.pathname==='/api/asset-count'&&request.method==='GET'){
+      const n=(await env.DB.prepare("SELECT COUNT(*) AS n FROM view_assets").first())?.n||0;
+      return json({ok:true,count:n});
+    }
 
     if(u.pathname.startsWith('/api/view-asset/')){
       const id=decodeURIComponent(u.pathname.slice('/api/view-asset/'.length));
       if(request.method==='POST'){
         const ab=await request.arrayBuffer();
         if(!ab.byteLength)return json({ok:false,error:'empty image'},400);
+        const bytes=new Uint8Array(ab);
         const mime=request.headers.get('content-type')||'image/webp';
         const now=new Date().toISOString();
         await env.DB.prepare(`
           INSERT INTO view_assets(id,image,mime_type,updated_at) VALUES(?,?,?,?)
           ON CONFLICT(id) DO UPDATE SET image=excluded.image,mime_type=excluded.mime_type,updated_at=excluded.updated_at
-        `).bind(id,ab,mime,now).run();
-        return json({ok:true,id,url:'/api/view-asset/'+encodeURIComponent(id)});
+        `).bind(id,bytes,mime,now).run();
+        return json({ok:true,id,url:'/api/view-asset/'+encodeURIComponent(id),bytes:bytes.byteLength});
       }
       if(request.method==='GET'){
         const r=await env.DB.prepare("SELECT image,mime_type FROM view_assets WHERE id=?").bind(id).first();
-        if(!r)return new Response('Not found',{status:404});
-        return new Response(r.image,{headers:{
+        if(!r)return new Response('Not found',{status:404,headers:{"cache-control":"no-store"}});
+
+        let bytes=null;
+        if(r.image instanceof ArrayBuffer){
+          bytes=new Uint8Array(r.image);
+        }else if(Array.isArray(r.image)){
+          bytes=new Uint8Array(r.image);
+        }else if(ArrayBuffer.isView(r.image)){
+          bytes=new Uint8Array(r.image.buffer,r.image.byteOffset,r.image.byteLength);
+        }
+
+        if(!bytes || !bytes.byteLength){
+          return new Response('Invalid image blob',{status:500,headers:{"cache-control":"no-store"}});
+        }
+
+        return new Response(bytes,{headers:{
           "content-type":r.mime_type||'image/webp',
-          "cache-control":"public,max-age=31536000,immutable"
+          "content-length":String(bytes.byteLength),
+          "cache-control":"no-store"
         }});
       }
       return json({ok:false,error:'Method not allowed'},405);
