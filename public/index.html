@@ -1133,18 +1133,18 @@ window.addEventListener('beforeprint',ensurePrintDecorations);
 function renderGenerated(mode='problem'){syncOutputSubject();const tools=`<div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ 10문제 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · W234</button><button class="btn ghost" id="wordSolution">해설지 Word · W234</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W234 · 첫 페이지 표시:</b> 문항 사이 12pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.2로 저장합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 글자 크기·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 파일명은 _W234.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
-/* WORD EXPORT 23.4 — moderate Word-only spacing.
+<button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · W235</button><button class="btn ghost" id="wordSolution">해설지 Word · W235</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W235 · 첫 페이지 표시:</b> 문항 사이 16pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.1로 저장합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 글자 크기·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 파일명은 _W235.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+/* WORD EXPORT 23.5 — compact body / distinct question spacing.
    Import/DB/JSON/browser printing and template geometry are unchanged. */
-const WORD_EXPORT_REVISION = 'word-23.4';
+const WORD_EXPORT_REVISION = 'word-23.5';
 const WORD230_MIME = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
-// W234: moderate paragraph and line spacing. Font size is unchanged.
+// W235: compact body and distinct question spacing. Font size is unchanged.
 // No template geometry, input text, selection, persistence or PDF-printing change.
-const WORD234_SPACING = Object.freeze({
-  // A moderate setting between W230 (tight) and W231-W234 (wide).
-  // Twips: 20 = 1 pt. Auto line spacing: 240 = 1.0; 288 = 1.2.
-  firstQuestionBefore:60, questionGap:240, titleAfter:80,
-  choiceAfter:30, viewBefore:60, viewAfter:100, line:288,
+const WORD235_SPACING = Object.freeze({
+  // W235: compact text inside each question, a slightly wider gap between questions.
+  // Twips: 20 = 1 pt. Auto line spacing: 240 = 1.0; 264 = 1.1.
+  firstQuestionBefore:60, questionGap:320, titleAfter:80,
+  choiceAfter:30, viewBefore:60, viewAfter:100, line:264,
   solutionHeadingBefore:100, solutionHeadingAfter:40,
   solutionParagraphAfter:30
 });
@@ -1167,8 +1167,8 @@ function word230Paragraph(text,{bold=false,size=20,color='111111',before=0,after
   const border=box?'<w:pBdr>'+['top','left','bottom','right'].map(side=>`<w:${side} w:val="single" w:sz="5" w:space="4" w:color="666666"/>`).join('')+'</w:pBdr>':'';
   return `<w:p><w:pPr>${keep?'<w:keepNext/>':'<w:keepNext w:val="0"/>'}${keepLines?'<w:keepLines/>':'<w:keepLines w:val="0"/>'}<w:widowControl/>${border}<w:spacing w:before="${before}" w:after="${after}" w:line="${line}" w:lineRule="auto"/>${box?'<w:ind w:left="100" w:right="100"/>':''}<w:contextualSpacing w:val="0"/>${align?`<w:jc w:val="${align}"/>`:''}</w:pPr>${word230Run(text,{bold,size,color})}</w:p>`;
 }
-// W234: keep short questions together, but do not chain a long question's
-// four choices into one unbreakable unit.  Spacing/template/content stay W234.
+// W235: keep short questions together, but do not chain a long question's
+// four choices into one unbreakable unit.  Spacing/template/content stay W235.
 function word233ChoiceBlocks(text) {
   const lines=String(text).split(/\r?\n/);
   if(!lines.some(line=>/^\s*[①②③④⑤]/u.test(line)))return lines;
@@ -1181,7 +1181,7 @@ function word233ChoiceBlocks(text) {
 }
 function word230Problem(p,index,image) {
   const title=`문 ${index+1}. ${p.question||''}`;
-  if (image) return word230Paragraph(`문 ${index+1}.`,{bold:true,size:20,before:index===0?WORD234_SPACING.firstQuestionBefore:WORD234_SPACING.questionGap,after:WORD234_SPACING.titleAfter,keep:true,line:WORD234_SPACING.line})+word230ImageXml(image);
+  if (image) return word230Paragraph(`문 ${index+1}.`,{bold:true,size:20,before:index===0?WORD235_SPACING.firstQuestionBefore:WORD235_SPACING.questionGap,after:WORD235_SPACING.titleAfter,keep:true,line:WORD235_SPACING.line})+word230ImageXml(image);
   if (!String(p.question||'').trim() || !String(p.choices||'').trim()) {
     throw new Error(`문 ${index+1}: 문제 본문 또는 선택지가 없습니다. 빈 문항을 Word로 내보내지 않았습니다.`);
   }
@@ -1191,16 +1191,16 @@ function word230Problem(p,index,image) {
   // different Word/font environments.  Long questions may flow at choice
   // boundaries; no forced column/page breaks, clipping or smaller type.
   const together=chars<=320;
-  let out=word230Paragraph(title,{bold:true,size:20,before:index===0?WORD234_SPACING.firstQuestionBefore:WORD234_SPACING.questionGap,after:WORD234_SPACING.titleAfter,keep:true,line:WORD234_SPACING.line});
-  if(p.viewText) out+=word230Paragraph(p.viewText,{box:true,before:WORD234_SPACING.viewBefore,after:WORD234_SPACING.viewAfter,keep:String(p.viewText).length<600,keepLines:String(p.viewText).length<600,line:WORD234_SPACING.line});
-  choices.forEach((choice,i)=>{out+=word230Paragraph(choice,{after:i===choices.length-1?WORD234_SPACING.questionGap:WORD234_SPACING.choiceAfter,keep:(together&&i<choices.length-1)||(!together&&i===choices.length-2&&choices.slice(-2).join('').length<=180),keepLines:choice.length<600,line:WORD234_SPACING.line});});
+  let out=word230Paragraph(title,{bold:true,size:20,before:index===0?WORD235_SPACING.firstQuestionBefore:WORD235_SPACING.questionGap,after:WORD235_SPACING.titleAfter,keep:true,line:WORD235_SPACING.line});
+  if(p.viewText) out+=word230Paragraph(p.viewText,{box:true,before:WORD235_SPACING.viewBefore,after:WORD235_SPACING.viewAfter,keep:String(p.viewText).length<600,keepLines:String(p.viewText).length<600,line:WORD235_SPACING.line});
+  choices.forEach((choice,i)=>{out+=word230Paragraph(choice,{after:i===choices.length-1?WORD235_SPACING.questionGap:WORD235_SPACING.choiceAfter,keep:(together&&i<choices.length-1)||(!together&&i===choices.length-2&&choices.slice(-2).join('').length<=180),keepLines:choice.length<600,line:WORD235_SPACING.line});});
   return out;
 }
 function word230Solution(p,index) {
   const explanation=String(p.editedExplanation||p.originalExplanation||p.explanation||'※ 상세 해설 미작성');
-  let out=word230Paragraph(`문 ${index+1}.`,{bold:true,size:20,before:index===0?WORD234_SPACING.firstQuestionBefore:WORD234_SPACING.questionGap,after:40,keep:true,line:WORD234_SPACING.line})
-    +word230Paragraph(`[정답] ${p.answer||''}`,{bold:true,after:30,keep:true,line:WORD234_SPACING.line})
-    +word230Paragraph('[해설]',{bold:true,after:40,keep:true,line:WORD234_SPACING.line});
+  let out=word230Paragraph(`문 ${index+1}.`,{bold:true,size:20,before:index===0?WORD235_SPACING.firstQuestionBefore:WORD235_SPACING.questionGap,after:40,keep:true,line:WORD235_SPACING.line})
+    +word230Paragraph(`[정답] ${p.answer||''}`,{bold:true,after:30,keep:true,line:WORD235_SPACING.line})
+    +word230Paragraph('[해설]',{bold:true,after:40,keep:true,line:WORD235_SPACING.line});
   // Only the Word presentation changes: retain the stored explanation string.
   // Empty source lines used as visual separators must not each become a full
   // height Word paragraph in addition to the heading's paragraph spacing.
@@ -1214,14 +1214,14 @@ function word230Solution(p,index) {
   }
   lines.forEach((text,i)=>{
     const heading=/^\s*\[[^\]]+\]\s*$/.test(text);
-    const before=i===0?0:heading?WORD234_SPACING.solutionHeadingBefore:hadBlankBefore[i]?60:0;
-    const after=i===lines.length-1?WORD234_SPACING.questionGap:heading?WORD234_SPACING.solutionHeadingAfter:WORD234_SPACING.solutionParagraphAfter;
-    out+=word230Paragraph(text,{bold:heading,before,after,keep:heading,keepLines:text.length<450,line:WORD234_SPACING.line});
+    const before=i===0?0:heading?WORD235_SPACING.solutionHeadingBefore:hadBlankBefore[i]?60:0;
+    const after=i===lines.length-1?WORD235_SPACING.questionGap:heading?WORD235_SPACING.solutionHeadingAfter:WORD235_SPACING.solutionParagraphAfter;
+    out+=word230Paragraph(text,{bold:heading,before,after,keep:heading,keepLines:text.length<450,line:WORD235_SPACING.line});
   });
   return out;
 }
 function word230ImageXml(image) {
-  return `<w:p><w:pPr><w:spacing w:after="${WORD234_SPACING.questionGap}"/><w:contextualSpacing w:val="0"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${image.cx}" cy="${image.cy}"/><wp:docPr id="${image.docPrId}" name="원문 문항 ${image.slot}" descr="문 ${image.slot} 원문 이미지"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="${image.name}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${image.rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${image.cx}" cy="${image.cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
+  return `<w:p><w:pPr><w:spacing w:after="${WORD235_SPACING.questionGap}"/><w:contextualSpacing w:val="0"/></w:pPr><w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${image.cx}" cy="${image.cy}"/><wp:docPr id="${image.docPrId}" name="원문 문항 ${image.slot}" descr="문 ${image.slot} 원문 이미지"/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="${image.name}"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="${image.rid}"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${image.cx}" cy="${image.cy}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`;
 }
 async function word230LoadImage(url,index) {
   const abs=new URL(url,location.href);
@@ -1305,7 +1305,7 @@ function word230VerifyPackage(xml,header,footer,items,mode){
       : normalized(`문 ${i+1}. ${p.question||''}\n${p.viewText||''}\n${p.choices||''}`);
     if(actual!==expected)throw new Error(`문 ${i+1}: 본문·보기·선택지 텍스트 검사 실패. 파일을 내려받지 않았습니다.`);
   }
-  return {checkedItems:items.length,sourceTextVerified:true,format:'docx',engine:'W234'};
+  return {checkedItems:items.length,sourceTextVerified:true,format:'docx',engine:'W235'};
 }
 
 async function buildWord230(items,meta,mode='problem') {
@@ -1402,9 +1402,9 @@ async function buildWord230(items,meta,mode='problem') {
   inspection.answerGridFirstPageOnly=true;
 
   let appXml=await zip.file('docProps/app.xml').async('string');
-  appXml=appXml.replace(/<Application>[\s\S]*?<\/Application>/,'<Application>exam-bank W234</Application>');
+  appXml=appXml.replace(/<Application>[\s\S]*?<\/Application>/,'<Application>exam-bank W235</Application>');
   zip.file('docProps/app.xml',appXml);
-  const customXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="2" name="ExamBankWordEngine"><vt:lpwstr>W234</vt:lpwstr></property></Properties>';
+  const customXml='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/custom-properties" xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"><property fmtid="{D5CDD505-2E9C-101B-9397-08002B2CF9AE}" pid="2" name="ExamBankWordEngine"><vt:lpwstr>W235</vt:lpwstr></property></Properties>';
   zip.file('docProps/custom.xml',customXml);
   let contentTypes=await zip.file('[Content_Types].xml').async('string');
   contentTypes=contentTypes.replace('</Types>','<Override PartName="/docProps/custom.xml" ContentType="application/vnd.openxmlformats-officedocument.custom-properties+xml"/></Types>');
@@ -1413,7 +1413,7 @@ async function buildWord230(items,meta,mode='problem') {
   rootRels=rootRels.replace('</Relationships>','<Relationship Id="rIdWordEngineAudit" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/custom-properties" Target="docProps/custom.xml"/></Relationships>');
   zip.file('_rels/.rels',rootRels);
   const bytes=await zip.generateAsync({type:'uint8array',compression:'DEFLATE',mimeType:WORD230_MIME});
-  return {bytes,subject,inspection,filename:`${subject.replace(/[\\/:*?"<>|]/g,'_')}_${isSolution?'해설':'문제'}_W234.docx`};
+  return {bytes,subject,inspection,filename:`${subject.replace(/[\\/:*?"<>|]/g,'_')}_${isSolution?'해설':'문제'}_W235.docx`};
 }
 let word230Busy=false;
 async function exportWord(mode='problem') {
@@ -1426,14 +1426,14 @@ async function exportWord(mode='problem') {
     const meta=sheetMeta();
     buttons.forEach(b=>{b.disabled=true;b.textContent='Word 생성 중…';});
     const result=await buildWord230(snapshot,meta,mode);
-    window.examBankLastWordExport={engine:'W234',file:result.filename,...result.inspection};
+    window.examBankLastWordExport={engine:'W235',file:result.filename,...result.inspection};
     downloadBlob(new Blob([result.bytes],{type:WORD230_MIME}),result.filename);
   } catch(error) {
     console.error(error);alert('Word 파일을 만들지 못했습니다.\n'+(error.message||String(error)));
   } finally {word230Busy=false;buttons.forEach((b,i)=>{b.disabled=false;b.textContent=labels[i];});}
 }
 
-window.examBankWordEngine = Object.freeze({revision:'W234',build:buildWord230});
+window.examBankWordEngine = Object.freeze({revision:'W235',build:buildWord230});
 
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
