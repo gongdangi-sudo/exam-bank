@@ -666,7 +666,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z242</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z243</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L243</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div>
@@ -764,15 +764,15 @@
   <div class="modal-box" style="max-width:1280px">
     <div class="modal-head">
       <div>
-        <h3>시험문제 ZIP 자동분리 · Z242</h3>
+        <h3>시험문제 ZIP 자동분리 · Z243</h3>
         <div class="help">ZIP 안의 PDF를 과목별로 자동 분리하고, 공식 정답표의 같은 과목·책형 정답과 연결합니다.</div>
       </div>
       <button class="close" id="closeZipImport">×</button>
     </div>
 
     <div class="notice" style="margin-top:14px">
-      <b>ZIP 규칙 · Z242:</b> <code>행정학개론_가.pdf</code>, <code>행정학개론-가.pdf</code>, <code>240323 국가 9급 행정학개론-가.pdf</code>를 읽습니다. 폴더 안 PDF도 확인하며, 파일명을 바꿀 필요가 없습니다.
-      같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다.<br>
+      <b>ZIP 규칙 · Z243:</b> <code>행정학개론_가.pdf</code>, <code>행정학개론-가.pdf</code>, <code>240323 국가 9급 행정학개론-가.pdf</code>를 읽습니다. 폴더 안 PDF도 확인하며, 파일명을 바꿀 필요가 없습니다.
+      같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다. 2017년처럼 <b>문 1.</b> 형식의 구형 PDF와 1단/2단 레이아웃도 자동 인식합니다.<br>
       <b>지원 과목은 자동 선택</b>하고, 나머지 과목은 목록에만 표시합니다.
     </div>
 
@@ -2418,45 +2418,76 @@ async function parseOfficialAnswers(file,subject,book){
   throw new Error(`${subject} ${book}책형의 1~20번 공식 정답을 정답표에서 찾지 못했습니다.`);
 }
 
+function questionHeaderMatchZ243(text){
+  // 연도별 원본 형식 차이 지원:
+  // 1. / 1) / 1번 / 문 1. / 문1. / 문 1) / 문 1번
+  const t=String(text||'').trim();
+  const m=t.match(/^\s*(?:문\s*)?(\d{1,3})\s*(?:[.．]|[)）]|번\s*[.．]?)\s*(?:\s+|$)/);
+  if(!m)return null;
+  const no=Number(m[1]);
+  return (no>=1&&no<=100)?{no,match:m[0]}:null;
+}
+function collectQuestionRegionsZ243(col,H,pageNo){
+  const lines=rawLines(col.items,2.9);
+  const heads=[];
+  for(let i=0;i<lines.length;i++){
+    const hm=questionHeaderMatchZ243(lines[i].text);
+    if(hm)heads.push({idx:i,no:hm.no,line:lines[i]});
+  }
+  const regions=[];
+  for(let h=0;h<heads.length;h++){
+    const cur=heads[h],next=heads[h+1];
+    const topY=cur.line.y+16;
+    const bottomY=next?next.line.y+7:H*0.025;
+    const regionItems=col.items.filter(it=>it.y<=topY&&it.y>=bottomY);
+    const headerItem=cur.line.items.find(it=>{
+      const z=questionHeaderMatchZ243(it.text);
+      return z&&z.no===cur.no;
+    })||cur.line.items.find(it=>new RegExp('^'+cur.no+'(?:[.．)]|번)?$').test(String(it.text||'').trim()))||cur.line.items[0];
+    const regionLines=lines.slice(cur.idx,next?next.idx:lines.length);
+    regions.push({
+      no:cur.no,pageNo,column:col.name,
+      x0:col.x0+4,x1:col.x1-4,topY,bottomY,pageHeight:H,
+      headerItem,items:regionItems,lines:regionLines,
+      rawText:regionLines.map(x=>x.text).join('\n')
+    });
+  }
+  return {regions,headCount:heads.length};
+}
 function officialQuestionRegions(tc,viewport,pageNo){
   const W=viewport.width,H=viewport.height;
-  // 공식 시험지는 페이지 맨 아래까지 선택지가 배치되는 경우가 많습니다.
-  // 기존 3.5% 하단 컷은 ④번 선택지를 잘라내어 텍스트 파싱을 실패시켰습니다.
-  // 하단 0.8%까지만 제외하고, 상단 헤더는 기존처럼 제외합니다.
   const body=rawPdfItems(tc).filter(it=>it.y>H*0.008&&it.y<H*0.965);
-  const cols=[
-    {name:'left',x0:0,x1:W*0.505,items:body.filter(it=>(it.x+it.w/2)<W*0.505)},
-    {name:'right',x0:W*0.495,x1:W,items:body.filter(it=>(it.x+it.w/2)>=W*0.495)}
-  ];
-  const regions=[];
-  for(const col of cols){
-    const lines=rawLines(col.items,2.7);
-    const heads=[];
-    for(let i=0;i<lines.length;i++){
-      const m=lines[i].text.match(/^\s*(\d{1,3})\s*[.．]\s+/);
-      if(m){
-        const no=+m[1];
-        if(no>=1&&no<=100)heads.push({idx:i,no,line:lines[i]});
-      }
-    }
-    for(let h=0;h<heads.length;h++){
-      const cur=heads[h],next=heads[h+1];
-      const topY=cur.line.y+15;
-      const bottomY=next?next.line.y+7:H*0.04;
-      const regionItems=col.items.filter(it=>it.y<=topY&&it.y>=bottomY);
-      const headerItem=cur.line.items.find(it=>new RegExp('^'+cur.no+'\\\\.?$').test(it.text.trim()))||cur.line.items[0];
-      const regionLines=lines.slice(cur.idx,next?next.idx:lines.length);
-      regions.push({
-        no:cur.no,pageNo,column:col.name,
-        x0:col.x0+4,x1:col.x1-4,topY,bottomY,pageHeight:H,
-        headerItem,items:regionItems,lines:regionLines,
-        rawText:regionLines.map(x=>x.text).join('\n')
-      });
-    }
-  }
-  return regions;
-}
 
+  // 구형 PDF 중에는 1단, 신형 PDF에는 2단이 섞여 있어 두 레이아웃을 모두 시험한다.
+  // 같은 문항 수가 잡히면 1단을 우선해 본문이 반으로 잘리는 일을 막는다.
+  const layouts=[
+    [{name:'full',x0:0,x1:W,items:body}],
+    [
+      {name:'left',x0:0,x1:W*0.505,items:body.filter(it=>(it.x+it.w/2)<W*0.505)},
+      {name:'right',x0:W*0.495,x1:W,items:body.filter(it=>(it.x+it.w/2)>=W*0.495)}
+    ]
+  ];
+
+  let best=[],bestScore=-1;
+  for(const cols of layouts){
+    let regs=[],usedCols=0;
+    for(const col of cols){
+      const got=collectQuestionRegionsZ243(col,H,pageNo);
+      if(got.headCount)usedCols++;
+      regs.push(...got.regions);
+    }
+    // 같은 번호가 중복 감지되면 첫 영역만 사용
+    const uniq=[]; const seen=new Set();
+    for(const r of regs){
+      if(seen.has(r.no))continue;
+      seen.add(r.no); uniq.push(r);
+    }
+    // 실제 2단에서 양쪽 열 모두 문항번호가 검출된 경우 가산점
+    const score=uniq.length+(usedCols>=2?0.25:0);
+    if(score>bestScore){best=uniq;bestScore=score;}
+  }
+  return best;
+}
 function cleanupOfficialPhrase(s){
   return String(s||'')
     .replace(/\s+([,.?!:;)\]])/g,'$1')
@@ -2484,7 +2515,7 @@ function parseOfficialStructured(region){
   if(!lines.length)return {ok:false,reason:'문항 텍스트 없음',stem:'',viewText:'',choices:[],rawOriginalText:''};
 
   // 첫 줄에서 원래 문항번호 제거
-  lines[0]=lines[0].replace(/^\s*\d{1,3}\s*[.．]\s*/,'');
+  lines[0]=lines[0].replace(/^\s*(?:문\s*)?\d{1,3}\s*(?:[.．]|[)）]|번\s*[.．]?)\s*/,'');
   const raw=lines.join('\n').trim();
 
   // 선택지 ①②③④⑤ 기준으로 본문과 선택지를 분리
@@ -2750,7 +2781,7 @@ function closeOfficialModal(){
   officialParsed=[];
 }
 
-// ===== 시험문제 ZIP 자동분리 v22 =====
+// ===== 시험문제 ZIP 자동분리 · Z243 (구형 문항번호/1·2단 자동 인식) =====
 let zipSubjectRows=[];
 let zipAnswerMap=new Map();
 
@@ -2855,7 +2886,7 @@ function renderZipImportRows(){
   const missing=Object.entries(ZIP_PREFERRED_SOURCE).filter(([app])=>!zipSubjectRows.some(r=>r.appSubject===app)).map(([app])=>app);
   const unknown=zipSubjectRows.filter(r=>r.parseError).length;
   $('#zipImportSummary').innerHTML=
-    `<span class="pill">Z242 · PDF ${zipSubjectRows.length}개</span>`+
+    `<span class="pill">Z243 · PDF ${zipSubjectRows.length}개</span>`+
     `<span class="pill">지원 과목 PDF ${supported}개</span>`+
     `<span class="pill">정답 연결 ${answerMatched}개</span>`+
     `<span class="pill">등록 선택 ${selected}개</span>`+
@@ -2942,6 +2973,10 @@ async function parseOneZipSubject(row,exam,year,progressCb){
   }
   regions.sort((a,b)=>a.no-b.no);
 
+  // Z243: 구형 PDF 진단값. 2017 등 '문 1.' 형식도 여기서 20문항이 잡혀야 한다.
+  row.detectedQuestionCount=regions.length;
+  row.detectedQuestionNos=regions.map(r=>r.no);
+
   const rows=[];
   for(let i=0;i<regions.length;i++){
     const region=regions[i];
@@ -3020,11 +3055,15 @@ async function registerZipSubjects(){
         bar.style.width=Math.round(overall*85)+'%';
       });
       allRows.push(...rows);
+      row.parseStatus=rows.length?`문항 ${rows.length}개 인식`:'문항번호 미인식';
 
       if(tr)tr.classList.remove('zip-registering');
     }
 
-    if(!allRows.length)throw new Error('등록 가능한 문항을 찾지 못했습니다.');
+    if(!allRows.length){
+      const details=selected.map(r=>`${r.fileName}: ${r.detectedQuestionCount||0}개`).join('\n');
+      throw new Error('등록 가능한 문항을 찾지 못했습니다.\n\nPDF 문항번호 인식 결과\n'+details+'\n\nZ243은 1. / 문 1. / 1) 형식을 지원합니다. 이 결과가 계속 0개라면 해당 PDF의 텍스트 레이어를 확인해야 합니다.');
+    }
 
     if(window.examBankLawGuard)allRows=window.examBankLawGuard.preserveBankReviews(allRows);
     // 50문항씩 D1 저장
