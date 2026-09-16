@@ -555,6 +555,18 @@
 #wordconvert .wc-original{max-height:240px;overflow:auto;white-space:pre-wrap;font:13px/1.5 monospace;padding:10px;border:1px solid #e2e8f0;background:#f8fafc}
 
 
+
+/* L241: only review form feedback, never Word / print styling. */
+#lawModal .law-status-box{white-space:pre-wrap;overflow-wrap:anywhere;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;background:#f8fafc;font-size:13px;line-height:1.6;margin:8px 0}
+#lawModal .law-status-box:empty{display:none}
+#lawModal .law-status-box.law-error{background:#fff1f2;border-color:#fda4af;color:#9f1239}
+#lawModal #lawImportRows{max-height:36vh;overflow:auto;padding-right:4px}
+#lawModal #lawImportActions{position:sticky;bottom:-1px;background:#fff;padding:12px 0 4px;border-top:1px solid #cbd5e1;z-index:3}
+#lawModal #lawImportSummary{white-space:pre-wrap;font-size:14px;line-height:1.7;font-weight:600;color:#1e3a8a;background:#eff6ff;padding:10px 12px;border-radius:8px;margin:8px 0}
+#lawModal #lawImportWarning{white-space:pre-wrap;font-size:13px;line-height:1.6;background:#fffbeb;color:#92400e;border:1px solid #fcd34d;border-radius:8px;padding:10px 12px;margin:8px 0}
+#lawModal #lawImportWarning:empty{display:none}
+#lawModal [aria-invalid="true"]{border:2px solid #e11d48;background:#fff1f2}
+
 /* L240: only review controls. No Word/print layout changes. */
 .law-tools{padding:12px 14px;border:1px solid #cbd5e1;border-radius:10px;background:#f8fafc;margin-top:14px}
 .law-tools label{display:inline-flex;align-items:center;gap:8px;margin-right:12px}
@@ -616,7 +628,7 @@
           <div class="field"><label>출제자</label><input id="fAuthor" placeholder="예: 이지영 선생님"></div>
           <div class="field"><label>시험 날짜</label><input id="fDate" type="date"></div>
         </div>
-        <div class="law-tools"><b>법령·판례 영향 검수 · L240</b><p class="law-help"><strong>개정 영향 제외 + 미검수 보류</strong>가 기본 적용됩니다. 기존의 ‘출제 가능’/공식 정답 연결만으로 현행 법령 검증을 대신하지 않습니다. 순수 이론은 검수자가 ‘법령 검수 비대상 확인’으로 승인할 수 있습니다.</p><label for="lawBasisDate">검수 기준일 <input type="date" id="lawBasisDate"></label><button type="button" class="btn ghost" id="openLawReviewMake">현재 문항 검수</button><p class="law-help">기준일을 변경하면 현행 확인 문항은 재검수가 필요합니다. 검수 기록의 공식 링크를 자동 조회하거나 새 개정을 실시간 감시하는 기능은 아닙니다. 원문은 변경하지 않습니다.</p></div><div class="actions"><button class="btn primary" id="generateBtn">문제 출제하기</button><button class="btn ghost" id="refreshFilters">조건 새로고침</button></div>
+        <div class="law-tools"><b>법령·판례 영향 검수 · L241</b><p class="law-help"><strong>개정 영향 제외 + 미검수 보류</strong>가 기본 적용됩니다. 기존의 ‘출제 가능’/공식 정답 연결만으로 현행 법령 검증을 대신하지 않습니다. 순수 이론은 검수자가 ‘법령 검수 비대상 확인’으로 승인할 수 있습니다.</p><label for="lawBasisDate">검수 기준일 <input type="date" id="lawBasisDate"></label><button type="button" class="btn ghost" id="openLawReviewMake">현재 문항 검수</button><p class="law-help">기준일을 변경하면 현행 확인 문항은 재검수가 필요합니다. 검수 기록의 공식 링크를 자동 조회하거나 새 개정을 실시간 감시하는 기능은 아닙니다. 원문은 변경하지 않습니다.</p></div><div class="actions"><button class="btn primary" id="generateBtn">문제 출제하기</button><button class="btn ghost" id="refreshFilters">조건 새로고침</button></div>
       </div>
       <div id="generated" class="panel"><div class="empty">출제 조건을 선택하고 <b>문제 출제하기</b>를 눌러주세요.</div></div>
     </section>
@@ -654,7 +666,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리</button><button class="btn warn" id="openLawReview">⚖ 법령 검수 · L240</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z242</button><button class="btn warn" id="openLawReview">⚖ 법령 검수 · L241</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div class="table-wrap"><table><thead><tr><th>ID</th><th>과목</th><th>시험</th><th>연도</th><th>번호</th><th>단원</th><th>문제</th><th>관리</th></tr></thead><tbody id="bankBody"></tbody></table></div>
       </div>
@@ -750,14 +762,14 @@
   <div class="modal-box" style="max-width:1280px">
     <div class="modal-head">
       <div>
-        <h3>시험문제 ZIP 자동분리</h3>
+        <h3>시험문제 ZIP 자동분리 · Z242</h3>
         <div class="help">ZIP 안의 PDF를 과목별로 자동 분리하고, 공식 정답표의 같은 과목·책형 정답과 연결합니다.</div>
       </div>
       <button class="close" id="closeZipImport">×</button>
     </div>
 
     <div class="notice" style="margin-top:14px">
-      <b>ZIP 규칙:</b> <code>행정학개론_가.pdf</code>, <code>행정법총론_가.pdf</code>처럼 <b>과목명_책형.pdf</b>이면 자동 인식합니다.
+      <b>ZIP 규칙 · Z242:</b> <code>행정학개론_가.pdf</code>, <code>행정학개론-가.pdf</code>, <code>240323 국가 9급 행정학개론-가.pdf</code>를 읽습니다. 폴더 안 PDF도 확인하며, 파일명을 바꿀 필요가 없습니다.
       같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다.<br>
       <b>지원 과목은 자동 선택</b>하고, 나머지 과목은 목록에만 표시합니다.
     </div>
@@ -1586,6 +1598,7 @@ $('#clearZipImport').onclick=clearZipImport;
 $('#scanQuestionZip').onclick=scanQuestionZip;
 $('#selectSupportedZip').onclick=selectSupportedZipSubjects;
 $('#registerZipSubjects').onclick=registerZipSubjects;
+['zQuestionZip','zAnswerPdf'].forEach(id=>$('#'+id).addEventListener('change',()=>{zipSubjectRows=[];zipAnswerMap=new Map();$('#zipImportBody').innerHTML='';$('#zipImportResult').classList.add('hidden');$('#registerZipSubjects').disabled=true;}));
 $('#closeOfficial').onclick=closeOfficialModal;
 $('#cancelOfficial').onclick=closeOfficialModal;
 $('#clearOfficial').onclick=()=>{officialParsed=[];$('#oProblemPdf').value='';$('#oAnswerPdf').value='';$('#officialResult').classList.add('hidden');};
@@ -2767,140 +2780,142 @@ const ZIP_PREFERRED_SOURCE={
 function decodeHashUnicodeName(name){
   return String(name||'').replace(/#U([0-9A-Fa-f]{4})/g,(_,h)=>String.fromCharCode(parseInt(h,16)));
 }
+// Z242: 원문 PDF는 변경하지 않고 파일명에 포함된 과목/책형만 분리합니다.
 function normalizeZipSubject(s){
-  return String(s||'')
-    .replace(/_/g,' ')
-    .replace(/ㆍ/g,'·')
-    .replace(/\s+/g,' ')
-    .trim();
+  return String(s||'').normalize('NFC')
+    .replace(/_/g,' ').replace(/[ㆍ･]/g,'·').replace(/\s+/g,' ').trim();
 }
 function zipAnswerKey(subject,book){
-  return normalizeZipSubject(subject)+'|'+String(book||'').trim();
+  // 정답표의 '회 계 학', 파일명의 '회계학'처럼 띄어쓰기만 다른 경우를 연결합니다.
+  // 총론/개론 등 과목명 자체는 제거하지 않습니다.
+  return normalizeZipSubject(subject).replace(/\s/g,'')+'|'+String(book||'').trim().toUpperCase();
+}
+function parseZipPdfNameZ242(name){
+  const fileName=decodeHashUnicodeName(name).normalize('NFC').replace(/\\/g,'/').split('/').pop();
+  if(!/\.pdf$/i.test(fileName))return null;
+  const stem=fileName.replace(/\.pdf$/i,'').replace(/\s*\(\d+\)\s*$/,'').trim();
+  // 기존 '_가'와 '-가', '(가)'를 모두 허용하되 책형이 없으면 추측하지 않습니다.
+  const match=stem.match(/^(.+?)(?:[_\-‐‑‒–—−]\s*([가나다라마바사아자차카타파하A-Za-z])|\s*\(\s*([가나다라마바사아자차카타파하A-Za-z])\s*\))\s*(?:책형)?$/);
+  if(!match)return {fileName,sourceSubject:'',book:'',parseError:'과목/책형 미인식 — 파일명에 _가 또는 -가 등 책형이 필요합니다.'};
+  let subject=match[1].trim();
+  // 실제 첨부 형식: 240323 국가 9급 행정학개론-가.pdf
+  // 날짜와 시험 구분이 함께 확인될 때만 앞부분을 제거합니다.
+  subject=subject.replace(/^(?:\d{6}|\d{8}|\d{4}(?:년도|년)?)[\s_]+(?:국가공무원|지방공무원|국가직|지방직|국가|지방)[\s_]+(?:[579]\s*급)[\s_]+(?:공개경쟁채용[\s_]+)?(?:공채[\s_]+)?(?:필기시험[\s_]+)?/,'');
+  subject=normalizeZipSubject(subject);
+  if(!subject)return {fileName,sourceSubject:'',book:'',parseError:'과목명이 없습니다.'};
+  const compact=subject.replace(/\s/g,'');
+  const known=Object.keys(ZIP_SUBJECT_MAP).find(x=>normalizeZipSubject(x).replace(/\s/g,'')===compact);
+  return {fileName,sourceSubject:known||subject,book:(match[2]||match[3]).toUpperCase(),parseError:''};
+}
+let zipScanInfoZ242={files:0,pdfs:0,ignored:0};
+let zipScanBusyZ242=false;
+function zipSourceReadyZ242(r){
+  return !r.parseError && !!r.appSubject && Array.isArray(r.answers) && r.answers.length===20;
 }
 async function parseAllOfficialAnswerRows(file){
   const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
   const map=new Map();
-
-  for(let p=1;p<=pdf.numPages;p++){
-    const page=await pdf.getPage(p);
-    const tc=await page.getTextContent();
-    const lines=rawLines(rawPdfItems(tc),3.0);
-
-    for(const line of lines){
-      const texts=line.items.map(x=>String(x.text||'').trim()).filter(Boolean);
-      if(texts.length<22)continue;
-
-      const bookIdx=texts.findIndex((t,i)=>i>0 && /^[가-하]$/.test(t));
-      if(bookIdx<2)continue;
-
-      const rowNo=texts[0];
-      if(!/^\d+$/.test(rowNo))continue;
-
-      const sourceSubject=normalizeZipSubject(texts.slice(1,bookIdx).join(' '));
-      const book=texts[bookIdx];
-      const nums=texts.slice(bookIdx+1).filter(t=>/^[1-5]$/.test(t)).map(Number);
-      if(nums.length>=20){
-        map.set(zipAnswerKey(sourceSubject,book),nums.slice(0,20));
+  try{
+    for(let p=1;p<=pdf.numPages;p++){
+      const page=await pdf.getPage(p);
+      const tc=await page.getTextContent();
+      for(const line of rawLines(rawPdfItems(tc),3.0)){
+        const text=line.items.map(x=>String(x.text||'').trim()).filter(Boolean).join(' ');
+        // [가-하]는 '및'도 매칭하므로 책형으로 사용하지 않습니다.
+        // 과목 뒤의 명시적 책형 + 정확히 20개의 답이 있는 행만 읽습니다.
+        const m=text.match(/^\s*\d+\s+(.+?)\s+([가나다라마바사아자차카타파하A-Za-z])\s+((?:[1-5]\s+){19}[1-5])\s*$/);
+        if(!m)continue;
+        const key=zipAnswerKey(m[1],m[2]);
+        const answers=m[3].trim().split(/\s+/).map(Number);
+        if(map.has(key)&&map.get(key).join(',')!==answers.join(',')){
+          throw new Error('정답표에서 같은 과목·책형의 서로 다른 정답을 발견했습니다: '+m[1]+' '+m[2]);
+        }
+        map.set(key,answers);
       }
     }
-  }
-  return map;
+    return map;
+  }finally{if(typeof pdf.destroy==='function')await pdf.destroy();}
 }
 
 function zipRowStatus(row){
+  if(row.parseError)return '<span class="warn-text">'+esc(row.parseError)+'</span>';
   if(!row.appSubject)return '<span class="zip-support-no">현재 문제은행 미지원</span>';
-  if(!row.answers)return '<span class="warn-text">정답표 미매칭</span>';
-  return '<span class="zip-support-ok">자동 등록 가능</span>';
+  if(!row.answers)return '<span class="warn-text">같은 과목·책형 정답 미매칭</span>';
+  return '<span class="zip-support-ok">과목·책형·정답 연결</span>';
 }
 function renderZipImportRows(){
   const supported=zipSubjectRows.filter(x=>x.appSubject).length;
-  const answerMatched=zipSubjectRows.filter(x=>x.answers).length;
+  const answerMatched=zipSubjectRows.filter(x=>Array.isArray(x.answers)&&x.answers.length===20).length;
   const selected=zipSubjectRows.filter(x=>x.checked).length;
-
+  const missing=Object.entries(ZIP_PREFERRED_SOURCE).filter(([app])=>!zipSubjectRows.some(r=>r.appSubject===app)).map(([app])=>app);
+  const unknown=zipSubjectRows.filter(r=>r.parseError).length;
   $('#zipImportSummary').innerHTML=
-    `<span class="pill">PDF ${zipSubjectRows.length}개</span>`+
-    `<span class="pill">지원 과목 ${supported}개</span>`+
+    `<span class="pill">Z242 · PDF ${zipSubjectRows.length}개</span>`+
+    `<span class="pill">지원 과목 PDF ${supported}개</span>`+
     `<span class="pill">정답 연결 ${answerMatched}개</span>`+
-    `<span class="pill">등록 선택 ${selected}개</span>`;
+    `<span class="pill">등록 선택 ${selected}개</span>`+
+    (unknown?`<span class="pill">파일명 확인 필요 ${unknown}개</span>`:'')+
+    `<div class="help" style="margin:8px 0">정답 연결은 법령 검수 완료가 아닙니다. 새 문항의 현행성 검수·출제 제외 기준은 L241 그대로 적용됩니다.</div>`+
+    (missing.length?`<div class="help">이 ZIP에서 찾지 못한 지원 과목: <b>${esc(missing.join(', '))}</b> — 해당 과목 파일을 별도로 확인해주세요.</div>`:'');
 
   $('#zipImportBody').innerHTML=zipSubjectRows.map((r,i)=>`<tr id="zipRow${i}">
-    <td><input type="checkbox" class="zCheck" data-i="${i}" ${r.checked?'checked':''} ${!r.appSubject||!r.answers?'disabled':''}></td>
+    <td><input type="checkbox" class="zCheck" data-i="${i}" ${r.checked?'checked':''} ${!zipSourceReadyZ242(r)?'disabled':''}></td>
     <td>${esc(r.fileName)}</td>
-    <td><b>${esc(r.sourceSubject)}</b></td>
+    <td><b>${esc(r.sourceSubject||'확인 필요')}</b></td>
     <td>${r.appSubject?`<b>${esc(r.appSubject)}</b>`:'-'}</td>
-    <td>${esc(r.book)}</td>
+    <td>${esc(r.book||'-')}</td>
     <td>${r.answers?'<span class="ok-text">1~20 연결</span>':'<span class="warn-text">없음</span>'}</td>
     <td>${zipRowStatus(r)}</td>
   </tr>`).join('');
-
+  $('#registerZipSubjects').disabled=zipScanBusyZ242||!selected;
   $$('.zCheck').forEach(x=>x.onchange=e=>{
-    zipSubjectRows[+e.target.dataset.i].checked=e.target.checked;
+    const r=zipSubjectRows[+e.target.dataset.i];
+    r.checked=!!e.target.checked&&zipSourceReadyZ242(r);
     renderZipImportRows();
   });
 }
 
 async function scanQuestionZip(){
-  const zipFile=$('#zQuestionZip').files[0];
-  const answerFile=$('#zAnswerPdf').files[0];
-  if(!zipFile||!answerFile){
-    alert('시험문제 ZIP과 공식 정답표 PDF를 모두 선택해주세요.');
-    return;
-  }
-  if(typeof JSZip==='undefined'){
-    alert('ZIP 모듈을 불러오지 못했습니다. 인터넷 연결 후 새로고침해주세요.');
-    return;
-  }
-
+  if(zipScanBusyZ242)return;
+  const zipFile=$('#zQuestionZip').files[0],answerFile=$('#zAnswerPdf').files[0];
+  if(!zipFile||!answerFile){alert('시험문제 ZIP과 공식 정답표 PDF를 모두 선택해주세요.');return;}
+  if(typeof JSZip==='undefined'){alert('ZIP 모듈을 불러오지 못했습니다. 새로고침해주세요.');return;}
+  if(typeof pdfjsLib==='undefined'){alert('PDF 모듈을 불러오지 못했습니다. 인터넷 연결을 확인하고 새로고침해주세요.');return;}
   const progress=$('#zipImportProgress'),bar=progress.querySelector('i');
-  progress.classList.remove('hidden');bar.style.width='5%';
-  $('#zipImportResult').classList.add('hidden');
-
+  zipSubjectRows=[];zipAnswerMap=new Map();zipScanInfoZ242={files:0,pdfs:0,ignored:0};zipScanBusyZ242=true;
+  $('#scanQuestionZip').disabled=true;$('#registerZipSubjects').disabled=true;
+  $('#zipImportBody').innerHTML='';$('#zipImportSummary').textContent='Z242 · ZIP과 공식 정답표를 읽는 중입니다.';
+  progress.classList.remove('hidden');bar.style.width='5%';$('#zipImportResult').classList.add('hidden');
   try{
-    zipAnswerMap=await parseAllOfficialAnswerRows(answerFile);
-    bar.style.width='25%';
-
+    zipAnswerMap=await parseAllOfficialAnswerRows(answerFile);bar.style.width='25%';
     const zip=await JSZip.loadAsync(zipFile);
-    const rows=[];
     const entries=Object.values(zip.files).filter(e=>!e.dir);
-
+    zipScanInfoZ242.files=entries.length;
+    const rows=[];
     for(const entry of entries){
-      const decoded=decodeHashUnicodeName(entry.name);
-      const base=decoded.split('/').pop();
-      if(!/\.pdf$/i.test(base))continue;
-
-      const m=base.match(/^(.+)_([가-하])\.pdf$/i);
-      if(!m)continue;
-
-      const sourceSubject=normalizeZipSubject(m[1]);
-      const book=m[2];
+      const info=parseZipPdfNameZ242(entry.name);
+      if(!info){zipScanInfoZ242.ignored++;continue;}
+      zipScanInfoZ242.pdfs++;
+      const {fileName,sourceSubject,book,parseError}=info;
       const appSubject=ZIP_SUBJECT_MAP[sourceSubject]||'';
-      const answers=zipAnswerMap.get(zipAnswerKey(sourceSubject,book))||null;
-
-      // 같은 앱 과목에 여러 원본과목이 있으면 대표 과목만 기본 선택
-      const preferred=appSubject && ZIP_PREFERRED_SOURCE[appSubject]===sourceSubject;
-      const checked=!!(appSubject&&answers&&preferred);
-
-      rows.push({
-        entry,
-        rawName:entry.name,
-        fileName:base,
-        sourceSubject,appSubject,book,answers,checked,
-        parsed:null
-      });
+      const answers=!parseError?zipAnswerMap.get(zipAnswerKey(sourceSubject,book))||null:null;
+      const preferred=appSubject&&ZIP_PREFERRED_SOURCE[appSubject]===sourceSubject;
+      const row={entry,rawName:entry.name,fileName,sourceSubject,appSubject,book,answers,parseError,checked:false,parsed:null};
+      row.checked=!!preferred&&zipSourceReadyZ242(row);
+      rows.push(row);
     }
-
-    zipSubjectRows=rows.sort((a,b)=>a.sourceSubject.localeCompare(b.sourceSubject,'ko'));
-    bar.style.width='100%';
-    renderZipImportRows();
-    $('#zipImportResult').classList.remove('hidden');
-
-    if(!zipSubjectRows.length){
-      alert('ZIP 안에서 과목명_책형.pdf 형식의 PDF를 찾지 못했습니다.');
-    }
+    zipSubjectRows=rows.sort((a,b)=>a.sourceSubject.localeCompare(b.sourceSubject,'ko')||a.fileName.localeCompare(b.fileName,'ko'));
+    bar.style.width='100%';$('#zipImportResult').classList.remove('hidden');
+    if(!rows.length)alert(`ZIP 안에 PDF 파일이 없습니다. 파일 ${entries.length}개를 확인했습니다. HWP는 이 메뉴에서 읽지 않습니다.`);
+    else if(!zipAnswerMap.size)alert('PDF 파일명은 읽었습니다. 다만 정답표에서 과목·책형·1~20번 정답을 확인하지 못해 등록을 보류합니다.');
   }catch(e){
-    console.error(e);
+    console.error(e);zipSubjectRows=[];zipAnswerMap=new Map();
+    $('#zipImportSummary').textContent='Z242 · 분석 실패. 등록한 문항은 없습니다.';
+    $('#zipImportResult').classList.remove('hidden');
     alert('ZIP 자동분리 중 오류가 발생했습니다.\n'+(e.message||e));
   }finally{
+    zipScanBusyZ242=false;$('#scanQuestionZip').disabled=false;
+    if(zipSubjectRows.length)renderZipImportRows();
     setTimeout(()=>progress.classList.add('hidden'),500);
   }
 }
@@ -2969,7 +2984,7 @@ async function parseOneZipSubject(row,exam,year,progressCb){
 }
 
 async function registerZipSubjects(){
-  const selected=zipSubjectRows.filter(r=>r.checked&&r.appSubject&&r.answers);
+  const selected=zipSubjectRows.filter(r=>r.checked&&zipSourceReadyZ242(r));
   if(!selected.length){
     alert('등록할 지원 과목을 선택해주세요.');
     return;
@@ -4004,7 +4019,7 @@ window.examBankStandaloneWord=Object.freeze({revision:'W239',inspect:()=>JSON.pa
 </div>
 <p class="law-help">기준일은 [문제 출제] 화면에서 설정합니다. 한 번에 최대 50문항씩 검수 JSON을 만들고, 원문·보기·정답은 건드리지 않고 검수 정보만 저장합니다.</p>
 <div class="actions"><button type="button" class="btn primary" id="lawExport">보류 문항 검수 요청 JSON</button><button type="button" class="btn ghost" id="lawReadFile">검수 결과 JSON 가져오기</button><input type="file" accept=".json,application/json" id="lawFile" class="hidden"></div>
-<div id="lawMessage" class="law-help" role="status" aria-live="polite"></div><div id="lawSummary" class="batch-summary"></div>
+<div id="lawMessage" class="law-status-box" role="status" aria-live="polite"></div><div id="lawSummary" class="batch-summary"></div>
 <div class="table-wrap"><table><thead><tr><th>출처 / ID</th><th>문제</th><th>현행성 검수</th><th>관리</th></tr></thead><tbody id="lawRows"></tbody></table></div>
 <div class="actions"><button type="button" class="btn ghost" id="lawPrev">이전</button><span id="lawPageText"></span><button type="button" class="btn ghost" id="lawNext">다음</button></div>
 <section id="lawEditor" class="hidden"><h3 id="lawEditTitle"></h3><pre id="lawOriginal"></pre>
@@ -4017,8 +4032,17 @@ window.examBankStandaloneWord=Object.freeze({revision:'W239',inspect:()=>JSON.pa
 <label class="law-check"><input type="checkbox" id="lawTransition"> 적용례·경과조치·부칙을 확인했습니다. 판례는 변경 관계를 확인했습니다.</label>
 <label class="law-check"><input type="checkbox" id="lawAnswerValid"> 현행 확인인 경우: 원문 정답이 유일하며 모든 보기의 기존 판단을 유지할 수 있습니다.</label>
 <label class="law-check"><input type="checkbox" id="lawManualConfirm"> 위 판정과 근거를 직접 확인했으며 검수자 이름으로 승인합니다. 미확인이면 보류만 지정합니다.</label>
-<button type="button" class="btn primary" id="lawSaveOne">이 문항 검수 결과 저장</button></section>
-<section id="lawImportPreview" class="hidden"><h3>가져온 검수 결과 — 아직 미적용</h3><div id="lawImportRows"></div><label class="law-check"><input type="checkbox" id="lawImportConfirm"> 공식 근거와 기준일·보기별 영향 판단을 확인했습니다. 위 결과를 검수자 이름으로 승인합니다.</label><button type="button" class="btn primary" id="lawApplyImport">확인한 검수 결과 승인·저장</button></section>
+<div id="lawManualMessage" class="law-status-box" role="status" aria-live="polite"></div><button type="button" class="btn primary" id="lawSaveOne">이 문항 검수 결과 저장</button></section>
+<section id="lawImportPreview" class="hidden">
+<h3 id="lawImportTitle">가져온 검수 결과 — 아직 미저장</h3>
+<p class="law-help">JSON 읽기 → 담당자 확인·저장 → 저장된 판정에 따라 출제 허용/제외. ‘검수 보류’는 저장에 성공해도 출제되지 않습니다.</p>
+<div id="lawImportRows"></div><div id="lawImportActions">
+<div id="lawImportSummary"></div><div id="lawImportWarning"></div>
+<div class="field"><label for="lawImportReviewer">승인 검수자 이름 *</label><input id="lawImportReviewer" maxlength="80" autocomplete="off" placeholder="담당자 이름 (상단 입력란과 연동)"></div>
+<label class="law-check"><input type="checkbox" id="lawImportConfirm"><span id="lawImportConfirmText">표시된 판정과 근거를 확인했으며 검수자 이름으로 저장합니다. 보류 문항은 출제되지 않습니다.</span></label>
+<div id="lawImportMessage" class="law-status-box" role="status" aria-live="polite"></div>
+<div class="actions"><button type="button" class="btn primary" id="lawApplyImport">확인한 검수 결과 승인·저장</button><button type="button" class="btn ghost" id="lawDiagnostic">저장 진단 내역 받기</button></div>
+</div></section>
 </div></div>
 <div id="lawPrintBlock">법령 검수 보류/제외 문항이 포함되어 인쇄를 중단했습니다. 문제은행의 [법령 검수 · L240]에서 확인 후 다시 인쇄해주세요.</div>
 
@@ -4027,12 +4051,47 @@ window.examBankStandaloneWord=Object.freeze({revision:'W239',inspect:()=>JSON.pa
    Original question text, Word W239 engine, imports and DB schema are unchanged. */
 (function(){
 'use strict';
-const REV='L240', SCHEMA='exam-bank-legal-review-v1';
+const REV='L241', SCHEMA='exam-bank-legal-review-v1';
 const $l=id=>document.getElementById(id);
 const STATES={allow:'현행 기준 확인',exclude:'개정 영향 제외',pending:'검수 보류',not_applicable:'법령 검수 비대상 확인'};
 const MAX_BATCH=50, PAGE_SIZE=30;
 let pageIndex=0, scope='bank', candidates=[], busy=false, editingId='';
 let capturedCurrentIds=[];
+let importInfo=null,lastSaved=null,savePhase='',writeAttempted=false;
+let lastDiagnostic={revision:REV,stage:'idle',message:''};
+function tallyDrafts(rows){const n={allow:0,exclude:0,pending:0,not_applicable:0};for(const x of rows){const st=x.legalReview?.state;if(Object.hasOwn(n,st))n[st]++;}return n;}
+function tallyText(n){return `현행 기준 확인 ${n.allow}건 · 비대상 확인 ${n.not_applicable}건 · 개정 영향 제외 ${n.exclude}건 · 검수 보류 ${n.pending}건`;}
+function syncReviewer(value){['lawReviewer','lawImportReviewer'].forEach(id=>{$l(id).value=value;$l(id).removeAttribute('aria-invalid');});}
+function focusReviewer(){if($l('lawReviewer').value.trim())return;const el=$l('lawImportPreview').classList.contains('hidden')?$l('lawReviewer'):$l('lawImportReviewer');el.setAttribute('aria-invalid','true');el.scrollIntoView({block:'center'});el.focus();}
+function syncImportControls(){const disabled=busy||!candidates.length;$l('lawApplyImport').disabled=disabled;$l('lawImportConfirm').disabled=disabled;$l('lawImportReviewer').disabled=disabled;}
+function importSummary(saved=false){
+ const rows=saved?(lastSaved?.rows||[]):candidates,n=tallyDrafts(rows);
+ $l('lawImportSummary').textContent=`JSON 인식 ${importInfo?.count||rows.length}건 · ${saved?'D1 저장 재확인 '+rows.length+'건':'아직 D1에 저장하지 않음'}\n${tallyText(n)}`;
+ $l('lawImportWarning').textContent=n.pending===rows.length&&rows.length
+   ? '이 파일은 전부 ‘검수 보류’입니다. 저장해도 출제 가능으로 바뀌지 않습니다. 완료된 검수 결과라면 JSON의 legalReview.state와 reason을 확인하세요. 담당자 승인만으로 pending을 allow로 바꾸지 않습니다.'
+   : n.pending?`검수 보류 ${n.pending}건은 저장 후에도 출제되지 않습니다. 개정 영향 제외 ${n.exclude}건도 계속 제외됩니다.`:'';
+ $l('lawImportConfirmText').textContent=n.pending===rows.length&&rows.length
+   ? '모든 문항이 검수 보류이며 저장해도 출제되지 않는 것을 확인했습니다. 보류 사유를 검수자 이름으로 저장합니다.'
+   : '현행 확인·비대상 확인·개정 제외 판정의 근거를 직접 확인했습니다. 표시된 판정을 저장하며 보류는 보류로 유지합니다.';
+ $l('lawApplyImport').textContent=saved?'저장 확인 완료':n.pending===rows.length&&rows.length?`검수 보류 ${rows.length}건 저장 (출제 불가 유지)`:'확인한 검수 결과 승인·저장';
+ syncImportControls();
+}
+function sameObject(a,b){const norm=v=>Array.isArray(v)?v.map(norm):v&&typeof v==='object'?Object.fromEntries(Object.keys(v).sort().filter(k=>v[k]!==undefined).map(k=>[k,norm(v[k])])):v;return JSON.stringify(norm(a))===JSON.stringify(norm(b));}
+async function reviewRequest(path,options={},label='D1 요청'){
+ const controller=new AbortController(),timer=setTimeout(()=>controller.abort(),25000);
+ try{
+  const r=await fetch(path,{cache:'no-store',credentials:'same-origin',...options,signal:controller.signal});
+  if(!r.ok)throw new Error(`${label} 실패 · HTTP ${r.status} (${path})`);
+  let d;try{d=await r.json();}catch{throw new Error(`${label}: JSON이 아닌 응답입니다. Worker 연결을 확인해주세요.`);}
+  if(!d||typeof d!=='object'||Array.isArray(d))throw new Error(`${label}: 서버 응답 형식이 올바르지 않습니다.`);
+  if(d.ok===false||d.success===false)throw new Error(`${label}: 서버가 실패를 반환했습니다. ${String(d.error||d.message||'').slice(0,150)}`);
+  return d;
+ }catch(e){if(e.name==='AbortError')throw new Error(`${label}: 25초 응답 대기시간을 초과했습니다.`);throw e;}
+ finally{clearTimeout(timer);}
+}
+function reportSaveError(e){status(`${writeAttempted?'저장 완료를 확인하지 못했습니다. 서버에 일부 또는 전부 반영됐을 수 있습니다.':'아직 저장하지 않았습니다.'}\n단계: ${savePhase||'입력 확인'}\n${e.message||e}`,true);}
+function savedMessage(n,rows){const t=tallyDrafts(rows);return `D1 저장 재확인 완료: ${n}건\n${tallyText(t)}\n검수 보류 ${t.pending}건 / 개정 영향 제외 ${t.exclude}건은 저장에 성공해도 출제되지 않습니다.\n현행·비대상 확인도 기준일과 원문 일치 등 기존 출제 조건을 적용합니다.`;}
+
 const dateToday=()=>new Intl.DateTimeFormat('sv-SE',{timeZone:'Asia/Seoul',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());
 function validDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(String(s))&&!Number.isNaN(Date.parse(s))&&new Date(s).toISOString().slice(0,10)===s;}
 function basis(){return $l('lawBasisDate').value||dateToday();}
@@ -4087,8 +4146,12 @@ function allowCurrentExport(){
   if(issues.length){alert('법령 검수 전 출력 차단 · '+issues.length+'문항\n'+messageIssues(issues)+'\n\n[법령 검수]에서 확인 후 승인해주세요. 원문은 삭제하지 않습니다.');return false;}
   return true;
 }
-function status(s,error=false){$l('lawMessage').textContent=s;$l('lawMessage').classList.toggle('law-error',error);}
-function setBusy(v){busy=v;document.querySelectorAll('#lawModal button,#lawModal input,#lawModal select,#lawModal textarea').forEach(el=>{if(!el.dataset.keepEnabled)el.disabled=v;});}
+function status(s,error=false){
+ for(const id of ['lawMessage','lawManualMessage','lawImportMessage']){const el=$l(id);el.textContent=s;el.classList.toggle('law-error',error);}
+ if(error&&$l('lawImportPreview').classList.contains('hidden')&&$l('lawEditor').classList.contains('hidden'))$l('lawMessage').scrollIntoView({block:'center'});
+ lastDiagnostic={revision:REV,stage:savePhase||'JSON 읽기',message:String(s),error,writeAttempted,time:new Date().toISOString(),basisDate:basis(),file:importInfo?.name||'',inputCount:importInfo?.count||0,states:importInfo?.states||null};
+}
+function setBusy(v){busy=v;document.querySelectorAll('#lawModal button,#lawModal input,#lawModal select,#lawModal textarea').forEach(el=>{if(!el.dataset.keepEnabled)el.disabled=v;});syncImportControls();}
 function selectionRows(){
   let rows=scope==='current'?capturedCurrentIds.map(id=>problems.find(p=>String(p.id)===id)).filter(Boolean):problems.slice();
   const subject=$l('lawSubject').value,q=$l('lawSearch').value.trim().toLowerCase(),filter=$l('lawFilter').value;
@@ -4135,9 +4198,10 @@ function manualReview(){
   return {state:$l('lawDecision').value,asOf:basis(),reason:$l('lawReason').value.trim(),sources,allOptionsReviewed:$l('lawAllOptions').checked,effectiveDateChecked:$l('lawDates').checked,transitionalRulesChecked:$l('lawTransition').checked,originalAnswerStillValid:$l('lawAnswerValid').checked};
 }
 async function saveRows(drafts){
+  writeAttempted=false;savePhase='담당자·원문·판정 확인';status('담당자 이름·문항 ID·원문·판정을 확인 중입니다.');
   if(!drafts.length)throw new Error('반영할 검수 결과가 없습니다.');
   if(drafts.length>MAX_BATCH)throw new Error('한 번에 '+MAX_BATCH+'문항까지 승인해주세요.');
-  const reviewer=$l('lawReviewer').value.trim();if(!reviewer)throw new Error('검수자 이름을 입력해주세요.');
+  const reviewer=$l('lawReviewer').value.trim();if(!reviewer)throw new Error('승인 검수자 이름이 비어 있습니다. 저장 버튼 바로 위의 이름란을 입력해주세요.');
   const err=basisError();if(err)throw new Error(err);
   const seen=new Set();
   // Validate every row BEFORE any network write or mutation.
@@ -4148,37 +4212,43 @@ async function saveRows(drafts){
     const e=reviewError(x.legalReview,basis());if(e)throw new Error(x.id+' · '+e);
   }
   // Read latest rows rather than overwrite from an old modal snapshot.
-  const r0=await fetch('/api/problems',{cache:'no-store'});
-  if(!r0.ok)throw new Error('D1 최신 문항 확인 실패: '+r0.status);
-  const d0=await r0.json();if(!Array.isArray(d0.problems))throw new Error('D1 문항 응답 형식이 다릅니다.');
+  savePhase='D1 최신 문항 읽기';status('D1 최신 문항을 읽고 있습니다. 아직 저장하지 않았습니다.');
+  const d0=await reviewRequest('/api/problems',{},'D1 최신 문항 읽기');
+  if(!Array.isArray(d0.problems))throw new Error('D1 문항 응답에 problems 배열이 없습니다.');
   const remote=new Map(d0.problems.map(p=>[String(p.id),p]));
   const now=new Date().toISOString(), updated=[];
   for(const x of drafts){
-    const local=problems.find(p=>String(p.id)===x.id),p=remote.get(x.id)||local;
+    const local=problems.find(p=>String(p.id)===x.id),p=remote.get(x.id);
+    if(!p)throw new Error('D1에 없는 문항입니다. 원본 등록 상태를 먼저 확인하세요: '+x.id);
     if(await fingerprint(p)!==x.fingerprint||await fingerprint(local)!==x.fingerprint)throw new Error('다른 편집 내용이 감지됐습니다. 재검수하세요: '+x.id);
     const prior=p.legalReview?{...p.legalReview,sourceCanonical:undefined}:null;
     const review={...x.legalReview,schema:SCHEMA,fingerprint:x.fingerprint,sourceCanonical:canonical(p),reviewer,approvedAt:now};
     updated.push({...p,legalReview:review,legalReviewHistory:[...(p.legalReviewHistory||[]),...(prior?[prior]:[])].slice(-5)});
   }
-  const r=await fetch('/api/problems/bulk',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems:updated})});
-  if(!r.ok)throw new Error('D1 검수 저장 실패: '+r.status+' · '+(await r.text()).slice(0,150));
-  const result=await r.json();if(result.ok!==true||result.written!==updated.length)throw new Error('D1 저장 문항 수를 확인하지 못했습니다. 자동 승인하지 않았습니다.');
-  const r1=await fetch('/api/problems',{cache:'no-store'});if(!r1.ok)throw new Error('저장 후 D1 재확인 실패. 새로고침해 검수 상태를 확인하세요.');
-  const d1=await r1.json();const checked=new Map((d1.problems||[]).map(p=>[String(p.id),p]));
-  for(const p of updated){if(JSON.stringify(checked.get(String(p.id))?.legalReview)!==JSON.stringify(p.legalReview))throw new Error('저장 결과 불일치: '+p.id);}
+  savePhase='D1 저장 요청';status('D1에 검수 결과 '+updated.length+'건 저장 요청 중입니다.');writeAttempted=true;
+  const result=await reviewRequest('/api/problems/bulk',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems:updated})},'D1 검수 저장');
+  // A transport count is not proof of persistence. Read every saved review back.
+  savePhase='D1 저장 후 재확인';status('D1에서 다시 읽어 실제 저장 결과를 확인 중입니다.');
+  const d1=await reviewRequest('/api/problems',{},'D1 저장 후 재확인');
+  if(!Array.isArray(d1.problems))throw new Error('저장 후 D1 응답에 problems 배열이 없습니다.');
+  const checked=new Map(d1.problems.map(p=>[String(p.id),p]));
+  for(const p of updated){
+    const r=checked.get(String(p.id));
+    if(!r||!sameObject(r.legalReview,p.legalReview)||canonical(r)!==canonical(p))throw new Error('저장 후 값이 일치하지 않습니다: '+p.id+' · 새로고침 후 상태를 확인해주세요.');
+  }
   const map=new Map(updated.map(p=>[String(p.id),p]));
   // Update review fields, not in-progress original or explanation text.
   problems=problems.map(p=>{const u=map.get(String(p.id));return u?{...p,legalReview:u.legalReview,legalReviewHistory:u.legalReviewHistory}:p;});
   currentSet=(currentSet||[]).map(p=>{const u=map.get(originId(p));return u?{...p,legalReview:u.legalReview}:p;});
   try{localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));}catch(e){console.warn('로컬 캐시 저장 실패, D1 저장 완료',e);}
-  renderBank();render();annotateCurrent();return updated.length;
+  renderBank();render();annotateCurrent();savePhase='저장 확인 완료';return updated.length;
 }
 async function saveManual(){
   if(busy)return;if(!$l('lawManualConfirm').checked){status('근거를 직접 확인했다는 승인 항목을 체크해주세요.',true);return;}
   const p=problems.find(p=>String(p.id)===editingId);if(!p)return;
   setBusy(true);status('검수 결과 저장·재확인 중…');
-  try{const n=await saveRows([{id:editingId,fingerprint:await fingerprint(p),legalReview:manualReview()}]);status(n+'문항 검수 결과 D1 저장 확인 완료. 문제 원문·해설은 변경하지 않았습니다.');$l('lawEditor').classList.add('hidden');}
-  catch(e){status(e.message,true);}finally{setBusy(false);render();}
+  try{const n=await saveRows([{id:editingId,fingerprint:await fingerprint(p),legalReview:manualReview()}]);status(savedMessage(n,[{legalReview:manualReview()}]));}
+  catch(e){reportSaveError(e);}finally{setBusy(false);render();focusReviewer();}
 }
 const REVIEW_INSTRUCTIONS=`당신은 기출문제 현행성 검수 보조자다. 이 요청의 원문과 정답을 수정하거나 새 문제/해설로 교체하지 마라. items의 id, fingerprint, original을 그대로 보존하고 legalReview 필드만 작성하라. 기준일 asOf를 지켜 국가법령정보센터의 해당 시점 시행본, 제·개정문/부칙/적용례/경과조치 및 법원·헌법재판소 공식 자료를 실제로 확인하라. 검색하지 못했거나 판례 변경 관계가 불명확하면 pending이다. URL만 추측해 넣지 마라.\n법령명이 개정됐다는 이유, 구 법령명 등장, 원래 오답인 선택지가 있다는 이유만으로 exclude 판정하지 마라. 원문 전체와 ㄱㄴㄷ 보기 및 모든 ①~④ 선택지를 검토하고, 출제 당시 판단과 기준일 판단이 달라져 원문 그대로 사용 불가능한 때에만 exclude. 정답 번호가 같더라도 다른 선택지 판단이나 핵심 기간/세율/공제액/기관/절차/제도/법리의 설명이 개정 때문에 달라지면 영향 이유를 기록하라. 다른 조문의 개정은 그 문항에 영향 없을 수 있다. 시행 전 개정안은 현행 규정으로 혼동하지 않는다. 법령 제도 판례와 무관한 순수 이론이면 not_applicable로 사유를 작성할 수 있다.\nallow에는 원문 정답의 유일성과 모든 보기 판정을 유지할 수 있다는 근거가 필요하다. sources에는 공식 HTTPS URL, title, reference(조문/사건번호), effectiveDate(시행일/선고일)를 기입한다. 사법 판례는 최신 판결 존재만으로 변경을 추정하지 마라. 과거 기출 정답을 현행 정답이라고 간주하지 말고 비교하라. 세법은 과세기간과 적용례까지 확인한다. 범위를 확인하지 못한 문항은 pending으로 남겨야 한다.\n반환값 schema/asOf/items 구조 유지. 각 legalReview는 state(allow|exclude|pending|not_applicable), asOf, reason, sources[], allOptionsReviewed, effectiveDateChecked, transitionalRulesChecked, originalAnswerStillValid를 포함한다. allow/exclude의 검토 체크는 실제 확인한 경우에만 true. 이 결과는 담당자 승인 전에는 자동 출제에 반영되지 않는다.`;
 async function exportReview(){
@@ -4188,15 +4258,18 @@ async function exportReview(){
   setBusy(true);
   try{
     const items=[];for(const p of rows)items.push({id:String(p.id),fingerprint:await fingerprint(p),original:{...JSON.parse(canonical(p)),sourceProblemFile:p.sourceProblemFile||p.sourceFile||'',rawOriginalText:p.rawOriginalText||'',existingExplanation:p.editedExplanation||p.explanation||''},legalReview:{state:'pending',asOf:basis(),reason:'공식 근거 확인 전',sources:[],allOptionsReviewed:false,effectiveDateChecked:false,transitionalRulesChecked:false,originalAnswerStillValid:false}});
-    downloadJson('법령검수요청_'+basis()+'_'+items.length+'문항_L240.json',{schema:SCHEMA,asOf:basis(),instructions:REVIEW_INSTRUCTIONS,items});
+    downloadJson('법령검수요청_'+basis()+'_'+items.length+'문항_L241.json',{schema:SCHEMA,asOf:basis(),instructions:REVIEW_INSTRUCTIONS,items});
     status(items.length+'문항 검수 요청 JSON을 만들었습니다. 공식 자료 조회가 가능한 검수 환경에서 확인한 결과를 가져오세요.');
   }catch(e){status(e.message,true);}finally{setBusy(false);render();}
 }
 async function readReviewFile(file){
+  lastSaved=null;writeAttempted=false;savePhase='JSON 읽기';importInfo={name:file.name,count:0,states:null};
+  $l('lawImportTitle').textContent='가져온 검수 결과 — 아직 미저장';
   candidates=[];$l('lawImportPreview').classList.add('hidden');$l('lawImportConfirm').checked=false;
   if(file.size>5*1024*1024)throw new Error('검수 JSON은 5MB 이하로 나눠주세요.');
   const raw=JSON.parse((await file.text()).replace(/^\uFEFF/,''));
-  if(raw.schema!==SCHEMA||raw.asOf!==basis()||!Array.isArray(raw.items))throw new Error('검수 전용 JSON 형식 또는 기준일이 맞지 않습니다. 해설 JSON과는 별도입니다.');
+  if(!raw||raw.schema!==SCHEMA||!Array.isArray(raw.items))throw new Error('법령 검수 전용 JSON 형식이 아닙니다. 문제·해설 JSON과는 별도입니다.');
+  if(raw.asOf!==basis())throw new Error('기준일 불일치: 파일 '+(raw.asOf||'없음')+' / 화면 '+basis()+'. 기준일이 다른 결과를 자동 승인하지 않습니다.');
   if(!raw.items.length||raw.items.length>MAX_BATCH)throw new Error('검수 결과는 1~50문항만 올려주세요.');
   const seen=new Set(),next=[];
   for(const x of raw.items){
@@ -4204,32 +4277,36 @@ async function readReviewFile(file){
     const p=problems.find(p=>String(p.id)===id);if(!p)throw new Error('문제은행에 없는 ID: '+id);
     if(x.fingerprint!==await fingerprint(p))throw new Error('원문 내용 불일치: '+id);
     if(x.original){const frozen=JSON.parse(canonical(p));for(const key of Object.keys(frozen)){if(JSON.stringify(x.original[key])!==JSON.stringify(frozen[key]))throw new Error('JSON에서 원문이 수정됐습니다: '+id+' '+key);}}
-    const r=x.legalReview,e=reviewError(r,basis());if(e)throw new Error(id+' · '+e);
+    const r=x.legalReview,e=reviewError(r,basis());if(e)throw new Error(id+' · '+e);if(r.sources!=null&&!Array.isArray(r.sources))throw new Error(id+' · sources는 배열이어야 합니다. 근거가 없으면 []로 표시해주세요.');
     const normalized={state:r.state,asOf:r.asOf,reason:String(r.reason).trim(),sources:(r.sources||[]).map(s=>({title:String(s.title||''),reference:String(s.reference||''),url:String(s.url||''),effectiveDate:String(s.effectiveDate||'')})),allOptionsReviewed:r.allOptionsReviewed===true,effectiveDateChecked:r.effectiveDateChecked===true,transitionalRulesChecked:r.transitionalRulesChecked===true,originalAnswerStillValid:r.originalAnswerStillValid===true};
     next.push({id,fingerprint:x.fingerprint,legalReview:normalized});
   }
-  candidates=next;
+  candidates=next;importInfo.count=next.length;importInfo.states=tallyDrafts(next);$l('lawImportReviewer').value=$l('lawReviewer').value;
   $l('lawImportRows').innerHTML=next.map(x=>`<article class="law-import-item"><b>${esc(x.id)} · ${esc(STATES[x.legalReview.state])}</b><p>${esc(x.legalReview.reason)}</p>${x.legalReview.sources.map(s=>`<p><a href="${esc(s.url)}" target="_blank" rel="noopener noreferrer">${esc(s.title)} · ${esc(s.reference)}</a> ${esc(s.effectiveDate)}</p>`).join('')}</article>`).join('');
-  $l('lawImportPreview').classList.remove('hidden');status(next.length+'문항을 검증했습니다. 아직 적용하지 않았습니다. 아래 공식 근거를 확인하고 승인해주세요.');
+  $l('lawImportPreview').classList.remove('hidden');importSummary(false);status('JSON '+next.length+'건을 읽었습니다. 아직 저장하지 않았습니다.\n'+tallyText(importInfo.states)+'\n아래 검수자 이름과 확인 항목을 입력한 뒤 저장해주세요.');$l('lawImportActions').scrollIntoView({block:'end'});
 }
 async function applyImport(){
-  if(busy)return;if(!$l('lawImportConfirm').checked){status('검수 결과 확인·승인을 체크해주세요.',true);return;}
-  setBusy(true);status('검수 결과 D1 저장·재확인 중…');
-  try{const n=await saveRows(candidates);candidates=[];$l('lawImportPreview').classList.add('hidden');status(n+'문항 검수 결과를 승인·저장했습니다. 개정 영향/보류 문항은 자동 출제에서 제외됩니다.');}
-  catch(e){status(e.message,true);}finally{setBusy(false);render();}
+  if(busy)return;writeAttempted=false;savePhase='입력 확인';
+  if(!candidates.length){status('저장할 결과가 없습니다. JSON을 먼저 읽어주세요.',true);return;}
+  if(!$l('lawImportConfirm').checked){status('표시된 판정과 근거를 확인한 뒤 승인 항목을 체크해주세요.',true);return;}
+  setBusy(true);
+  try{
+    const n=await saveRows(candidates);lastSaved={count:n,rows:candidates.map(x=>({legalReview:{state:x.legalReview.state}}))};candidates=[];
+    $l('lawImportTitle').textContent='가져온 검수 결과 — D1 저장 재확인 완료';importSummary(true);status(savedMessage(n,lastSaved.rows));
+  }catch(e){reportSaveError(e);}finally{setBusy(false);render();focusReviewer();}
 }
 function annotateCurrent(){
   const host=document.getElementById('generated');if(!host)return;
   host.querySelector('#lawCurrentNotice')?.remove();
   if(!(currentSet||[]).length)return;
   const issues=currentIssues(),notice=document.createElement('div');notice.id='lawCurrentNotice';notice.className='notice no-print';
-  notice.textContent=issues.length?`법령 검수 L240 · ${issues.length}/${currentSet.length}문항 보류/제외 — 검수 승인 전 Word·인쇄 저장이 차단됩니다. (검수 JSON 내보내기는 가능)`:`법령 검수 L240 · ${currentSet.length}문항 검수 조건 충족 · 기준일 ${basis()} (새 법령을 실시간 감시하는 기능은 아닙니다.)`;
+  notice.textContent=issues.length?`법령 검수 L241 · ${issues.length}/${currentSet.length}문항 보류/제외 — 검수 승인 전 Word·인쇄 저장이 차단됩니다. (검수 JSON 내보내기는 가능)`:`법령 검수 L241 · ${currentSet.length}문항 검수 조건 충족 · 기준일 ${basis()} (새 법령을 실시간 감시하는 기능은 아닙니다.)`;
   const b=document.createElement('button');b.type='button';b.className='btn ghost';b.textContent='현재 문항 법령 검수';b.onclick=()=>open('current');notice.appendChild(b);host.prepend(notice);
   ['wordProblem','wordSolution','printCurrent'].forEach(id=>{const el=$l(id);if(el){el.disabled=!!issues.length;el.title=issues.length?'법령 검수 보류/제외 문항이 포함되어 있습니다.':'';}});
 }
 function annotateBank(){
   const sorted=problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0));
-  document.querySelectorAll('#bankBody tr').forEach((tr,i)=>{const p=sorted[i];if(!p)return;const td=tr.cells[7];if(!td)return;const b=document.createElement('button');b.className='btn ghost';b.type='button';b.textContent='법령 검수';b.onclick=()=>{open();edit(String(p.id));};td.appendChild(b);const d=evaluate(p),small=document.createElement('div');small.className='help';small.textContent='L240 · '+(d.ok?d.reason:d.kind==='excluded'?'개정 영향 제외':'보류/재검수');td.appendChild(small);});
+  document.querySelectorAll('#bankBody tr').forEach((tr,i)=>{const p=sorted[i];if(!p)return;const td=tr.cells[7];if(!td)return;const b=document.createElement('button');b.className='btn ghost';b.type='button';b.textContent='법령 검수';b.onclick=()=>{open();edit(String(p.id));};td.appendChild(b);const d=evaluate(p),small=document.createElement('div');small.className='help';small.textContent='L241 · '+(d.ok?d.reason:d.kind==='excluded'?'개정 영향 제외':'보류/재검수');td.appendChild(small);});
 }
 function generate(){
   if(busy){alert('법령 검수 저장 중입니다. 완료 후 출제해주세요.');return;}
@@ -4247,19 +4324,19 @@ function generate(){
   }
   const order=$('#fOrder').value;if(order==='random')shuffle(pool);if(order==='yearDesc')pool.sort((a,b)=>(b.year||0)-(a.year||0));if(order==='yearAsc')pool.sort((a,b)=>(a.year||0)-(b.year||0));
   currentSet=pool.slice(0,count);
-  const summary=`<div class="notice no-print"><b>개정 영향 제외 · L240</b> 기준일 ${esc(basis())} · 대상 ${stats.total} / 출제 가능 ${pool.length} / 개정 영향 제외 ${stats.excluded} / 미검수·재검수 ${stats.pending} / 정답·분석 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}</div>`;
-  if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>검수 조건을 만족하는 문항이 없습니다.</b><br>문제은행의 [법령 검수 · L240]에서 검수 요청 JSON을 내보내거나 문항별 검수를 승인해주세요.<br>미검수 문항을 자동으로 현행으로 간주하거나 부족분을 임의 생성하지 않습니다.</div>';return;}
+  const summary=`<div class="notice no-print"><b>개정 영향 제외 · L241</b> 기준일 ${esc(basis())} · 대상 ${stats.total} / 출제 가능 ${pool.length} / 개정 영향 제외 ${stats.excluded} / 미검수·재검수 ${stats.pending} / 정답·분석 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}</div>`;
+  if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>검수 조건을 만족하는 문항이 없습니다.</b><br>문제은행의 [법령 검수 · L241]에서 검수 요청 JSON을 내보내거나 문항별 검수를 승인해주세요.<br>미검수 문항을 자동으로 현행으로 간주하거나 부족분을 임의 생성하지 않습니다.</div>';return;}
   history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,mode,lawBasisDate:basis(),lawGate:REV,permanentDuplicateBlock:true},problemIds:currentSet.map(originId)});history=history.slice(0,1000);
   save();renderGenerated('problem');$('#generated').insertAdjacentHTML('afterbegin',summary);renderBank();fillSubjects();
   if(currentSet.length<count)alert(`요청 ${count}문항 / 검수 조건 충족 ${currentSet.length}문항만 출제했습니다.\n개정 영향·미검수 문항으로 부족분을 채우지 않았습니다.`);
 }
-window.examBankLawGuard=Object.freeze({revision:REV,evaluate,canonical,fingerprint,open,currentIssues,allowCurrentExport,reviewError,basis});
+window.examBankLawGuard=Object.freeze({revision:REV,evaluate,canonical,fingerprint,open,currentIssues,allowCurrentExport,reviewError,basis,inspectImport:()=>JSON.parse(JSON.stringify({revision:REV,importInfo,busy,savePhase,lastSaved,diagnostic:lastDiagnostic}))});
 // Wrappers preserve original W239 builders and styling.
 const oldRender=renderGenerated;renderGenerated=function(...args){oldRender(...args);annotateCurrent();};
 const oldBank=renderBank;renderBank=function(...args){oldBank(...args);annotateBank();};
 const oldWord=exportWord;exportWord=async function(...args){if(allowCurrentExport())return oldWord(...args);};
 const oldPrint=printStableCurrentSheet;printStableCurrentSheet=async function(...args){if(allowCurrentExport())return oldPrint(...args);};
-const oldRules=renderRules;renderRules=function(...args){oldRules(...args);const el=$l('ruleText');if(el)el.textContent+='\n\n[L240 우선 원칙] 법령·판례 영향 검수 전 문항은 보류합니다. 개정 영향 확인 문항은 원문을 자동 수정하지 않고 출제 제외합니다. 원문 변경 또는 기준일 변경 후에는 재검수가 필요합니다. 단순 파일→Word 변환은 현행성 검증과 별개입니다.';};
+const oldRules=renderRules;renderRules=function(...args){oldRules(...args);const el=$l('ruleText');if(el)el.textContent+='\n\n[L241 우선 원칙] 법령·판례 영향 검수 전 문항은 보류합니다. 개정 영향 확인 문항은 원문을 자동 수정하지 않고 출제 제외합니다. 원문 변경 또는 기준일 변경 후에는 재검수가 필요합니다. 단순 파일→Word 변환은 현행성 검증과 별개입니다.';};
 $('#generateBtn').onclick=generate;
 $l('lawBasisDate').value=dateToday();$l('lawBasisDate').max=dateToday();
 $l('lawBasisDate').addEventListener('change',()=>{annotateCurrent();if(!$l('lawModal').classList.contains('hidden'))render();});
@@ -4270,6 +4347,10 @@ $l('lawPrev').onclick=()=>{pageIndex=Math.max(0,pageIndex-1);render();};$l('lawN
 $l('lawExport').onclick=exportReview;$l('lawSaveOne').onclick=saveManual;
 $l('lawReadFile').onclick=()=>$l('lawFile').click();$l('lawFile').onchange=async()=>{const f=$l('lawFile').files[0];if(!f)return;setBusy(true);try{await readReviewFile(f);}catch(e){candidates=[];status('전체 적용 보류: '+e.message,true);}finally{$l('lawFile').value='';setBusy(false);render();}};
 $l('lawApplyImport').onclick=applyImport;
+$l('lawReviewer').addEventListener('input',e=>syncReviewer(e.target.value));
+$l('lawImportReviewer').addEventListener('input',e=>syncReviewer(e.target.value));
+$l('lawDiagnostic').onclick=()=>downloadJson('법령검수_저장진단_L241.json',{...lastDiagnostic,note:'읽기·저장 단계의 진단입니다. 원문과 검수자 이름은 포함하지 않습니다.'});
+
 window.addEventListener('beforeprint',()=>{document.body.dataset.lawBlocked=currentIssues().length?'1':'0';});
 window.addEventListener('afterprint',()=>{delete document.body.dataset.lawBlocked;});
 annotateBank();annotateCurrent();
