@@ -604,7 +604,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · E251 개별수정</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · E253 문항관리</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -785,11 +785,89 @@
 </div>
 
 
+
+<div id="currentExplanationEditModal" class="modal hidden">
+  <div class="modal-box" style="max-width:920px">
+    <div class="modal-head">
+      <div>
+        <h3>현재 문항 해설 수정 · E253</h3>
+        <div class="help" id="ceEditSource">선택한 문항의 해설만 수정합니다.</div>
+      </div>
+      <button class="close" id="closeCurrentExplanationEdit">×</button>
+    </div>
+
+    <div class="notice" style="margin-top:12px">
+      <b>문제·보기·정답은 건드리지 않습니다.</b>
+      수정한 해설은 현재 해설지에 즉시 반영되며, 문제은행 저장을 체크하면 다음 출제에서도 사용합니다.
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>상세 해설</label>
+      <textarea id="ceExplanation" rows="22" style="width:100%;resize:vertical"
+        placeholder="[정답 근거]&#10;...&#10;&#10;[보기별 해설]&#10;① (O) ...&#10;② (X) ...&#10;&#10;[핵심 정리]&#10;..."></textarea>
+    </div>
+
+    <label style="display:flex;gap:8px;align-items:flex-start;margin:10px 0 4px;font-size:13px">
+      <input type="checkbox" id="ceSaveBank" checked>
+      <span><b>문제은행에도 저장</b> — 다음 출제에서도 수정된 해설 사용</span>
+    </label>
+
+    <div id="ceEditStatus" class="help" role="status" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn primary" id="saveCurrentExplanationEdit">이 해설만 저장</button>
+      <button class="btn ghost" id="cancelCurrentExplanationEdit">취소</button>
+    </div>
+  </div>
+</div>
+
+<div id="currentQuestionReplaceModal" class="modal hidden">
+  <div class="modal-box" style="max-width:1040px">
+    <div class="modal-head">
+      <div>
+        <h3>현재 문항 다른 문제로 교체 · E253</h3>
+        <div class="help" id="crReplaceSource">현재 위치의 문항 1개만 다른 문제로 바꿉니다.</div>
+      </div>
+      <button class="close" id="closeCurrentQuestionReplace">×</button>
+    </div>
+
+    <div class="notice" style="margin-top:12px">
+      <b>교체 원칙:</b> 현재 과목과 출제 조건을 유지하고, 문제은행에서 정답·검수 조건을 통과한 다른 문항만 후보로 표시합니다.
+      현재 시험지의 다른 문항은 바뀌지 않습니다.
+    </div>
+
+    <div class="form-grid" style="margin-top:14px">
+      <div class="field">
+        <label>후보 검색</label>
+        <input id="crSearch" placeholder="연도 · 원본번호 · 문제 내용 · ID 검색">
+      </div>
+      <div class="field">
+        <label>과거 출제 이력</label>
+        <label style="display:flex;gap:8px;align-items:center;min-height:42px">
+          <input type="checkbox" id="crIncludeUsed">
+          <span>과거에 출제한 문항도 후보에 포함</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="actions" style="margin-top:4px">
+      <button class="btn ghost" id="refreshReplaceCandidates">후보 새로고침</button>
+      <button class="btn primary" id="randomReplaceCandidate">🎲 후보 중 랜덤 교체</button>
+    </div>
+
+    <div id="crReplaceStatus" class="help" style="margin:8px 0" role="status" aria-live="polite"></div>
+    <div id="crCandidateList" style="max-height:520px;overflow:auto;border:1px solid #e2e8f0;border-radius:12px;padding:8px"></div>
+
+    <div class="actions">
+      <button class="btn ghost" id="cancelCurrentQuestionReplace">닫기</button>
+    </div>
+  </div>
+</div>
+
 <div id="currentQuestionEditModal" class="modal hidden">
   <div class="modal-box" style="max-width:900px">
     <div class="modal-head">
       <div>
-        <h3>현재 출제문항 1개 수정 · E251</h3>
+        <h3>현재 출제문항 1개 수정 · E253</h3>
         <div class="help" id="cqEditSource">현재 시험지의 선택한 문항만 수정합니다.</div>
       </div>
       <button class="close" id="closeCurrentQuestionEdit">×</button>
@@ -1470,6 +1548,303 @@ function syncExamCountHint(){
     : `${n}문항 선택 · 문제와 해설 모두 현재 출제된 문항 전체를 Word로 저장합니다.`;
 }
 
+
+// ===== E253: 문제/해설/교체 통합 문항 관리 =====
+let currentExplanationEditIndex=-1;
+let currentQuestionReplaceIndex=-1;
+let currentReplaceCandidates=[];
+
+function currentRenderModeE253(){
+  return $('#generated')?.querySelector('.solution-sheet') ? 'solution' : 'problem';
+}
+
+function saveCurrentSetSessionE253(){
+  try{
+    sessionStorage.setItem('examBankCurrentSetV1',JSON.stringify(currentSet));
+    save();
+  }catch(e){ console.warn('current set save',e); }
+}
+
+function openCurrentExplanationEditE253(index){
+  if(!Array.isArray(currentSet)||!currentSet[index])return;
+  currentExplanationEditIndex=index;
+  const p=currentSet[index];
+  const text=String(p.editedExplanation||p.originalExplanation||p.explanation||'');
+  $('#ceExplanation').value=text;
+  $('#ceSaveBank').checked=true;
+  $('#ceEditStatus').textContent='';
+  $('#ceEditSource').textContent=
+    `시험지 문 ${index+1} · ${p.subject||''} · ${p.exam||''} ${p.year||''} · 원본번호 ${p.no||'-'} · ID ${originId(p)||p.id||'-'}`;
+  $('#currentExplanationEditModal').classList.remove('hidden');
+}
+
+function closeCurrentExplanationEditE253(){
+  currentExplanationEditIndex=-1;
+  $('#currentExplanationEditModal').classList.add('hidden');
+}
+
+async function saveCurrentExplanationEditE253(){
+  const idx=currentExplanationEditIndex;
+  if(idx<0||!currentSet[idx])return;
+
+  const p=currentSet[idx];
+  const text=$('#ceExplanation').value.trim();
+  const saveBank=$('#ceSaveBank').checked;
+  const status=$('#ceEditStatus');
+  const btn=$('#saveCurrentExplanationEdit');
+
+  btn.disabled=true;
+  status.style.color='';
+  status.textContent='선택한 문항의 해설만 저장 중입니다…';
+
+  const before={
+    editedExplanation:p.editedExplanation,
+    explanation:p.explanation,
+    explanationStatus:p.explanationStatus
+  };
+
+  try{
+    p.editedExplanation=text;
+    p.explanation=text;
+    p.explanationStatus=text?'수동 수정':'작성 대기';
+    p.explanationEditedAt=new Date().toISOString();
+
+    if(saveBank){
+      const id=originId(p)||p.id;
+      const bank=problems.find(x=>String(x.id)===String(id));
+      if(!bank)throw new Error('문제은행에서 같은 ID 문항을 찾지 못했습니다.');
+
+      bank.editedExplanation=text;
+      bank.explanation=text;
+      bank.explanationStatus=text?'수동 수정':'작성 대기';
+      bank.explanationEditedAt=p.explanationEditedAt;
+      bank.updatedAt=new Date().toISOString();
+
+      const payload=window.examBankLawGuard
+        ? window.examBankLawGuard.preserveBankReviews([bank])
+        : [bank];
+
+      const r=await fetch('/api/problems/bulk',{
+        method:'PUT',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({problems:payload})
+      });
+      if(!r.ok)throw new Error('문제은행 저장 실패: '+await r.text());
+
+      const verify=await fetch('/api/state',{cache:'no-store'});
+      if(verify.ok){
+        const state=await verify.json();
+        const saved=(state.problems||[]).find(x=>String(x.id)===String(id));
+        if(!saved || String(saved.editedExplanation||saved.explanation||'')!==text){
+          throw new Error('D1 저장 후 재확인에서 해설 내용이 일치하지 않습니다.');
+        }
+      }
+    }
+
+    saveCurrentSetSessionE253();
+    renderGenerated(currentRenderModeE253());
+
+    status.style.color='#047857';
+    status.textContent=saveBank
+      ? '현재 해설지와 문제은행에 이 문항의 해설만 저장했습니다.'
+      : '현재 해설지에만 이 문항의 해설을 반영했습니다.';
+    setTimeout(closeCurrentExplanationEditE253,850);
+  }catch(e){
+    console.error(e);
+    p.editedExplanation=before.editedExplanation;
+    p.explanation=before.explanation;
+    p.explanationStatus=before.explanationStatus;
+    status.style.color='#b91c1c';
+    status.textContent='저장 실패 · 수정 전 해설을 유지했습니다. '+(e.message||e);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function replacementCandidateTextE253(p){
+  let tx=null;
+  try{ tx=typeof problemTextForOutput==='function'?problemTextForOutput(p):null; }catch(e){}
+  return String(tx?.stem||p.question||'').trim();
+}
+
+function buildReplacementCandidatesE253(index){
+  if(index<0||!currentSet[index])return [];
+  const old=currentSet[index];
+  const subject=String(old.subject||$('#fSubject').value||'');
+  const exam=$('#fExam').value;
+  const year=$('#fYear').value;
+  const unit=$('#fUnit').value;
+  const mode=$('#fSourceMode').value;
+  const includeUsed=$('#crIncludeUsed')?.checked;
+  const currentIds=new Set(currentSet.map(x=>String(originId(x)||x.id)));
+  const out=[];
+
+  for(const p of problems){
+    if(String(p.subject)!==subject)continue;
+    if(exam && p.exam!==exam)continue;
+    if(year && String(p.year)!==String(year))continue;
+    if(unit && p.unit!==unit)continue;
+    try{ if(typeof rangePass==='function' && !rangePass(p))continue; }catch(e){}
+    if(currentIds.has(String(p.id)))continue;
+    if(!p.answer)continue;
+
+    const raw=evaluate(p);
+    if(!raw.ok)continue;
+    if(!includeUsed && isHistoricalDuplicate(p))continue;
+
+    let c=candidateForMode(p,mode);
+    if(!c)continue;
+    let check=evaluate(c);
+    if(!check.ok && mode==='mixed'){
+      c=asOriginal(p);
+      check=evaluate(c);
+    }
+    if(!check.ok)continue;
+
+    out.push(c);
+  }
+
+  // 텍스트 문항을 위에, 최신 연도를 우선. 같은 조건에서 충분히 고를 수 있게 최대 300개.
+  out.sort((a,b)=>{
+    const at=replacementCandidateTextE253(a)?1:0;
+    const bt=replacementCandidateTextE253(b)?1:0;
+    if(bt!==at)return bt-at;
+    return (+b.year||0)-(+a.year||0) || (+a.no||0)-(+b.no||0);
+  });
+  return out.slice(0,300);
+}
+
+function filteredReplacementCandidatesE253(){
+  const q=String($('#crSearch')?.value||'').trim().toLowerCase();
+  if(!q)return currentReplaceCandidates;
+  return currentReplaceCandidates.filter(p=>{
+    const hay=[
+      p.id,p.subject,p.exam,p.year,p.no,p.unit,p.subunit,
+      replacementCandidateTextE253(p),p.viewText,p.choices
+    ].join(' ').toLowerCase();
+    return hay.includes(q);
+  });
+}
+
+function renderReplacementCandidatesE253(){
+  const list=$('#crCandidateList');
+  const status=$('#crReplaceStatus');
+  if(!list)return;
+  const rows=filteredReplacementCandidatesE253();
+  status.textContent=`교체 가능 후보 ${currentReplaceCandidates.length}개 · 현재 검색 결과 ${rows.length}개`;
+
+  if(!rows.length){
+    list.innerHTML='<div class="empty">조건에 맞는 다른 문제가 없습니다. 검색어를 지우거나 “과거에 출제한 문항도 후보에 포함”을 체크해보세요.</div>';
+    return;
+  }
+
+  list.innerHTML=rows.slice(0,100).map((p,i)=>{
+    const bankId=String(originId(p)||p.id);
+    const text=replacementCandidateTextE253(p)||'[이미지 원문 문항]';
+    const imgTag=!replacementCandidateTextE253(p)
+      ? '<span class="pill" style="margin-left:6px">이미지</span>'
+      : '<span class="pill" style="margin-left:6px">텍스트</span>';
+    return `<div style="padding:10px;border-bottom:1px solid #e2e8f0">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div style="min-width:0">
+          <div style="font-size:12px;color:#64748b;margin-bottom:4px">
+            ${esc(p.exam||'')} ${esc(String(p.year||''))} · 원본 ${esc(String(p.no||'-'))}번 · ${esc(bankId)} ${imgTag}
+          </div>
+          <div style="font-weight:700;line-height:1.45">${esc(text.slice(0,240))}${text.length>240?'…':''}</div>
+          <div style="font-size:12px;color:#475569;margin-top:5px">정답 ${esc(p.answer||'-')} ${p.unit?`· ${esc(p.unit)}`:''}</div>
+        </div>
+        <button type="button" class="btn primary e253-replace-pick" data-id="${esc(bankId)}">이 문제로 교체</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.querySelectorAll('.e253-replace-pick').forEach(btn=>{
+    btn.onclick=()=>replaceCurrentQuestionWithIdE253(btn.dataset.id);
+  });
+}
+
+function refreshReplacementCandidatesE253(){
+  currentReplaceCandidates=buildReplacementCandidatesE253(currentQuestionReplaceIndex);
+  renderReplacementCandidatesE253();
+}
+
+function openCurrentQuestionReplaceE253(index){
+  if(!Array.isArray(currentSet)||!currentSet[index])return;
+  currentQuestionReplaceIndex=index;
+  const p=currentSet[index];
+  $('#crSearch').value='';
+  $('#crIncludeUsed').checked=false;
+  $('#crReplaceSource').textContent=
+    `현재 문 ${index+1} 교체 · ${p.subject||''} · ${p.exam||''} ${p.year||''} · 원본번호 ${p.no||'-'} · ID ${originId(p)||p.id||'-'}`;
+  $('#currentQuestionReplaceModal').classList.remove('hidden');
+  refreshReplacementCandidatesE253();
+}
+
+function closeCurrentQuestionReplaceE253(){
+  currentQuestionReplaceIndex=-1;
+  currentReplaceCandidates=[];
+  $('#currentQuestionReplaceModal').classList.add('hidden');
+}
+
+function replacementFromBankIdE253(id){
+  const mode=$('#fSourceMode').value;
+  const bank=problems.find(p=>String(p.id)===String(id));
+  if(!bank)return null;
+  let c=candidateForMode(bank,mode);
+  if(!c&&mode==='mixed')c=asOriginal(bank);
+  return c;
+}
+
+function updateLatestHistoryReplacementE253(oldId,newId){
+  for(const h of history){
+    if(!Array.isArray(h.problemIds))continue;
+    const i=h.problemIds.findIndex(x=>String(x)===String(oldId));
+    if(i>=0){
+      h.problemIds[i]=newId;
+      h.updatedAt=new Date().toISOString();
+      return true;
+    }
+  }
+  return false;
+}
+
+async function replaceCurrentQuestionWithIdE253(id){
+  const idx=currentQuestionReplaceIndex;
+  if(idx<0||!currentSet[idx])return;
+
+  const candidate=replacementFromBankIdE253(id);
+  if(!candidate){ alert('교체할 문제를 찾지 못했습니다.'); return; }
+
+  const old=currentSet[idx];
+  const oldId=String(originId(old)||old.id);
+  const newId=String(originId(candidate)||candidate.id);
+  if(oldId===newId){ alert('현재 문제와 같은 문항입니다.'); return; }
+
+  const mode=currentRenderModeE253();
+  currentSet[idx]={...candidate};
+  updateLatestHistoryReplacementE253(oldId,newId);
+  saveCurrentSetSessionE253();
+
+  try{
+    if(typeof autoTextifyCurrentSetT247==='function'){
+      await autoTextifyCurrentSetT247();
+    }
+  }catch(e){ console.warn('replacement OCR',e); }
+
+  renderGenerated(mode);
+  closeCurrentQuestionReplaceE253();
+}
+
+async function randomReplaceCandidateE253(){
+  const rows=filteredReplacementCandidatesE253();
+  if(!rows.length){
+    alert('현재 검색 조건에 교체할 후보가 없습니다.');
+    return;
+  }
+  const p=rows[Math.floor(Math.random()*rows.length)];
+  await replaceCurrentQuestionWithIdE253(String(originId(p)||p.id));
+}
+
 // ===== E251: 현재 출제문항 1개 수정 =====
 let currentQuestionEditIndex=-1;
 
@@ -1632,29 +2007,45 @@ async function saveCurrentQuestionEditE251(){
 }
 
 function addCurrentQuestionEditButtonsE251(mode='problem'){
-  if(mode!=='problem')return;
-  const sheet=$('#problemSheet');
+  const sheet=mode==='solution'?$('#solutionSheet'):$('#problemSheet');
   if(!sheet)return;
-  const qs=[...sheet.querySelectorAll('.paper-q')];
-  qs.forEach((q,i)=>{
+  const items=[...sheet.querySelectorAll(mode==='solution'?'.solution-item':'.paper-q')];
+
+  items.forEach((item,i)=>{
     const bar=document.createElement('div');
     bar.className='only-screen current-q-edit-bar';
-    bar.style.cssText='display:flex;justify-content:flex-end;margin:-2px 0 4px;';
-    const b=document.createElement('button');
-    b.type='button';
-    b.className='btn ghost';
-    b.style.cssText='font-size:11px;padding:4px 8px;';
-    b.textContent=`✏ 문 ${i+1} 수정`;
-    b.onclick=()=>openCurrentQuestionEditE251(i);
-    bar.appendChild(b);
-    q.insertBefore(bar,q.firstChild);
+    bar.style.cssText='display:flex;justify-content:flex-end;gap:5px;flex-wrap:wrap;margin:-2px 0 6px;';
+
+    const problemBtn=document.createElement('button');
+    problemBtn.type='button';
+    problemBtn.className='btn ghost';
+    problemBtn.style.cssText='font-size:11px;padding:4px 8px;';
+    problemBtn.textContent=`✏ 문제 수정`;
+    problemBtn.onclick=()=>openCurrentQuestionEditE251(i);
+
+    const explainBtn=document.createElement('button');
+    explainBtn.type='button';
+    explainBtn.className='btn ghost';
+    explainBtn.style.cssText='font-size:11px;padding:4px 8px;';
+    explainBtn.textContent='📝 해설 수정';
+    explainBtn.onclick=()=>openCurrentExplanationEditE253(i);
+
+    const replaceBtn=document.createElement('button');
+    replaceBtn.type='button';
+    replaceBtn.className='btn ghost';
+    replaceBtn.style.cssText='font-size:11px;padding:4px 8px;';
+    replaceBtn.textContent='🔄 다른 문제';
+    replaceBtn.onclick=()=>openCurrentQuestionReplaceE253(i);
+
+    bar.append(problemBtn,explainBtn,replaceBtn);
+    item.insertBefore(bar,item.firstChild);
   });
 }
 
 function renderGenerated(mode='problem'){syncOutputSubject();syncExamCountHint();const tools=`<div class="help no-print" id="wordExportCount" role="status" style="margin-bottom:10px"><b>Word 저장 대상: 현재 ${currentSet.length}문항 · 문 1~문 ${currentSet.length}</b> — 20문항 저장은 위에서 [20문항] → [문제 출제하기]를 누르세요. 기존 10문항을 복제하거나 임의로 추가하지 않습니다.</div><div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ ${currentSet.length}문항 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="ocrCurrentImages">🧾 이미지 문항 텍스트 복구</button><button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · ${currentSet.length}문항 · W239</button><button class="btn ghost" id="wordSolution">해설지 Word · ${currentSet.length}문항 · W239</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ E251 개별 수정:</b> 출제 후 각 문항의 ✏ 문항 수정 버튼으로 이상한 문항 1개만 고칠 수 있습니다. 문제은행 저장을 체크하면 다음 출제에도 반영됩니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W239 · 첫 페이지 표시:</b> 문제·보기·선택지·해설 본문은 9pt, 자간은 좁게 0.3pt로 저장합니다. 문항 사이 16pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.1은 그대로 유지합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 상단 제목·과목명·정답표·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 중복 [해설] 한 줄은 출력하지 않고 상세 소제목과 설명은 그대로 표시합니다. 파일명은 _W239.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.<br><b>※ 이미지 최소화 · T247:</b> 출제 시 이미지 fallback 문항을 자동 OCR하여 문제·보기·선택지를 텍스트로 전환합니다. 문제와 4개 선택지를 안전하게 복원하지 못한 진짜 그림·표 문항만 이미지로 유지합니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};const ocrBtn=$('#ocrCurrentImages');if(ocrBtn)ocrBtn.onclick=ocrRescueCurrentSetT246;$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');
+<button class="btn ghost" id="ocrCurrentImages">🧾 이미지 문항 텍스트 복구</button><button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · ${currentSet.length}문항 · W239</button><button class="btn ghost" id="wordSolution">해설지 Word · ${currentSet.length}문항 · W239</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ E253 문항별 관리:</b> 출제 후 각 문항에서 문제 수정 · 해설 수정 · 다른 문제로 교체를 할 수 있습니다. 선택한 문항 1개만 바뀌며 다른 문항은 그대로 유지됩니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W239 · 첫 페이지 표시:</b> 문제·보기·선택지·해설 본문은 9pt, 자간은 좁게 0.3pt로 저장합니다. 문항 사이 16pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.1은 그대로 유지합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 상단 제목·과목명·정답표·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 중복 [해설] 한 줄은 출력하지 않고 상세 소제목과 설명은 그대로 표시합니다. 파일명은 _W239.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.<br><b>※ 이미지 최소화 · T247:</b> 출제 시 이미지 fallback 문항을 자동 OCR하여 문제·보기·선택지를 텍스트로 전환합니다. 문제와 4개 선택지를 안전하게 복원하지 못한 진짜 그림·표 문항만 이미지로 유지합니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};const ocrBtn=$('#ocrCurrentImages');if(ocrBtn)ocrBtn.onclick=ocrRescueCurrentSetT246;$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');
   addCurrentQuestionEditButtonsE251(mode);
 }
 /* WORD EXPORT 23.6 — body character tracking; vertical spacing preserved.
@@ -2008,6 +2399,15 @@ const fullResetOpen=$('#openFullReset');if(fullResetOpen)fullResetOpen.onclick=o
 const fullResetClose=$('#closeFullReset');if(fullResetClose)fullResetClose.onclick=closeFullResetR248;
 const fullResetCancel=$('#cancelFullReset');if(fullResetCancel)fullResetCancel.onclick=closeFullResetR248;
 const fullResetExec=$('#executeFullReset');if(fullResetExec)fullResetExec.onclick=executeFullResetR248;
+const ceClose=$('#closeCurrentExplanationEdit');if(ceClose)ceClose.onclick=closeCurrentExplanationEditE253;
+const ceCancel=$('#cancelCurrentExplanationEdit');if(ceCancel)ceCancel.onclick=closeCurrentExplanationEditE253;
+const ceSave=$('#saveCurrentExplanationEdit');if(ceSave)ceSave.onclick=saveCurrentExplanationEditE253;
+const crClose=$('#closeCurrentQuestionReplace');if(crClose)crClose.onclick=closeCurrentQuestionReplaceE253;
+const crCancel=$('#cancelCurrentQuestionReplace');if(crCancel)crCancel.onclick=closeCurrentQuestionReplaceE253;
+const crRefresh=$('#refreshReplaceCandidates');if(crRefresh)crRefresh.onclick=refreshReplacementCandidatesE253;
+const crRandom=$('#randomReplaceCandidate');if(crRandom)crRandom.onclick=randomReplaceCandidateE253;
+const crSearch=$('#crSearch');if(crSearch)crSearch.oninput=renderReplacementCandidatesE253;
+const crUsed=$('#crIncludeUsed');if(crUsed)crUsed.onchange=refreshReplacementCandidatesE253;
 const cqClose=$('#closeCurrentQuestionEdit');if(cqClose)cqClose.onclick=closeCurrentQuestionEditE251;
 const cqCancel=$('#cancelCurrentQuestionEdit');if(cqCancel)cqCancel.onclick=closeCurrentQuestionEditE251;
 const cqSave=$('#saveCurrentQuestionEdit');if(cqSave)cqSave.onclick=saveCurrentQuestionEditE251;
