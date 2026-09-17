@@ -666,7 +666,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z258 / E260 원문보존</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z263 / E260 원문보존</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L250</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R249: 완전 재등록이 필요하면 <b>문제은행 완전 초기화</b>를 사용하세요. 문제·이력뿐 아니라 업로드 이미지 자산과 저장 상태까지 모두 삭제합니다.</div>
@@ -1118,7 +1118,7 @@
   <div class="modal-box" style="max-width:1280px">
     <div class="modal-head">
       <div>
-        <h3>시험문제 ZIP 자동분리 · Z258 / E260 원문보존</h3>
+        <h3>시험문제 ZIP 자동분리 · Z263 / E260 원문보존</h3>
         <div class="help">ZIP 안의 PDF를 과목별로 자동 분리하고, 공식 정답표의 같은 과목·책형 정답과 연결합니다.</div>
       </div>
       <button class="close" id="closeZipImport">×</button>
@@ -1126,7 +1126,7 @@
 
     <div class="notice" style="margin-top:14px">
       <b>ZIP 규칙 · Z243:</b> <code>행정학개론_가.pdf</code>, <code>행정학개론-가.pdf</code>, <code>240323 국가 9급 행정학개론-가.pdf</code>를 읽습니다. 폴더 안 PDF도 확인하며, 파일명을 바꿀 필요가 없습니다.
-      같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다. 2017년처럼 <b>문 1.</b> 형식의 구형 PDF와 1단/2단 레이아웃도 자동 인식합니다.<br>
+      같은 이름의 HWP는 자동으로 무시하고 PDF만 사용합니다. 2016의 -4.pdf ↔ ④책형, 2017의 -나.pdf ↔ 나책형, 2018의 -다.pdf ↔ 다책형 및 최신 B/Ⓑ 책형을 함께 지원합니다. 2017년처럼 <b>문 1.</b> 형식의 구형 PDF와 1단/2단 레이아웃도 자동 인식합니다.<br>
       <b>지원 과목은 자동 선택</b>하고, 나머지 과목은 목록에만 표시합니다.
     </div>
 
@@ -4690,7 +4690,7 @@ function closeOfficialModal(){
   officialParsed=[];
 }
 
-// ===== 시험문제 ZIP 자동분리 · Z258 / E260 원문보존 (구형 문항번호/1·2단 자동 인식) =====
+// ===== 시험문제 ZIP 자동분리 · Z263 / E260 원문보존 (구형 문항번호/1·2단 자동 인식) =====
 let zipSubjectRows=[];
 let zipAnswerMap=new Map();
 
@@ -4736,9 +4736,11 @@ function normalizeZipSubject(s){
 function normalizeZipBookZ258(s){
   const map={
     'Ⓐ':'A','Ⓑ':'B','Ⓒ':'C','Ⓓ':'D','Ⓔ':'E',
-    'ⓐ':'A','ⓑ':'B','ⓒ':'C','ⓓ':'D','ⓔ':'E'
+    'ⓐ':'A','ⓑ':'B','ⓒ':'C','ⓓ':'D','ⓔ':'E',
+    '①':'1','②':'2','③':'3','④':'4','⑤':'5',
+    '❶':'1','❷':'2','❸':'3','❹':'4','❺':'5'
   };
-  let v=String(s||'').trim();
+  let v=String(s||'').normalize('NFC').trim();
   Object.entries(map).forEach(([a,b])=>{v=v.split(a).join(b)});
   return v.toUpperCase();
 }
@@ -4766,8 +4768,8 @@ function parseZipPdfNameZ242(name){
   const stem=fileName.replace(/\.pdf$/i,'').replace(/\s*\(\d+\)\s*$/,'').trim();
 
   // _가 / -가 / (가), A/B 책형 모두 허용
-  const match=stem.match(/^(.+?)(?:[_\-‐‑‒–—−]\s*([가나다라마바사아자차카타파하A-Za-z])|\s*\(\s*([가나다라마바사아자차카타파하A-Za-z])\s*\))\s*(?:책형)?$/);
-  if(!match)return {fileName,sourceSubject:'',book:'',parseError:'과목/책형 미인식 — 파일명 끝의 -B, -가, _가 같은 책형 표기를 확인해주세요.'};
+  const match=stem.match(/^(.+?)(?:[_\-‐‑‒–—−]\s*([가나다라마바사아자차카타파하A-Za-z1-5①②③④⑤])|\s*\(\s*([가나다라마바사아자차카타파하A-Za-z1-5①②③④⑤])\s*\))\s*(?:책형)?$/);
+  if(!match)return {fileName,sourceSubject:'',book:'',parseError:'과목/책형 미인식 — 파일명 끝의 -4, -나, -다, -B 같은 책형 표기를 확인해주세요.'};
 
   let subject=match[1].trim();
 
@@ -4803,8 +4805,8 @@ function isPreferredZipSourceZ258(appSubject,sourceSubject){
     '교정학':['교정학개론'],
     '세법':['세법개론','지방세법'],
     '회계학':['회계학'],
-    '형법':['형법','형법총론'],
-    '형사소송법':['형사소송법','형사소송법개론'],
+    '형법':['형법'],
+    '형사소송법':['형사소송법'],
     '국어':['국어'],
     '영어':['영어']
   };
@@ -4822,65 +4824,167 @@ function normalizeAnswerRowTextZ258(text){
     .trim();
 }
 
-function parseAnswerRowTextZ258(text){
-  const t=normalizeAnswerRowTextZ258(text);
-  const m=t.match(
-    /^\s*(\d{1,2})\s+(.+?)\s+([A-Z가나다라마바사아자차카타파하])\s+((?:[1-5]\s+){19}[1-5])\s*$/
-  );
+// Z263: 2016 ②/④, 2017 나/마, 2018 가/다, 최신 A/B 책형을 모두 읽는다.
+const Z263_BOOK_TOKEN_SRC='(?:[A-Za-z]|[가나다라마바사아자차카타파하]|[1-5]|[①②③④⑤])';
+
+function isAnswerTokenZ263(v){
+  const s=String(v||'').replace(/\s+/g,'');
+  return /^(?:[1-5](?:,[1-5])?|정답없음)$/.test(s);
+}
+
+function normalizeAnswerTokenZ263(v){
+  const s=String(v||'').replace(/\s+/g,'');
+  if(s==='정답없음')return '';
+  if(/^[1-5]$/.test(s))return Number(s);
+  return s; // 복수정답은 문자열로 보존
+}
+
+function parseAnswerTokensZ263(text){
+  const normalized=String(text||'')
+    .replace(/정답\s*없음/g,'정답없음')
+    .replace(/([1-5])\s*,\s*([1-5])/g,'$1,$2')
+    .trim();
+  return normalized.split(/\s+/).filter(isAnswerTokenZ263).map(normalizeAnswerTokenZ263);
+}
+
+function splitBookSegmentsZ263(text){
+  const s=String(text||'').trim();
+  if(!s)return [];
+
+  const re=new RegExp(`(^|\\s)(${Z263_BOOK_TOKEN_SRC})(?=\\s)`, 'g');
+  const hits=[...s.matchAll(re)];
+  const out=[];
+
+  for(let i=0;i<hits.length;i++){
+    const bookRaw=hits[i][2];
+    const begin=hits[i].index+hits[i][0].length;
+    const finish=i+1<hits.length ? hits[i+1].index : s.length;
+    const body=s.slice(begin,finish).trim();
+    const answers=parseAnswerTokensZ263(body);
+    if(answers.length===20){
+      out.push({book:normalizeZipBookZ258(bookRaw),answers});
+    }
+  }
+  return out;
+}
+
+function firstBookPositionZ263(text){
+  const re=new RegExp(`(^|\\s)(${Z263_BOOK_TOKEN_SRC})(?=\\s)`);
+  const m=String(text||'').match(re);
   if(!m)return null;
+  return {
+    index:m.index+(m[1]?.length||0),
+    raw:m[2],
+    matchLength:m[0].length-(m[1]?.length||0)
+  };
+}
 
-  const subject=canonicalZipSourceSubjectZ258(m[2]);
-  const book=normalizeZipBookZ258(m[3]);
-  const answers=m[4].trim().split(/\s+/).map(Number);
-  if(answers.length!==20 || answers.some(n=>n<1||n>5))return null;
+function addAnswerRowZ263(map,subject,book,answers){
+  subject=canonicalZipSourceSubjectZ258(subject);
+  book=normalizeZipBookZ258(book);
+  if(!subject||!book||!Array.isArray(answers)||answers.length!==20)return false;
 
-  return {serial:+m[1],subject,book,answers};
+  const key=zipAnswerKey(subject,book);
+  if(map.has(key) && map.get(key).join(',')!==answers.join(',')){
+    throw new Error(
+      '정답표에서 같은 과목·책형의 서로 다른 정답을 발견했습니다: '+
+      subject+' '+book
+    );
+  }
+  map.set(key,answers);
+  return true;
 }
 
 async function parseAllOfficialAnswerRows(file){
   const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
   const map=new Map();
+  let currentSubject='';
 
   try{
     for(let p=1;p<=pdf.numPages;p++){
       const page=await pdf.getPage(p);
       const tc=await page.getTextContent();
 
-      // 정답표에서 한 과목명이 2줄로 갈라지는 경우까지 이어 붙여 읽음.
-      // 예: '35 행정학개론' + '지방행정 포함( ) Ⓑ 3 1 ...'
-      const texts=rawLines(rawPdfItems(tc),3.0)
-        .map(line=>line.items.map(x=>String(x.text||'').trim()).filter(Boolean).join(' '))
-        .map(normalizeAnswerRowTextZ258)
-        .filter(Boolean);
+      // 물리적인 표 행(y좌표)을 기준으로 읽는다.
+      // 모든 text item을 한 과목 문자열로 합치지 않으므로 2017/2018의 두 번째 책형 행도 보존된다.
+      const texts=rawLines(rawPdfItems(tc),2.8)
+        .map(line=>normalizeAnswerRowTextZ258(line.text))
+        .filter(Boolean)
+        .filter(t=>!/^연번\s|^과목명\s|^책형\s|^\d{4}년도/.test(t));
 
-      let buffer='';
-      const flush=()=>{
-        if(!buffer)return;
-        const row=parseAnswerRowTextZ258(buffer);
-        buffer='';
-        if(!row)return;
+      for(let text of texts){
+        let serial='';
+        let content=text;
 
-        const key=zipAnswerKey(row.subject,row.book);
-        if(map.has(key) && map.get(key).join(',')!==row.answers.join(',')){
-          throw new Error(
-            '정답표에서 같은 과목·책형의 서로 다른 정답을 발견했습니다: '+
-            row.subject+' '+row.book
-          );
+        // 새 과목: "8 교육학개론 나 ..." / "8 교육학개론" 모두 허용
+        const sm=content.match(/^(\d{1,2})\s+(.+)$/);
+        if(sm){
+          serial=sm[1];
+          content=sm[2].trim();
+
+          const bp=firstBookPositionZ263(content);
+          if(bp){
+            const subjectPart=content.slice(0,bp.index).trim();
+            if(subjectPart)currentSubject=subjectPart;
+          }else{
+            // 책형이 다음 줄에 오는 2016형
+            // 숫자만 잔뜩 있는 헤더/행은 과목으로 잡지 않는다.
+            if(/[가-힣A-Za-z]/.test(content))currentSubject=content;
+            continue;
+          }
         }
-        map.set(key,row.answers);
-      };
 
-      for(const text of texts){
-        // 연번으로 시작하면 새 과목 행
-        if(/^\d{1,2}\s+/.test(text)){
-          flush();
-          buffer=text;
-        }else if(buffer){
-          // 과목명 또는 괄호 설명이 다음 줄로 내려간 행
-          buffer+=' '+text;
+        if(!currentSubject)continue;
+
+        // 현재 줄의 첫 책형 위치를 찾는다.
+        const bp=firstBookPositionZ263(content);
+        if(!bp){
+          // 행정학개론 다음 줄의 "(지방행정 포함) B ..." 같은 부가설명 행을 위해
+          // 책형이 뒤쪽에 있는지 공백 정규화 후 한 번 더 본다.
+          continue;
+        }
+
+        // 새 과목 줄이라면 book 앞부분은 과목명,
+        // continuation 줄에서 book 앞에 부가설명이 있으면 기존 과목명에 붙인다.
+        const prefix=content.slice(0,bp.index).trim();
+        let subjectForLine=currentSubject;
+        if(serial && prefix){
+          subjectForLine=prefix;
+          currentSubject=prefix;
+        }else if(!serial && prefix && /[가-힣A-Za-z]/.test(prefix)){
+          subjectForLine=(currentSubject+' '+prefix).trim();
+        }
+
+        // book 시작점부터 1개 또는 여러 책형 segment를 읽는다.
+        const segmentText=content.slice(bp.index).trim();
+        const segments=splitBookSegmentsZ263(segmentText);
+        for(const seg of segments){
+          addAnswerRowZ263(map,subjectForLine,seg.book,seg.answers);
         }
       }
-      flush();
+
+      // PDF.js가 두 물리행을 한 줄로 합친 일부 2016 PDF에 대한 보조 경로:
+      // 페이지 전체 순서 텍스트에서 "과목 → 책형 → 20답 → 책형 → 20답" 구조를 읽는다.
+      // 위 geometry 파서가 이미 만든 key는 덮어쓰지 않는다.
+      const sequential=(tc.items||[])
+        .map(x=>String(x.str||'').trim())
+        .filter(Boolean)
+        .join(' ')
+        .replace(/정답\s*없음/g,'정답없음')
+        .replace(/\s+/g,' ');
+
+      const subjectNames=Object.keys(ZIP_SUBJECT_MAP).sort((a,b)=>b.length-a.length);
+      for(const sourceSubject of subjectNames){
+        const escSub=sourceSubject.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+        const subjectRe=new RegExp(`(?:^|\\s)${escSub}\\s+`, 'g');
+        for(const hit of sequential.matchAll(subjectRe)){
+          const tail=sequential.slice(hit.index+hit[0].length,hit.index+hit[0].length+800);
+          const segments=splitBookSegmentsZ263(tail);
+          for(const seg of segments.slice(0,2)){
+            addAnswerRowZ263(map,sourceSubject,seg.book,seg.answers);
+          }
+        }
+      }
     }
 
     return map;
@@ -4888,6 +4992,22 @@ async function parseAllOfficialAnswerRows(file){
     if(typeof pdf.destroy==='function')await pdf.destroy();
   }
 }
+
+
+function zipParserSelfTestZ263(){
+  const samples=[
+    {name:'교육학개론-4.pdf',book:'4'},
+    {name:'교육학개론-나.pdf',book:'나'},
+    {name:'교육학개론-다.pdf',book:'다'},
+    {name:'240323 국가 9급 교육학개론-가.pdf',book:'가'},
+    {name:'행정학개론(지방행정 포함)-B.pdf',book:'B'}
+  ];
+  return samples.map(s=>{
+    const r=parseZipPdfNameZ242(s.name);
+    return {name:s.name,ok:!!r&&!r.parseError&&r.book===s.book,parsed:r};
+  });
+}
+window.examBankZ263=Object.freeze({selfTest:zipParserSelfTestZ263});
 
 function zipRowStatus(row){
   if(row.parseError)return '<span class="warn-text">'+esc(row.parseError)+'</span>';
@@ -4902,7 +5022,7 @@ function renderZipImportRows(){
   const missing=Object.entries(ZIP_PREFERRED_SOURCE).filter(([app])=>!zipSubjectRows.some(r=>r.appSubject===app)).map(([app])=>app);
   const unknown=zipSubjectRows.filter(r=>r.parseError).length;
   $('#zipImportSummary').innerHTML=
-    `<span class="pill">Z258 · PDF ${zipSubjectRows.length}개</span>`+
+    `<span class="pill">Z263 · PDF ${zipSubjectRows.length}개</span>`+
     `<span class="pill">지원 과목 PDF ${supported}개</span>`+
     `<span class="pill">정답표 인식 ${zipAnswerMap.size}과목</span>`+
     `<span class="pill">정답 연결 ${answerMatched}개</span>`+
@@ -4937,7 +5057,7 @@ async function scanQuestionZip(){
   const progress=$('#zipImportProgress'),bar=progress.querySelector('i');
   zipSubjectRows=[];zipAnswerMap=new Map();zipScanInfoZ242={files:0,pdfs:0,ignored:0};zipScanBusyZ242=true;
   $('#scanQuestionZip').disabled=true;$('#registerZipSubjects').disabled=true;
-  $('#zipImportBody').innerHTML='';$('#zipImportSummary').textContent='Z258 · ZIP과 공식 정답표를 읽는 중입니다.';
+  $('#zipImportBody').innerHTML='';$('#zipImportSummary').textContent='Z263 · 구형/신형 책형과 정답표를 읽는 중입니다.';
   progress.classList.remove('hidden');bar.style.width='5%';$('#zipImportResult').classList.add('hidden');
   try{
     zipAnswerMap=await parseAllOfficialAnswerRows(answerFile);bar.style.width='25%';
@@ -4964,7 +5084,7 @@ async function scanQuestionZip(){
     else if(!zipAnswerMap.size)alert('PDF 파일명은 읽었습니다. 다만 정답표에서 과목·책형·1~20번 정답을 확인하지 못했습니다. Z258은 Ⓑ/B 책형과 두 줄 과목명을 지원하므로, 계속 0건이면 정답표 파일 자체를 확인해주세요.');
   }catch(e){
     console.error(e);zipSubjectRows=[];zipAnswerMap=new Map();
-    $('#zipImportSummary').textContent='Z258 · 분석 실패. 등록한 문항은 없습니다.';
+    $('#zipImportSummary').textContent='Z263 · 분석 실패. 등록한 문항은 없습니다.';
     $('#zipImportResult').classList.remove('hidden');
     alert('ZIP 자동분리 중 오류가 발생했습니다.\n'+(e.message||e));
   }finally{
