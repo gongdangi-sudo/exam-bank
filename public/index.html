@@ -666,7 +666,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z243</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z243</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L243</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div>
@@ -1236,7 +1236,7 @@ function syncExamCountHint(){
 function renderGenerated(mode='problem'){syncOutputSubject();syncExamCountHint();const tools=`<div class="help no-print" id="wordExportCount" role="status" style="margin-bottom:10px"><b>Word 저장 대상: 현재 ${currentSet.length}문항 · 문 1~문 ${currentSet.length}</b> — 20문항 저장은 위에서 [20문항] → [문제 출제하기]를 누르세요. 기존 10문항을 복제하거나 임의로 추가하지 않습니다.</div><div class="print-tools no-print"><button class="btn primary" id="showProblem">문제지 보기</button><button class="btn ghost" id="showSolution">해설지 보기</button><button class="btn success" id="exportCurrentExplain">🤖 현재 출제문항 상세 해설 요청</button>
           <button class="btn" id="applyCurrentExplanationJsonBtn" title="현재 출제된 문항의 id와 explanation을 기준으로 해설을 바로 반영합니다.">⬆ ${currentSet.length}문항 해설 JSON 바로 적용</button>
           <input id="currentExplanationJsonFile" type="file" accept=".json,application/json" style="display:none">
-<button class="btn ghost" id="ocrCurrentImages">🧾 이미지 문항 텍스트 복구</button><button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · ${currentSet.length}문항 · W239</button><button class="btn ghost" id="wordSolution">해설지 Word · ${currentSet.length}문항 · W239</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W239 · 첫 페이지 표시:</b> 문제·보기·선택지·해설 본문은 9pt, 자간은 좁게 0.3pt로 저장합니다. 문항 사이 16pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.1은 그대로 유지합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 상단 제목·과목명·정답표·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 중복 [해설] 한 줄은 출력하지 않고 상세 소제목과 설명은 그대로 표시합니다. 파일명은 _W239.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.<br><b>※ 이미지 최소화 · T246:</b> 이미지 예외 문항도 저장된 PDF 원문 텍스트가 있으면 자동으로 텍스트로 복구해 출력합니다. 남는 이미지 문항은 [이미지 문항 텍스트 복구]에서 OCR할 수 있으며, OCR 복구본은 검수 필요 상태로 저장됩니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};const ocrBtn=$('#ocrCurrentImages');if(ocrBtn)ocrBtn.onclick=ocrRescueCurrentSetT246;$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
+<button class="btn ghost" id="ocrCurrentImages">🧾 이미지 문항 텍스트 복구</button><button class="btn ghost" id="printCurrent">현재 양식 인쇄/PDF</button><button class="btn ghost" id="wordProblem">문제지 Word · ${currentSet.length}문항 · W239</button><button class="btn ghost" id="wordSolution">해설지 Word · ${currentSet.length}문항 · W239</button></div><div class="notice no-print">문제·보기·정답의 <b>문구는 문제은행 원문을 그대로 사용</b>하고, 출력 배치만 업로드한 매일테스트 양식에 맞춥니다.<br><b>※ 안정 인쇄:</b> A4 실제 크기로 먼저 측정한 뒤 문항을 1열→2열→다음 장 순서로 배치하여 잘림을 방지합니다.<br><b>※ Word W239 · 첫 페이지 표시:</b> 문제·보기·선택지·해설 본문은 9pt, 자간은 좁게 0.3pt로 저장합니다. 문항 사이 16pt, 제목 아래 4pt, 선택지 사이 1.5pt, 본문 줄간격 1.1은 그대로 유지합니다. 해설의 빈 줄은 문단 여백으로 정리합니다. 상단 제목·과목명·정답표·2단·외곽선·하단 안내문은 그대로 유지하며 장수는 제한하지 않습니다. 과목명은 첫 페이지에만, 해설지 상단 정답표도 첫 페이지에만 표시합니다. 각 문항의 [정답]과 하단 안내문은 매번 유지합니다. 중복 [해설] 한 줄은 출력하지 않고 상세 소제목과 설명은 그대로 표시합니다. 파일명은 _W239.docx로 끝납니다.<br><b>※ 페이지가 넘어가도 공단기 양식 유지:</b> 각 A4 페이지에 동일한 외곽선·2단 구조·하단 안내문을 반복합니다.<br><b>※ 인쇄 설정:</b> Chrome 인쇄창에서 <u>머리글 및 바닥글 OFF</u>로 설정하세요. URL·날짜·1/2 같은 브라우저 문구가 사라집니다. 배경색은 사이트에서 강제 보존하도록 설정했습니다.<br><b>※ 양식:</b> 페이지가 넘어가도 파란 외곽선·2단 구조·제목/과목 형식은 유지하고, 안내문과 공단기 로고는 <u>파란 문제지 프레임 밖 하단</u>에 반복 표시됩니다.<br><b>※ 장수 제한 없음:</b> 문제·보기·해설이 길면 A4 2장 이상으로 자연스럽게 이어집니다. 내용을 줄이거나 잘라서 한 장에 맞추지 않습니다.<br><b>※ 이미지 최소화 · T247:</b> 출제 시 이미지 fallback 문항을 자동 OCR하여 문제·보기·선택지를 텍스트로 전환합니다. 문제와 4개 선택지를 안전하게 복원하지 못한 진짜 그림·표 문항만 이미지로 유지합니다.</div>`;$('#generated').innerHTML=tools+(mode==='solution'?solutionSheetHTML():problemSheetHTML());installStrictExplanationImporter();$('#showProblem').onclick=()=>renderGenerated('problem');$('#showSolution').onclick=()=>renderGenerated('solution');$('#exportCurrentExplain').onclick=()=>{if(!currentSet.length){alert('먼저 문제를 출제해주세요.');return}const testKey=currentTestKey(currentSet);const payload={schema:'exam-bank-explanations-v3',scope:'current-set',testKey,instructions:'sourceId, fingerprint, testKey는 절대 수정하거나 삭제하지 않는다. 문제 원문·보기·정답도 수정하지 않는다. 오직 explanation 필드만 작성한다. 해설은 반드시 충분히 자세하게 작성하며 단순 정답 확인 수준으로 끝내지 않는다. 각 문항은 반드시 다음 형식을 지킨다.\n\n[정답 근거]\n- 정답이 되는 핵심 이유를 최소 3~5문장으로 설명한다.\n- 관련 개념·이론·법령·판례가 있으면 왜 적용되는지 연결해서 설명한다.\n- 법령/판례 문제는 현행 시행 기준과 적용 시점을 확인하고, 확실하지 않으면 [검수 필요]라고 쓴다.\n\n[보기별 해설]\n- ①부터 마지막 보기까지 하나도 빠뜨리지 않는다.\n- 각 보기는 반드시 ① (O) 또는 ① (X) 형식으로 시작한다.\n- 각 보기마다 최소 2~4문장으로 왜 맞는지/틀리는지 설명한다.\n- 틀린 보기는 틀린 부분이 무엇인지와 올바른 내용이 무엇인지 함께 쓴다.\n- 맞는 보기는 단순히 맞다고 하지 말고 근거 개념을 설명한다.\n\n[핵심 정리]\n- 이 문제에서 기억해야 할 핵심 개념·비교 포인트·함정을 2~5개로 정리한다.\n\n[주의]\n- 같은 표현을 반복해서 분량만 늘리지 않는다.\n- 문제에 없는 내용을 임의로 창작하지 않는다.\n- 정답과 충돌하는 설명을 쓰지 않는다.\n- 최소 분량은 문항당 약 500~900자 수준을 권장한다.',items:currentSet.map((p,i)=>({slot:i+1,sourceId:p.id,id:p.id,fingerprint:problemFingerprint(p),subject:p.subject,exam:p.exam,year:p.year,no:p.no,unit:p.unit||'',question:p.question,viewText:p.viewText||'',choices:p.choices,choicesData:p.choicesData||[],rawOriginalText:p.rawOriginalText||'',answer:p.answer,answerSource:p.answerSource||'',explanation:''}))};downloadJson(`현재출제문항_상세해설_${testKey}.json`,payload);alert('현재 출제된 문항만 담은 상세 해설 작성용 JSON을 만들었습니다. 이 파일을 ChatGPT에 올려 해설을 작성한 뒤 문제은행의 ‘해설 JSON 가져오기’로 다시 넣으세요.');};const ocrBtn=$('#ocrCurrentImages');if(ocrBtn)ocrBtn.onclick=ocrRescueCurrentSetT246;$('#printCurrent').onclick=printStableCurrentSheet;$('#wordProblem').onclick=()=>exportWord('problem');$('#wordSolution').onclick=()=>exportWord('solution');}
 /* WORD EXPORT 23.6 — body character tracking; vertical spacing preserved.
    Import/DB/JSON/browser printing and template geometry are unchanged. */
 const WORD_EXPORT_REVISION = 'word-23.9';
@@ -1592,7 +1592,15 @@ $('#exportBtn').onclick=()=>downloadBlob(new Blob([JSON.stringify({version:1,exp
 function openBatch(){selectedPdfFiles=[];batchParsed=[];$('#pdfFiles').value='';$('#pdfFileList').innerHTML='';$('#batchResult').classList.add('hidden');$('#pdfProgress').classList.add('hidden');$('#batchModal').classList.remove('hidden');}
 function closeBatch(){$('#batchModal').classList.add('hidden');}
 $('#batchPdfBtn').onclick=openBatch;
+async function batchTextifyBankT247(){
+  const subject=$('#fSubject')?.value||'';let rows=problems.filter(p=>(!subject||p.subject===subject)&&!problemTextForOutput(p)&&(p.fallbackImageUrl||p.originalQuestionImageUrl));
+  if(!rows.length){alert(`${subject||'현재'} 과목에 텍스트 변환이 필요한 이미지 문항이 없습니다.`);return}
+  if(rows.length>100){if(!confirm(`${subject||'현재 과목'} 이미지 문항 ${rows.length}개 중 앞 100개를 변환할까요?`))return;rows=rows.slice(0,100);}
+  const btn=$('#batchTextifyBankT247');btn.disabled=true;try{const r=await convertImageProblemsT247(rows,{button:btn,quiet:true});renderBank();alert(`문제은행 이미지→텍스트 변환 완료\n성공 ${r.success}개 / 이미지 유지 ${r.failed}개`);}catch(e){alert('문제은행 텍스트 변환 실패\n'+(e.message||e));}finally{btn.disabled=false;btn.textContent='🧾 현재 과목 이미지→텍스트 · T247';}
+}
+
 $('#officialImportBtn').onclick=openOfficialModal;
+const t247BankBtn=$('#batchTextifyBankT247');if(t247BankBtn)t247BankBtn.onclick=batchTextifyBankT247;
 $('#zipImportBtn').onclick=openZipImportModal;
 $('#closeZipImport').onclick=closeZipImportModal;
 $('#cancelZipImport').onclick=closeZipImportModal;
@@ -2639,15 +2647,16 @@ function parseOfficialLooseText(rawInput){
     stem=joinLogicalLines(before.slice(0,vi).split('\n'));
     let viewRaw=before.slice(vi).trim()
       .replace(/^(?:<\s*보기\s*>|＜\s*보기\s*＞)\s*/,'');
-    if(/ㄱ\s*[.．]/.test(viewRaw)){
+    // 교육학처럼 ○ 문장 안에 (가)/(나) 빈칸이 있는 경우 ○ 구조를 먼저 보존한다.
+    if(/(^|\n)\s*○/.test(viewRaw)||/^○/.test(viewRaw)){
+      const parts=splitByMarker(viewRaw,/(○)\s*/g);
+      viewText=parts.length?parts.map(p=>`○ ${p.text}`).join('\n'):viewRaw;
+    }else if(/ㄱ\s*[.．]/.test(viewRaw)){
       const parts=splitByMarker(viewRaw,/((?:ㄱ|ㄴ|ㄷ|ㄹ|ㅁ)\s*[.．])\s*/g);
       viewText=parts.length?parts.map(p=>`${p.label} ${p.text}`).join('\n'):viewRaw;
     }else if(/[\(（]\s*가\s*[\)）]/.test(viewRaw)){
       const parts=splitByMarker(viewRaw,/([\(（]\s*[가나다라마바사]\s*[\)）])\s*/g);
       viewText=parts.length?parts.map(p=>`${p.label} ${p.text}`).join('\n'):viewRaw;
-    }else if(/○/.test(viewRaw)){
-      const parts=splitByMarker(viewRaw,/(○)\s*/g);
-      viewText=parts.length?parts.map(p=>`○ ${p.text}`).join('\n'):viewRaw;
     }else{
       viewText=viewRaw;
     }
@@ -2703,111 +2712,44 @@ function problemTextForOutput(p){
   return r?{stem:r.stem,viewText:r.viewText,choicesText:r.choicesText,recovered:true}:null;
 }
 
-async function ensureTesseractT246(){
+async function ensureTesseractT247(){
   if(window.Tesseract)return window.Tesseract;
   await new Promise((resolve,reject)=>{
-    const old=document.querySelector('script[data-t246-tesseract]');
-    if(old){
-      old.addEventListener('load',resolve,{once:true});
-      old.addEventListener('error',()=>reject(new Error('OCR 모듈 로드 실패')),{once:true});
-      return;
-    }
-    const s=document.createElement('script');
-    s.dataset.t246Tesseract='1';
-    s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';
-    s.onload=resolve;
-    s.onerror=()=>reject(new Error('OCR 모듈을 불러오지 못했습니다.'));
-    document.head.appendChild(s);
+    const old=document.querySelector('script[data-t247-tesseract]');
+    if(old){if(window.Tesseract)return resolve();old.addEventListener('load',resolve,{once:true});old.addEventListener('error',()=>reject(new Error('OCR 모듈 로드 실패')),{once:true});return;}
+    const sc=document.createElement('script');sc.dataset.t247Tesseract='1';sc.src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js';sc.onload=resolve;sc.onerror=()=>reject(new Error('OCR 모듈을 불러오지 못했습니다.'));document.head.appendChild(sc);
   });
   return window.Tesseract;
 }
-
-async function ocrBlobT246(blob,progress){
-  const T=await ensureTesseractT246();
-  const result=await T.recognize(blob,'kor+eng',{
-    logger:m=>{
-      if(progress && m.status==='recognizing text' && Number.isFinite(m.progress)){
-        progress(Math.round(m.progress*100));
-      }
-    }
-  });
-  return {text:String(result?.data?.text||''),confidence:Number(result?.data?.confidence||0)};
+async function createOcrWorkerT247(onProgress){
+  const T=await ensureTesseractT247();
+  const worker=await T.createWorker('kor+eng',1,{logger:m=>{if(onProgress&&m.status==='recognizing text'&&Number.isFinite(m.progress))onProgress(m.progress);}});
+  try{await worker.setParameters({preserve_interword_spaces:'1',tessedit_pageseg_mode:'3'});}catch(e){}
+  return worker;
 }
-
-async function ocrRescueCurrentSetT246(){
-  if(!currentSet?.length){alert('먼저 문제를 출제해주세요.');return}
-  const targets=currentSet.filter(p=>{
-    if(problemTextForOutput(p))return false;
-    return !!(p.fallbackImageUrl||p.originalQuestionImageUrl);
-  });
-  if(!targets.length){alert('현재 출제문항에는 OCR이 필요한 이미지 문항이 없습니다.');return}
-
-  const btn=$('#ocrCurrentImages');
-  if(btn)btn.disabled=true;
-  let success=0,failed=0;
-  const updates=[];
-
+async function preprocessOcrBlobT247(blob){
+  const bmp=await createImageBitmap(blob);const scale=Math.max(1.5,Math.min(2.4,1800/Math.max(1,bmp.width)));
+  const c=document.createElement('canvas');c.width=Math.round(bmp.width*scale);c.height=Math.round(bmp.height*scale);const ctx=c.getContext('2d',{willReadFrequently:true});ctx.fillStyle='#fff';ctx.fillRect(0,0,c.width,c.height);ctx.drawImage(bmp,0,0,c.width,c.height);
+  const img=ctx.getImageData(0,0,c.width,c.height),d=img.data;for(let i=0;i<d.length;i+=4){const g=Math.round(.299*d[i]+.587*d[i+1]+.114*d[i+2]);const v=g>230?255:(g<145?0:Math.round((g-145)*3.2));d[i]=d[i+1]=d[i+2]=v;}ctx.putImageData(img,0,0);return await new Promise(res=>c.toBlob(res,'image/png'));
+}
+async function ocrBlobWithWorkerT247(worker,blob){const prepared=await preprocessOcrBlobT247(blob);const r=await worker.recognize(prepared||blob);return {text:String(r?.data?.text||''),confidence:Number(r?.data?.confidence||0)};}
+function imageTargetsT247(set=currentSet){return (set||[]).filter(p=>!problemTextForOutput(p)&&!!(p.fallbackImageUrl||p.originalQuestionImageUrl));}
+async function persistRecoveredT247(updates){if(!updates.length)return;const safe=window.examBankLawGuard?window.examBankLawGuard.preserveBankReviews(updates):updates;for(let i=0;i<safe.length;i+=25){const r=await fetch('/api/problems/bulk',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems:safe.slice(i,i+25)})});if(!r.ok)throw new Error(await r.text());}try{save()}catch(e){}}
+async function convertImageProblemsT247(targets,{button=null,quiet=false}={}){
+  if(!targets.length)return {success:0,failed:0};let worker=null,success=0,failed=0;const updates=[];let currentIndex=0;
   try{
-    await ensureTesseractT246();
-    for(let i=0;i<targets.length;i++){
-      const p=targets[i];
-      const url=p.fallbackImageUrl||p.originalQuestionImageUrl;
-      if(btn)btn.textContent=`OCR 텍스트 복구 ${i+1}/${targets.length}…`;
-      try{
-        const res=await fetch(assetUrl(url),{cache:'no-store'});
-        if(!res.ok)throw new Error('이미지 불러오기 실패');
-        const blob=await res.blob();
-        const ocr=await ocrBlobT246(blob,pct=>{
-          if(btn)btn.textContent=`OCR ${i+1}/${targets.length} · ${pct}%`;
-        });
-        const parsed=parseOfficialLooseText(ocr.text);
-        if(parsed.ok && ocr.confidence>=45){
-          p.question=parsed.stem;
-          p.viewText=parsed.viewText||'';
-          p.choices=parsed.choicesText||'';
-          p.choicesData=parsed.choices||[];
-          p.ocrRecoveredText=ocr.text;
-          p.ocrConfidence=Math.round(ocr.confidence);
-          p.textRecoveryMode='ocr';
-          p.sourceMode='officialText';
-          p.status='OCR 검수 필요';
-          p.updatedAt=new Date().toISOString();
-
-          const bank=problems.find(x=>String(x.id)===String(p.id));
-          if(bank)Object.assign(bank,p);
-          updates.push(bank||p);
-          success++;
-        }else{
-          failed++;
-        }
-      }catch(e){
-        console.warn('OCR rescue failed',p.id,e);
-        failed++;
-      }
+    worker=await createOcrWorkerT247(progress=>{if(button)button.textContent=`텍스트 변환 ${currentIndex+1}/${targets.length} · ${Math.round(progress*100)}%`;});
+    for(let i=0;i<targets.length;i++){currentIndex=i;const p=targets[i],url=p.fallbackImageUrl||p.originalQuestionImageUrl;if(button)button.textContent=`텍스트 변환 ${i+1}/${targets.length}…`;
+      try{const res=await fetch(assetUrl(url),{cache:'no-store'});if(!res.ok)throw new Error('이미지 불러오기 실패');const ocr=await ocrBlobWithWorkerT247(worker,await res.blob());const parsed=parseOfficialLooseText(ocr.text);const choiceCount=(parsed.choicesText?.match(/[①②③④⑤]/g)||[]).length;
+        if(parsed.ok&&choiceCount>=4&&parsed.stem.length>=6){p.question=parsed.stem;p.viewText=parsed.viewText||'';p.choices=parsed.choicesText||'';p.choicesData=parsed.choices||[];p.rawOriginalText=p.rawOriginalText||ocr.text;p.ocrRecoveredText=ocr.text;p.ocrConfidence=Math.round(ocr.confidence||0);p.textRecoveryMode='auto-ocr-t247';p.sourceMode='officialText';p.status='OCR 검수 필요';p.updatedAt=new Date().toISOString();const bank=problems.find(x=>String(x.id)===String(p.id));if(bank)Object.assign(bank,p);updates.push(bank||p);success++;}else failed++;
+      }catch(e){console.warn('T247 OCR failed',p.id,e);failed++;}
     }
-
-    if(updates.length){
-      const safe=window.examBankLawGuard?window.examBankLawGuard.preserveBankReviews(updates):updates;
-      for(let i=0;i<safe.length;i+=25){
-        const r=await fetch('/api/problems/bulk',{
-          method:'PUT',headers:{'content-type':'application/json'},
-          body:JSON.stringify({problems:safe.slice(i,i+25)})
-        });
-        if(!r.ok)throw new Error(await r.text());
-      }
-      try{save()}catch(e){}
-    }
-    renderGenerated('problem');
-    alert(`이미지 문항 텍스트 복구 완료\n성공 ${success}개 / 이미지 유지 ${failed}개\n\nOCR 복구 문항은 'OCR 검수 필요'로 표시됩니다. 원문과 비교 후 문제은행에서 확인해주세요.`);
-  }catch(e){
-    console.error(e);
-    alert('OCR 텍스트 복구 중 오류가 발생했습니다.\n'+(e.message||e));
-  }finally{
-    const b=$('#ocrCurrentImages');
-    if(b){b.disabled=false;b.textContent='🧾 이미지 문항 텍스트 복구';}
-  }
+    await persistRecoveredT247(updates);
+  }finally{if(worker){try{await worker.terminate()}catch(e){}}}
+  if(!quiet)alert(`이미지 문항 텍스트 변환 완료\n텍스트 전환 ${success}개 / 이미지 유지 ${failed}개\n\n문제·4개 선택지를 안전하게 복원하지 못한 문항만 이미지로 남습니다.`);return {success,failed};
 }
-
+async function ocrRescueCurrentSetT246(){const targets=imageTargetsT247();if(!targets.length){alert('현재 출제문항에는 이미지로 남은 문항이 없습니다.');return}const btn=$('#ocrCurrentImages');if(btn)btn.disabled=true;try{await convertImageProblemsT247(targets,{button:btn});renderGenerated('problem');}catch(e){alert('이미지 문항 텍스트 변환 중 오류가 발생했습니다.\n'+(e.message||e));}finally{if(btn){btn.disabled=false;btn.textContent='🧾 이미지 문항 텍스트 복구';}}}
+async function autoTextifyCurrentSetT247(){const targets=imageTargetsT247();if(!targets.length)return {success:0,failed:0};const gen=$('#generateBtn'),old=gen?.textContent;if(gen){gen.disabled=true;gen.textContent=`이미지 ${targets.length}문항 텍스트 변환 중…`;}try{return await convertImageProblemsT247(targets,{button:gen,quiet:true});}catch(e){console.warn(e);return {success:0,failed:targets.length};}finally{if(gen){gen.disabled=false;gen.textContent=old||'문제 출제하기';}}}
 
 async function makeOfficialFallbackCrop(pdf,region){
   const page=await pdf.getPage(region.pageNo);
@@ -4665,7 +4607,7 @@ function annotateBank(){
   const sorted=problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0));
   document.querySelectorAll('#bankBody tr').forEach((tr,i)=>{const p=sorted[i];if(!p)return;const td=tr.cells[7];if(!td)return;const b=document.createElement('button');b.className='btn ghost';b.type='button';b.textContent='등록 검수';b.onclick=()=>{open();edit(String(p.id));};td.appendChild(b);const d=evaluate(p),small=document.createElement('div');small.className='help';small.textContent='L243 · '+(d.ok?d.reason:d.kind==='excluded'?'개정 영향 제외':'보류/재검수');td.appendChild(small);});
 }
-function generate(){
+async function generate(){
   if(busy){alert('법령 검수 저장 중입니다. 완료 후 출제해주세요.');return;}
   const subject=$('#fSubject').value,exam=$('#fExam').value,year=$('#fYear').value,unit=$('#fUnit').value,mode=$('#fSourceMode').value,count=requestedExamCount();if(count===null)return;
   const scoped=problems.filter(p=>p.subject===subject&&(!exam||p.exam===exam)&&(!year||String(p.year)===year)&&(!unit||p.unit===unit)&&rangePass(p));
@@ -4683,7 +4625,12 @@ function generate(){
   const summary=`<div class="notice no-print"><b>출제 결과 · L243</b> · 대상 ${stats.total} / 출제 가능 ${pool.length} / 저장된 개정 제외 ${stats.excluded} / 문제은행 검수 대기·보류 ${stats.pending} / 정답·분석 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}${NON_LEGAL_SUBJECTS.has(subject)?'<br>국어·영어: 기본 법령 검수 비대상 (담당자 보류·제외와 정답·구조·중복 조건은 유지)':''}</div>`;
   if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>현재 조건에서 출제할 수 있는 문항이 없습니다.</b><br>위 집계에서 정답 미확인·중복·문제은행 보류 사유를 확인해주세요. 법령 검수가 필요한 문항은 문제은행에서 관리합니다.<br>국어·영어는 법령 기록이 없다는 이유만으로 제외하지 않습니다.</div>';return;}
   history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,mode,lawGate:REV,reviewPolicy:'saved-bank-record',permanentDuplicateBlock:true},problemIds:currentSet.map(originId)});history=history.slice(0,1000);
-  save();renderGenerated('problem');$('#generated').insertAdjacentHTML('afterbegin',summary);renderBank();fillSubjects();
+  save();
+  const t247Conv=await autoTextifyCurrentSetT247();
+  renderGenerated('problem');
+  const t247Remain=imageTargetsT247().length;
+  const t247Summary=summary.replace('</div>',` / 이미지→텍스트 ${t247Conv.success||0} / 이미지 잔여 ${t247Remain}</div>`);
+  $('#generated').insertAdjacentHTML('afterbegin',t247Summary);renderBank();fillSubjects();
   if(currentSet.length<count)alert(`요청 ${count}문항 / 현재 출제 가능 ${currentSet.length}문항만 출제했습니다.\n문제은행의 보류·제외, 정답·중복 등 저장된 조건을 적용했습니다.`);
 }
 
