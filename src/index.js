@@ -41,6 +41,168 @@ export default{
       return json({ok:true,count:n});
     }
 
+
+    if(u.pathname==='/api/admin/full-reset'&&request.method==='POST'){
+      // destructive: same-origin UI requires explicit phrase + header
+      if(request.headers.get('x-exam-bank-reset')!=='R249-RESET-ALL'){
+        return json({ok:false,error:'reset header mismatch'},403);
+      }
+      let b={};try{b=await request.json()}catch{}
+      if(b?.confirm!=='전체삭제'||b?.scope!=='all'){
+        return json({ok:false,error:'reset confirmation mismatch'},400);
+      }
+
+      const beforeProblems=(await env.DB.prepare("SELECT COUNT(*) AS n FROM problems").first())?.n||0;
+      const beforeAssets=(await env.DB.prepare("SELECT COUNT(*) AS n FROM view_assets").first())?.n||0;
+      const hr=await env.DB.prepare("SELECT value FROM app_state WHERE key='history'").first();
+      let beforeHistory=0;try{beforeHistory=JSON.parse(hr?.value||'[]').length||0}catch{}
+
+      await env.DB.batch([
+        env.DB.prepare("DELETE FROM problems"),
+        env.DB.prepare("DELETE FROM view_assets"),
+        env.DB.prepare("DELETE FROM app_state")
+      ]);
+
+      const afterProblems=(await env.DB.prepare("SELECT COUNT(*) AS n FROM problems").first())?.n||0;
+      const afterAssets=(await env.DB.prepare("SELECT COUNT(*) AS n FROM view_assets").first())?.n||0;
+      const afterState=(await env.DB.prepare("SELECT COUNT(*) AS n FROM app_state").first())?.n||0;
+      if(afterProblems||afterAssets||afterState){
+        return json({ok:false,error:`reset verification failed: problems=${afterProblems}, assets=${afterAssets}, state=${afterState}`},500);
+      }
+      return json({ok:true,before:{problems:beforeProblems,history:beforeHistory,assets:beforeAssets},after:{problems:0,history:0,assets:0,state:0}});
+    }
+
+
+    if(u.pathname==='/api/admin/reset-language'&&request.method==='POST'){
+      if(request.headers.get('x-exam-bank-reset')!=='K262-RESET-LANGUAGE'){
+        return json({ok:false,error:'language reset header mismatch'},403);
+      }
+
+      let b={};try{b=await request.json()}catch{}
+      if(b?.confirm!=='국어영어삭제'){
+        return json({ok:false,error:'language reset confirmation mismatch'},400);
+      }
+
+      const requested=Array.isArray(b?.subjects)?b.subjects:[];
+      const subjects=[...new Set(requested.filter(x=>x==='국어'||x==='영어'))];
+      if(!subjects.length){
+        return json({ok:false,error:'삭제할 과목을 선택해주세요.'},400);
+      }
+      const subjectSet=new Set(subjects);
+
+      const allProblems=await readProblems(env);
+      const shouldDelete=(p)=>{
+        const subject=String(p?.subject||'').normalize('NFC').trim();
+        const id=String(p?.id||'');
+        if(subjectSet.has(subject))return true;
+        if(subjectSet.has('국어') && (/^LANG2?-국어-/u.test(id)||/^LANGPAGE-국어-/u.test(id)))return true;
+        if(subjectSet.has('영어') && (/^LANG2?-영어-/u.test(id)||/^LANGPAGE-영어-/u.test(id)))return true;
+        return false;
+      };
+
+      const removed=allProblems.filter(shouldDelete);
+      const remaining=allProblems.filter(p=>!shouldDelete(p));
+      const removedIds=new Set(removed.map(p=>String(p.id)));
+
+      // 문제 JSON에 연결되어 있는 view-asset ID를 수집한다.
+      const assetIds=new Set();
+      const collectAssets=(v)=>{
+        if(v==null)return;
+        if(typeof v==='string'){
+          const m=v.match(/\/api\/view-asset\/([^?#\s]+)/);
+          if(m){
+            try{assetIds.add(decodeURIComponent(m[1]))}
+            catch{assetIds.add(m[1])}
+          }
+          return;
+        }
+        if(Array.isArray(v)){for(const x of v)collectAssets(x);return}
+        if(typeof v==='object'){for(const x of Object.values(v))collectAssets(x)}
+      };
+      for(const p of removed)collectAssets(p);
+
+      // 구형/신형 국어·영어 페이지 자산도 함께 정리한다.
+      const allAssetRows=await env.DB.prepare("SELECT id FROM view_assets").all();
+      for(const r of (allAssetRows.results||[])){
+        const id=String(r.id||'');
+        if(subjectSet.has('국어') && (
+          id.startsWith('LANGPAGE-국어-') ||
+          id.startsWith('LANG-국어-') ||
+          id.startsWith('LANG2-국어-')
+        ))assetIds.add(id);
+        if(subjectSet.has('영어') && (
+          id.startsWith('LANGPAGE-영어-') ||
+          id.startsWith('LANG-영어-') ||
+          id.startsWith('LANG2-영어-')
+        ))assetIds.add(id);
+      }
+
+      // 출제이력: 국어/영어 이력은 삭제하고, 혹시 혼합 이력이 있으면 해당 ID만 제거한다.
+      const hr=await env.DB.prepare("SELECT value FROM app_state WHERE key='history'").first();
+      let history=[];try{history=JSON.parse(hr?.value||'[]')}catch{}
+      const beforeHistory=history.length;
+      const newHistory=[];
+      for(const h of history){
+        const hs=String(h?.subject||'').normalize('NFC').trim();
+        if(subjectSet.has(hs))continue;
+        const ids=Array.isArray(h?.problemIds)?h.problemIds:[];
+        const filtered=ids.filter(id=>!removedIds.has(String(id)));
+        if(ids.length && !filtered.length)continue;
+        newHistory.push({...h,problemIds:filtered});
+      }
+
+      // D1 problems 테이블에서 선택 과목만 삭제.
+      const removedIdList=[...removedIds];
+      for(let i=0;i<removedIdList.length;i+=50){
+        const batch=removedIdList.slice(i,i+50).map(
+          id=>env.DB.prepare("DELETE FROM problems WHERE id=?").bind(id)
+        );
+        if(batch.length)await env.DB.batch(batch);
+      }
+
+      // 연결 이미지 자산 삭제.
+      const assetList=[...assetIds];
+      for(let i=0;i<assetList.length;i+=50){
+        const batch=assetList.slice(i,i+50).map(
+          id=>env.DB.prepare("DELETE FROM view_assets WHERE id=?").bind(id)
+        );
+        if(batch.length)await env.DB.batch(batch);
+      }
+
+      // 구형 problems 캐시는 삭제해 나중에 되살아나지 않게 하고,
+      // history는 선택 과목 이력을 제거한 버전으로 저장한다.
+      const now=new Date().toISOString();
+      await env.DB.batch([
+        env.DB.prepare("DELETE FROM app_state WHERE key='problems'"),
+        env.DB.prepare(`
+          INSERT INTO app_state(key,value,updated_at) VALUES('history',?,?)
+          ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at
+        `).bind(JSON.stringify(newHistory),now)
+      ]);
+
+      // 재확인
+      const verified=await readProblems(env);
+      const remainSelected=verified.filter(p=>subjectSet.has(String(p?.subject||'').normalize('NFC').trim())).length;
+      if(remainSelected){
+        return json({ok:false,error:`선택 과목 ${remainSelected}문항이 아직 남아 있습니다.`},500);
+      }
+
+      const counts={};
+      for(const s of subjects){
+        counts[s]=removed.filter(p=>String(p?.subject||'').normalize('NFC').trim()===s).length;
+      }
+
+      return json({
+        ok:true,
+        subjects,
+        deletedProblems:removed.length,
+        deletedBySubject:counts,
+        deletedAssets:assetList.length,
+        deletedHistory:beforeHistory-newHistory.length,
+        remainingProblems:verified.length
+      });
+    }
+
     if(u.pathname.startsWith('/api/view-asset/')){
       const id=decodeURIComponent(u.pathname.slice('/api/view-asset/'.length));
       if(request.method==='POST'){
