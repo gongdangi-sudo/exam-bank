@@ -702,10 +702,68 @@
     </section>
     
     
-    <section id="language" class="page hidden">
+    
+    <div id="languageResetModal" class="modal hidden">
+      <div class="modal-box" style="max-width:720px">
+        <div class="modal-head">
+          <div>
+            <h3>국어·영어 업로드 자료만 삭제 · K262</h3>
+            <div class="help">다른 과목은 유지하고 선택한 국어/영어 문제와 관련 출제이력·원본 이미지 자산만 삭제합니다.</div>
+          </div>
+          <button class="close" id="closeLanguageReset">×</button>
+        </div>
+
+        <div class="notice" style="margin-top:14px;border-color:#fecaca;background:#fff7f7;color:#991b1b">
+          <b>삭제되는 항목</b><br>
+          • 선택한 국어/영어 문제은행 문항 전체<br>
+          • 해당 과목의 출제이력<br>
+          • 해당 문항에서 만든 원본/페이지/fallback 이미지 자산<br><br>
+          <b>유지되는 항목</b><br>
+          • 행정학·행정법·교육학·세법·회계학·형법·형사소송법·교정학 등 다른 과목<br>
+          • 다른 과목의 법령검수·해설·원본 이미지<br>
+          • 사이트 코드와 Word/PDF 양식
+        </div>
+
+        <div class="two" style="margin-top:14px">
+          <label style="display:flex;gap:9px;align-items:center;padding:12px;border:1px solid #e5e7eb;border-radius:10px">
+            <input type="checkbox" id="resetKorean" checked>
+            <span><b>국어</b> <span id="resetKoreanCount" class="help"></span></span>
+          </label>
+          <label style="display:flex;gap:9px;align-items:center;padding:12px;border:1px solid #e5e7eb;border-radius:10px">
+            <input type="checkbox" id="resetEnglish" checked>
+            <span><b>영어</b> <span id="resetEnglishCount" class="help"></span></span>
+          </label>
+        </div>
+
+        <div class="notice" style="margin-top:14px">
+          삭제 직전에 선택 과목의 문제와 관련 출제이력을 <b>JSON으로 자동 백업</b>합니다.
+          원본 PDF/해설 PDF 자체는 브라우저 서버에 저장된 파일이 아니므로 삭제 대상이 아닙니다.
+        </div>
+
+        <div class="field">
+          <label>확인 문구</label>
+          <input id="languageResetPhrase" autocomplete="off" placeholder="국어영어삭제 입력">
+          <div class="help"><b>국어영어삭제</b>를 정확히 입력해야 실행됩니다.</div>
+        </div>
+
+        <label style="display:flex;gap:8px;align-items:flex-start;margin-top:12px;font-size:13px">
+          <input type="checkbox" id="languageResetConfirm">
+          <span>선택한 국어/영어 문제를 삭제하고 다시 업로드할 것을 확인했습니다.</span>
+        </label>
+
+        <div id="languageResetStatus" class="help" style="margin-top:12px" role="status" aria-live="polite"></div>
+
+        <div class="actions">
+          <button class="btn danger" id="executeLanguageReset">백업 후 국어·영어만 삭제</button>
+          <button class="btn ghost" id="cancelLanguageReset">취소</button>
+        </div>
+      </div>
+    </div>
+
+<section id="language" class="page hidden">
       <div class="panel">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <h2 style="margin-right:auto">국어·영어 코드 전용 등록 · K261</h2>
+          <h2 style="margin-right:auto">국어·영어 코드 전용 등록 · K261 / 선택초기화 K262</h2>
           <span class="pill">A01 ↔ A01 정확 코드 연결</span>
           <span class="pill">유사도·순서 매칭 사용 안 함</span>
         </div>
@@ -748,6 +806,7 @@
           <button class="btn ghost" id="langAnswerTemplateBtn">정답 JSON 템플릿</button>
           <button class="btn ghost" id="langClearBtn">선택 초기화</button>
           <button class="btn ghost" id="langRecheckBank">기존 국어·영어 출제상태 재판정</button>
+          <button class="btn danger" id="openLanguageReset">🗑 국어·영어 업로드 자료 삭제 · K262</button>
         </div>
 
         <div class="help" style="margin-top:10px;line-height:1.65">
@@ -5802,6 +5861,155 @@ if($('#langAnalyzeBtn'))$('#langAnalyzeBtn').onclick=analyzeLanguageSet;
 if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{$('#langProblemPdf').value='';$('#langSolutionPdf').value='';languageParsed=[];$('#langResult').innerHTML='<div class="empty">문제편과 해설편 PDF를 선택해주세요.</div>'};
 
 
+
+// ===== K262: 국어·영어 선택 초기화 =====
+function languageResetSubjectsK262(){
+  const out=[];
+  if($('#resetKorean')?.checked)out.push('국어');
+  if($('#resetEnglish')?.checked)out.push('영어');
+  return out;
+}
+function updateLanguageResetCountsK262(){
+  const kc=problems.filter(p=>p.subject==='국어').length;
+  const ec=problems.filter(p=>p.subject==='영어').length;
+  if($('#resetKoreanCount'))$('#resetKoreanCount').textContent=`현재 ${kc.toLocaleString()}문항`;
+  if($('#resetEnglishCount'))$('#resetEnglishCount').textContent=`현재 ${ec.toLocaleString()}문항`;
+  if($('#languageResetStatus')){
+    $('#languageResetStatus').textContent=`현재 국어 ${kc.toLocaleString()}문항 · 영어 ${ec.toLocaleString()}문항`;
+  }
+}
+function openLanguageResetK262(){
+  $('#languageResetPhrase').value='';
+  $('#languageResetConfirm').checked=false;
+  $('#resetKorean').checked=true;
+  $('#resetEnglish').checked=true;
+  updateLanguageResetCountsK262();
+  $('#languageResetModal').classList.remove('hidden');
+}
+function closeLanguageResetK262(){
+  $('#languageResetModal').classList.add('hidden');
+}
+function languageResetBackupK262(subjects){
+  const subjectSet=new Set(subjects);
+  const selectedProblems=problems.filter(p=>subjectSet.has(p.subject));
+  const selectedIds=new Set(selectedProblems.map(p=>String(p.id)));
+  const selectedHistory=history.filter(h=>
+    subjectSet.has(h.subject) ||
+    (Array.isArray(h.problemIds)&&h.problemIds.some(id=>selectedIds.has(String(id))))
+  );
+  const payload={
+    schema:'exam-bank-language-backup-k262',
+    exportedAt:new Date().toISOString(),
+    subjects,
+    problems:selectedProblems,
+    history:selectedHistory
+  };
+  const stamp=new Date().toISOString().slice(0,19).replace(/[-:T]/g,'');
+  downloadJson(`국어영어_삭제전백업_${stamp}_K262.json`,payload);
+}
+async function executeLanguageResetK262(){
+  const subjects=languageResetSubjectsK262();
+  const status=$('#languageResetStatus');
+  const btn=$('#executeLanguageReset');
+
+  if(!subjects.length){
+    status.style.color='#b91c1c';
+    status.textContent='삭제할 과목을 하나 이상 선택해주세요.';
+    return;
+  }
+  if($('#languageResetPhrase').value.trim()!=='국어영어삭제'){
+    status.style.color='#b91c1c';
+    status.textContent='확인 문구에 “국어영어삭제”를 정확히 입력해주세요.';
+    return;
+  }
+  if(!$('#languageResetConfirm').checked){
+    status.style.color='#b91c1c';
+    status.textContent='삭제 확인 체크박스를 선택해주세요.';
+    return;
+  }
+
+  const beforeCount=problems.filter(p=>subjects.includes(p.subject)).length;
+  if(!beforeCount){
+    status.style.color='#475569';
+    status.textContent='선택한 과목에 삭제할 문제가 없습니다.';
+    return;
+  }
+
+  languageResetBackupK262(subjects);
+
+  btn.disabled=true;
+  btn.textContent='국어·영어 삭제 중…';
+  status.style.color='';
+  status.textContent='백업을 다운로드했습니다. D1에서 선택한 과목 문제·이력·이미지 자산을 삭제하고 있습니다…';
+
+  try{
+    try{clearTimeout(cloudSaveTimer)}catch(e){}
+
+    const r=await fetch('/api/admin/reset-language',{
+      method:'POST',
+      headers:{
+        'content-type':'application/json',
+        'x-exam-bank-reset':'K262-RESET-LANGUAGE'
+      },
+      body:JSON.stringify({confirm:'국어영어삭제',subjects})
+    });
+    const result=await r.json().catch(()=>({}));
+    if(!r.ok||!result.ok)throw new Error(result.error||'국어·영어 삭제 요청 실패');
+
+    // 서버 재조회로 로컬 상태도 정확히 맞춘다.
+    const check=await fetch('/api/state',{cache:'no-store'});
+    if(!check.ok)throw new Error('삭제 후 D1 재확인 실패: '+await check.text());
+    const state=await check.json();
+    problems=Array.isArray(state.problems)?state.problems:[];
+    history=Array.isArray(state.history)?state.history:[];
+
+    if(currentSet.some(p=>subjects.includes(p.subject))){
+      currentSet=[];
+      try{sessionStorage.removeItem('examBankCurrentSetV1')}catch(e){}
+      if($('#generated'))$('#generated').innerHTML='';
+    }
+
+    try{
+      localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
+      localStorage.setItem(K_HISTORY,JSON.stringify(history));
+    }catch(e){console.warn('language reset local cache',e)}
+
+    // 국어·영어 분석 임시 상태도 비운다.
+    languageParsed=[];
+    languageStrictK261={
+      rows:[],subject:'',title:'',pfName:'',sfName:'',datasetKey:'',
+      problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map()
+    };
+    if($('#langProblemPdf'))$('#langProblemPdf').value='';
+    if($('#langSolutionPdf'))$('#langSolutionPdf').value='';
+    if($('#langAnswerJson'))$('#langAnswerJson').value='';
+    if($('#langStageBadge'))$('#langStageBadge').textContent='분석 전';
+    if($('#langResult'))$('#langResult').innerHTML='<div class="empty">국어·영어 등록 자료를 초기화했습니다. 새 문제편·해설편으로 다시 시작해주세요.</div>';
+
+    renderBank();
+    fillSubjects();
+    renderHistory();
+    renderExplanationEditor();
+    updateLanguageResetCountsK262();
+
+    status.style.color='#047857';
+    status.innerHTML=
+      `<b>국어·영어 선택 초기화 완료.</b><br>`+
+      `삭제 문제 ${Number(result.deletedProblems||0).toLocaleString()}개 · `+
+      `출제이력 ${Number(result.deletedHistory||0).toLocaleString()}건 · `+
+      `이미지 자산 ${Number(result.deletedAssets||0).toLocaleString()}개<br>`+
+      `다른 과목 문제 ${Number(result.remainingProblems||0).toLocaleString()}개는 그대로 유지했습니다.`;
+    btn.textContent='삭제 완료';
+  }catch(e){
+    console.error(e);
+    status.style.color='#b91c1c';
+    status.textContent='국어·영어 삭제 실패 · '+(e.message||e)+' 백업 JSON은 이미 다운로드되었습니다.';
+    btn.disabled=false;
+    btn.textContent='백업 후 국어·영어만 삭제';
+  }
+}
+
+
 // ===== 국어·영어 코드 전용 등록 K261 =====
 let languageStrictK261={
   rows:[],
@@ -6337,6 +6545,12 @@ async function registerLanguageStrictK261(){
 }
 
 // K261이 최종 핸들러를 가져간다.
+if($('#openLanguageReset'))$('#openLanguageReset').onclick=openLanguageResetK262;
+if($('#closeLanguageReset'))$('#closeLanguageReset').onclick=closeLanguageResetK262;
+if($('#cancelLanguageReset'))$('#cancelLanguageReset').onclick=closeLanguageResetK262;
+if($('#executeLanguageReset'))$('#executeLanguageReset').onclick=executeLanguageResetK262;
+if($('#resetKorean'))$('#resetKorean').onchange=updateLanguageResetCountsK262;
+if($('#resetEnglish'))$('#resetEnglish').onchange=updateLanguageResetCountsK262;
 if($('#langAnalyzeBtn'))$('#langAnalyzeBtn').onclick=analyzeLanguageStrictK261;
 if($('#langAnswerTemplateBtn'))$('#langAnswerTemplateBtn').onclick=downloadLanguageAnswerTemplateK261;
 if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{
