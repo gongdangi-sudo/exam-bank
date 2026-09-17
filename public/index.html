@@ -604,7 +604,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · E259 편집개선</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · E260 원문보존</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -666,7 +666,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z258</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z258 / E260 원문보존</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L250</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R249: 완전 재등록이 필요하면 <b>문제은행 완전 초기화</b>를 사용하세요. 문제·이력뿐 아니라 업로드 이미지 자산과 저장 상태까지 모두 삭제합니다.</div>
@@ -1022,7 +1022,7 @@
   <div class="modal-box" style="max-width:1280px">
     <div class="modal-head">
       <div>
-        <h3>시험문제 ZIP 자동분리 · Z258</h3>
+        <h3>시험문제 ZIP 자동분리 · Z258 / E260 원문보존</h3>
         <div class="help">ZIP 안의 PDF를 과목별로 자동 분리하고, 공식 정답표의 같은 과목·책형 정답과 연결합니다.</div>
       </div>
       <button class="close" id="closeZipImport">×</button>
@@ -1906,7 +1906,7 @@ function openOriginalSourceE256(index){
   if(imgUrl){
     imageBox.innerHTML=`<img src="${esc(assetUrl(imgUrl))}" alt="원본 문제 이미지" style="max-width:100%;max-height:800px;object-fit:contain">`;
   }else{
-    imageBox.innerHTML='<div style="color:#64748b;font-size:13px">등록 당시 별도 원본 이미지가 저장되지 않은 문항입니다. 위 PDF 추출 원문을 확인해주세요.</div>';
+    imageBox.innerHTML='<div style="color:#64748b;font-size:13px">기존 버전에서 등록되어 원본 이미지가 저장되지 않은 문항입니다. E260 적용 후 같은 원본 PDF/ZIP을 다시 등록하면 같은 ID로 갱신되며 원본 이미지가 자동 저장됩니다.</div>';
   }
 
   overlay.style.display='flex';
@@ -2415,7 +2415,7 @@ function fillQuestionEditOriginalE257(index){
     if(imgUrl){
       imgEl.innerHTML=`<img id="cqOriginalInlineImgTag" src="${esc(assetUrl(imgUrl))}" alt="원본 문제 이미지" style="width:auto;max-width:100%;max-height:510px;object-fit:contain;cursor:zoom-in">`;
     }else{
-      imgEl.innerHTML='<div class="help" style="padding:18px 4px">별도 원본 이미지가 저장되지 않았습니다.<br>왼쪽 PDF 추출 원문을 확인해주세요.</div>';
+      imgEl.innerHTML='<div class="help" style="padding:18px 4px">기존 등록본에는 원본 이미지가 없습니다.<br>E260 적용 후 같은 원본 PDF/ZIP을 다시 등록하면 자동으로 원본 이미지가 저장됩니다.</div>';
     }
   }
 }
@@ -3907,14 +3907,56 @@ function normalizeOfficialText(s){
   return String(s||'').replace(/\s+/g,'').replace(/[·ㆍ･]/g,'').toLowerCase();
 }
 function rawPdfItems(tc){
-  return (tc.items||[]).map(it=>({
-    text:String(it.str||'').trim(),
-    x:Number(it.transform?.[4]||0),
-    y:Number(it.transform?.[5]||0),
-    w:Number(it.width||0),
-    h:Math.max(7,Math.abs(Number(it.transform?.[3]||0))||8)
-  })).filter(x=>x.text);
+  return (tc.items||[]).map(it=>{
+    const raw=String(it.str||'');
+    return {
+      raw,
+      text:raw.trim(),
+      leadingSpace:/^\s/.test(raw),
+      trailingSpace:/\s$/.test(raw),
+      x:Number(it.transform?.[4]||0),
+      y:Number(it.transform?.[5]||0),
+      w:Number(it.width||0),
+      h:Math.max(7,Math.abs(Number(it.transform?.[3]||0))||8)
+    };
+  }).filter(x=>x.text);
 }
+
+// E260: PDF.js가 한 단어를 여러 text item으로 쪼개도 무조건 공백을 넣지 않는다.
+// 실제 x좌표 간격이 '단어 사이 공백'만큼 벌어진 경우에만 공백을 복원한다.
+function joinPdfLineItemsE260(items){
+  const a=items.slice().sort((x,y)=>x.x-y.x);
+  if(!a.length)return '';
+  let out=a[0].text;
+  let prev=a[0];
+
+  for(let i=1;i<a.length;i++){
+    const cur=a[i];
+    const gap=cur.x-(prev.x+prev.w);
+    const h=Math.max(7,prev.h||0,cur.h||0);
+    const gapThreshold=Math.max(1.15,h*0.17);
+
+    const explicit=!!prev.trailingSpace || !!cur.leadingSpace;
+    const visualGap=gap>gapThreshold;
+
+    const noSpaceBefore=/^[,.;:!?%‰°℃)\]}>〉》」』’”·ㆍ…]/.test(cur.text);
+    const noSpaceAfter=/[(\[<{〈《「『‘“]$/.test(out);
+
+    // 숫자+단위/한글 접미가 바로 붙는 경우: 30 년 → 30년, 제 1 → 제1 등
+    const tightNumber=/[0-9]$/.test(out) && /^[가-힣%℃]/.test(cur.text) && gap<h*0.34;
+    const tightPrefix=/[제제]$/.test(out) && /^[0-9]/.test(cur.text) && gap<h*0.34;
+
+    const sep=(explicit||visualGap) && !noSpaceBefore && !noSpaceAfter && !tightNumber && !tightPrefix ? ' ' : '';
+    out+=sep+cur.text;
+    prev=cur;
+  }
+
+  return out.replace(/\s+([,.?!:;)\]])/g,'$1')
+            .replace(/([(\[])\s+/g,'$1')
+            .replace(/\s{2,}/g,' ')
+            .trim();
+}
+
 function rawLines(items,yTol=2.6){
   const sorted=items.slice().sort((a,b)=>b.y-a.y||a.x-b.x);
   const lines=[];
@@ -3925,7 +3967,7 @@ function rawLines(items,yTol=2.6){
   }
   return lines.sort((a,b)=>b.y-a.y).map(l=>{
     l.items.sort((a,b)=>a.x-b.x);
-    return {y:l.y,items:l.items,text:l.items.map(x=>x.text).join(' ').trim()};
+    return {y:l.y,items:l.items,text:joinPdfLineItemsE260(l.items)};
   }).filter(x=>x.text);
 }
 
@@ -4283,6 +4325,36 @@ async function convertImageProblemsT247(targets,{button=null,quiet=false}={}){
 async function ocrRescueCurrentSetT246(){const targets=imageTargetsT247();if(!targets.length){alert('현재 출제문항에는 이미지로 남은 문항이 없습니다.');return}const btn=$('#ocrCurrentImages');if(btn)btn.disabled=true;try{await convertImageProblemsT247(targets,{button:btn});renderGenerated('problem');}catch(e){alert('이미지 문항 텍스트 변환 중 오류가 발생했습니다.\n'+(e.message||e));}finally{if(btn){btn.disabled=false;btn.textContent='🧾 이미지 문항 텍스트 복구';}}}
 async function autoTextifyCurrentSetT247(){const targets=imageTargetsT247();if(!targets.length)return {success:0,failed:0};const gen=$('#generateBtn'),old=gen?.textContent;if(gen){gen.disabled=true;gen.textContent=`이미지 ${targets.length}문항 텍스트 변환 중…`;}try{return await convertImageProblemsT247(targets,{button:gen,quiet:true});}catch(e){console.warn(e);return {success:0,failed:targets.length};}finally{if(gen){gen.disabled=false;gen.textContent=old||'문제 출제하기';}}}
 
+
+// E260: 텍스트로 인식된 문제도 원본 PDF 모양을 비교할 수 있도록
+// 모든 문항의 원본 영역을 별도 저장한다. 문항번호도 가리지 않는다.
+async function makeOfficialOriginalCropE260(pdf,region){
+  const page=await pdf.getPage(region.pageNo);
+  const scale=1.55;
+  const vp=page.getViewport({scale});
+  const full=document.createElement('canvas');
+  full.width=Math.ceil(vp.width);full.height=Math.ceil(vp.height);
+  const ctx=full.getContext('2d',{alpha:false});
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,full.width,full.height);
+  await page.render({canvasContext:ctx,viewport:vp}).promise;
+
+  const H=region.pageHeight;
+  const padX=7*scale,padY=6*scale;
+  const sx=Math.max(0,Math.floor(region.x0*scale-padX));
+  const ex=Math.min(full.width,Math.ceil(region.x1*scale+padX));
+  const sy=Math.max(0,Math.floor((H-region.topY)*scale-padY));
+  const ey=Math.min(full.height,Math.ceil((H-region.bottomY)*scale+padY));
+  const w=Math.max(1,ex-sx),h=Math.max(1,ey-sy);
+  if(w<120||h<55)return null;
+
+  const crop=document.createElement('canvas');
+  crop.width=w;crop.height=h;
+  const c=crop.getContext('2d',{alpha:false});
+  c.fillStyle='#fff';c.fillRect(0,0,w,h);
+  c.drawImage(full,sx,sy,w,h,0,0,w,h);
+  return await new Promise(res=>crop.toBlob(res,'image/webp',0.78));
+}
+
 async function makeOfficialFallbackCrop(pdf,region){
   const page=await pdf.getPage(region.pageNo);
   const scale=2.0;
@@ -4396,6 +4468,7 @@ async function analyzeOfficialSource(){
         choices:parsed.choicesText,
         choicesData:parsed.choices,
         rawOriginalText:parsed.rawOriginalText||r.rawText||'',
+        region:r,
         parseMode,
         parseReason:parsed.reason||'',
         blob,previewUrl,
@@ -4413,6 +4486,24 @@ async function analyzeOfficialSource(){
   }finally{
     setTimeout(()=>progress.classList.add('hidden'),500);
   }
+}
+
+
+function mergeExistingLearningDataE260(row){
+  const old=problems.find(p=>String(p.id)===String(row.id));
+  if(!old)return row;
+
+  const keep=[
+    'explanation','editedExplanation','originalExplanation',
+    'explanationStatus','explanationUpdatedAt','explanationEditedAt',
+    'unit','subunit'
+  ];
+  for(const k of keep){
+    if((row[k]===undefined || row[k]==='' || row[k]===null) && old[k]!==undefined){
+      row[k]=old[k];
+    }
+  }
+  return row;
 }
 
 async function registerOfficialSource(){
@@ -4437,7 +4528,15 @@ async function registerOfficialSource(){
         fallbackImageUrl=await uploadViewAsset(id+'-fallback',p.blob);
       }
 
-      rows.push({
+      let originalQuestionImageUrl='';
+      if(p.region && officialProblemDoc){
+        const originalBlob=await makeOfficialOriginalCropE260(officialProblemDoc,p.region);
+        if(originalBlob){
+          originalQuestionImageUrl=await uploadViewAsset(id+'-original',originalBlob);
+        }
+      }
+
+      rows.push(mergeExistingLearningDataE260({
         id,subject,exam,year,no:p.no,unit,subunit:'',type:'원문기출',
         answer:p.answer,answerSource:'공식 정답표',
         question:p.question,
@@ -4451,10 +4550,12 @@ async function registerOfficialSource(){
         sourceBook:book,
         sourceProblemFile:$('#oProblemPdf').files[0]?.name||'',
         sourceAnswerFile:$('#oAnswerPdf').files[0]?.name||'',
+        originalQuestionImageUrl,
         explanation:'',explanationStatus:'작성 대기',
         status:'출제 가능',
+        spacingEngine:'geometry-e260',
         updatedAt:new Date().toISOString()
-      });
+      }));
     }
 
     if(window.examBankLawGuard){rows.splice(0,rows.length,...window.examBankLawGuard.preserveBankReviews(rows));}
@@ -4493,7 +4594,7 @@ function closeOfficialModal(){
   officialParsed=[];
 }
 
-// ===== 시험문제 ZIP 자동분리 · Z258 (구형 문항번호/1·2단 자동 인식) =====
+// ===== 시험문제 ZIP 자동분리 · Z258 / E260 원문보존 (구형 문항번호/1·2단 자동 인식) =====
 let zipSubjectRows=[];
 let zipAnswerMap=new Map();
 
@@ -4803,8 +4904,16 @@ async function parseOneZipSubject(row,exam,year,progressCb){
     const region=regions[i];
     let parsed=parseOfficialStructured(region);
     let fallbackImageUrl='';
+    let originalQuestionImageUrl='';
     let sourceMode='officialText';
     let textRecoveryMode='';
+
+    // 모든 ZIP 원문 문항은 텍스트 성공 여부와 관계없이 원본 이미지도 저장
+    const originalBlob=await makeOfficialOriginalCropE260(pdf,region);
+    if(originalBlob){
+      const idBase=`ZIP-${row.sourceSubject}-${exam}-${year}-${row.book}-${region.no}`;
+      originalQuestionImageUrl=await uploadViewAsset(idBase+'-original',originalBlob);
+    }
 
     if(!parsed.ok){
       const rescued=parseOfficialLooseText(region.rawText||parsed.rawOriginalText||'');
@@ -4823,7 +4932,7 @@ async function parseOneZipSubject(row,exam,year,progressCb){
     }
 
     const id=`ZIP-${row.sourceSubject}-${exam}-${year}-${row.book}-${region.no}`;
-    rows.push({
+    rows.push(mergeExistingLearningDataE260({
       id,
       subject:row.appSubject,
       sourceSubject:row.sourceSubject,
@@ -4837,7 +4946,9 @@ async function parseOneZipSubject(row,exam,year,progressCb){
       choicesData:parsed.choices||[],
       rawOriginalText:parsed.rawOriginalText||region.rawText||'',
       fallbackImageUrl,
+      originalQuestionImageUrl,
       sourceMode,textRecoveryMode,
+      spacingEngine:'geometry-e260',
       sourceBook:row.book,
       sourceProblemFile:row.fileName,
       sourceAnswerFile:$('#zAnswerPdf').files[0]?.name||'',
@@ -4845,7 +4956,7 @@ async function parseOneZipSubject(row,exam,year,progressCb){
       explanationStatus:'작성 대기',
       status:'출제 가능',
       updatedAt:new Date().toISOString()
-    });
+    }));
 
     if(progressCb)progressCb(i+1,regions.length);
   }
