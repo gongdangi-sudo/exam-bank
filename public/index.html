@@ -701,33 +701,70 @@
       <div class="panel"><h2>최상위 출제 규칙</h2><div class="notice"><b>정확성 우선:</b> 조건을 확실히 충족하지 못한 문항은 출제하지 않습니다. 문항 수가 부족해도 임의 생성·추측·구법 문항을 채우지 않습니다.</div><div id="ruleText" style="white-space:pre-wrap;line-height:1.75;font-size:14px;margin-top:16px"></div></div>
     </section>
     
+    
     <section id="language" class="page hidden">
       <div class="panel">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <h2 style="margin-right:auto">국어·영어 문제·해설 세트 등록 · K252</h2>
-          <span class="pill">원본 해설 우선</span>
+          <h2 style="margin-right:auto">국어·영어 코드 전용 등록 · K261</h2>
+          <span class="pill">A01 ↔ A01 정확 코드 연결</span>
+          <span class="pill">유사도·순서 매칭 사용 안 함</span>
         </div>
+
         <div class="notice">
-          국어·영어는 <b>문제편 PDF + 해설편 PDF</b>를 한 세트로 등록합니다.
-          문항코드(A01, A02 등)를 기준으로 문제와 해설을 연결하며, AI가 원본 해설을 임의로 대체하지 않습니다.
+          <b>국어·영어는 다른 과목과 별도로 등록합니다.</b><br>
+          ① 문제편에서 A01·A02 같은 <b>문항 코드로 문제 구조화</b> →
+          ② 정답 JSON 또는 해설편의 <b>같은 코드에서 정답 연결</b> →
+          ③ 해설편의 <b>같은 코드 해설만 연결</b> →
+          ④ 문제·선택지·정답·공유지문 검증을 모두 통과한 문항만 문제은행에 등록합니다.<br>
+          코드가 없는 해설을 번호나 순서로 추측하여 붙이지 않습니다.
         </div>
+
         <div class="form-grid">
-          <div class="field"><label>과목</label><select id="langSubject"><option>국어</option><option>영어</option></select></div>
-          <div class="field"><label>자료명</label><input id="langTitle" placeholder="예: 국어 독서 실전"></div>
-          <div class="field"><label>문제편 PDF</label><input id="langProblemPdf" type="file" accept="application/pdf"></div>
-          <div class="field"><label>해설편 PDF</label><input id="langSolutionPdf" type="file" accept="application/pdf"></div>
+          <div class="field">
+            <label>과목</label>
+            <select id="langSubject"><option>국어</option><option>영어</option></select>
+          </div>
+          <div class="field">
+            <label>자료명</label>
+            <input id="langTitle" placeholder="예: 자이스토리 국어 독서 실전 2026">
+          </div>
+          <div class="field">
+            <label>문제편 PDF</label>
+            <input id="langProblemPdf" type="file" accept="application/pdf">
+          </div>
+          <div class="field">
+            <label>해설편 PDF</label>
+            <input id="langSolutionPdf" type="file" accept="application/pdf">
+          </div>
+          <div class="field">
+            <label>정답 JSON <span class="help">(선택)</span></label>
+            <input id="langAnswerJson" type="file" accept=".json,application/json">
+            <div class="help">교재의 빠른 정답표가 PDF에서 깨지는 경우 한 번 만든 JSON을 계속 재사용할 수 있습니다.</div>
+          </div>
         </div>
+
         <div class="actions">
-          <button class="btn primary" id="langAnalyzeBtn">전체 분석 · 자동 매칭</button>
-          <button class="btn ghost" id="langClearBtn">선택 초기화</button><button class="btn ghost" id="langRecheckBank">🔄 기존 국어·영어 출제상태 재판정 · K252</button>
+          <button class="btn primary" id="langAnalyzeBtn">①~④ 코드 기준 검증 · K261</button>
+          <button class="btn ghost" id="langAnswerTemplateBtn">정답 JSON 템플릿</button>
+          <button class="btn ghost" id="langClearBtn">선택 초기화</button>
+          <button class="btn ghost" id="langRecheckBank">기존 국어·영어 출제상태 재판정</button>
         </div>
-        <div class="help" style="margin-top:10px">
-          K252는 기존 분석 실패 상태값을 그대로 믿지 않고 저장된 문제 본문·제시문·선택지·정답을 다시 검사합니다. 정상 구조는 출제 가능으로 복구하고, 정답 누락·지문 누락·선택지 오류만 제외합니다.
+
+        <div class="help" style="margin-top:10px;line-height:1.65">
+          <b>K261 안전 규칙</b> · A01을 A02 해설과 연결하지 않습니다 · 코드 없는 해설은 미연결 처리합니다 ·
+          공유지문을 참조하는 문제는 실제 지문 연결이 있어야 합니다 · ①~④ 또는 ①~⑤ 선택지가 완전해야 합니다 ·
+          정답이 선택지 안에 있어야 합니다 · 검증 실패 문항은 문제은행에 등록하지 않습니다.
         </div>
       </div>
+
       <div class="panel">
-        <h2>매칭 결과</h2>
-        <div id="langResult" class="empty">문제편과 해설편 PDF를 선택한 뒤 <b>전체 분석 · 자동 매칭</b>을 눌러주세요.</div>
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <h2 style="margin-right:auto">코드 검증 결과</h2>
+          <span class="pill" id="langStageBadge">분석 전</span>
+        </div>
+        <div id="langResult" class="empty">
+          문제편과 해설편을 선택한 뒤 <b>코드 기준 검증</b>을 눌러주세요.
+        </div>
       </div>
     </section>
 
@@ -1359,7 +1396,7 @@ async function bootstrapCloudState(){
   }
 }
 function uid(){return 'Q'+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase()}
-function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page).classList.remove('hidden');$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const map={wordconvert:['파일 → Word 변환','문제은행에 등록하지 않고 올린 자료를 공단기 양식 DOCX로 변환합니다.'],home:['과목 선택','과목을 선택해 기출문제 출제를 시작하세요.'],make:['문제 출제','등록된 문제은행에서 조건에 맞는 문제만 출제합니다.'],bank:['문제은행','기출문제 원문·정답·검수상태를 등록·관리합니다.'],explanations:['해설 편집','원본 해설·수정본을 확인하고 최종 사용 해설을 편집합니다.'],language:['국어·영어 자료 등록 · K252','문제편·해설편을 코드 매칭한 뒤 문제/제시문/선택지/정답까지 구조화합니다.'],history:['출제 이력','최근 사용한 문제 세트를 확인합니다.'],rules:['출제 규칙','업로드 기출 전용·중복 금지·현행성 검증 규칙입니다.']};$('#pageTitle').textContent=map[page][0];$('#pageDesc').textContent=map[page][1];if(page==='bank')renderBank();if(page==='explanations')renderExplanationEditor();if(page==='language')renderLanguagePage();if(page==='history')renderHistory();if(page==='rules')
+function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page).classList.remove('hidden');$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const map={wordconvert:['파일 → Word 변환','문제은행에 등록하지 않고 올린 자료를 공단기 양식 DOCX로 변환합니다.'],home:['과목 선택','과목을 선택해 기출문제 출제를 시작하세요.'],make:['문제 출제','등록된 문제은행에서 조건에 맞는 문제만 출제합니다.'],bank:['문제은행','기출문제 원문·정답·검수상태를 등록·관리합니다.'],explanations:['해설 편집','원본 해설·수정본을 확인하고 최종 사용 해설을 편집합니다.'],language:['국어·영어 코드 전용 등록 · K261','문항코드 기준으로 문제·정답·해설·공유지문을 정확 연결하고 검증 통과 문항만 등록합니다.'],history:['출제 이력','최근 사용한 문제 세트를 확인합니다.'],rules:['출제 규칙','업로드 기출 전용·중복 금지·현행성 검증 규칙입니다.']};$('#pageTitle').textContent=map[page][0];$('#pageDesc').textContent=map[page][1];if(page==='bank')renderBank();if(page==='explanations')renderExplanationEditor();if(page==='language')renderLanguagePage();if(page==='history')renderHistory();if(page==='rules')
 function downloadJson(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 $('#explainExportBtn').onclick=()=>{
   if(!problems.length){alert('문제은행에 문제가 없습니다.');return}
@@ -5349,7 +5386,7 @@ const XISTORY_KOREAN_READING_COUNTS = {A:14,B:14,C:14,D:39,E:211,F:214,G:101,H:9
 function renderLanguagePage(){
   const r=$('#langResult');
   if(!r) return;
-  if(!languageParsed.length && !r.innerHTML.trim()) r.innerHTML='<div class="empty">문제편과 해설편 PDF를 선택한 뒤 <b>전체 분석 · 자동 매칭</b>을 눌러주세요.</div>';
+  if(!languageParsed.length && !r.innerHTML.trim()) r.innerHTML='<div class="empty">문제편과 해설편 PDF를 선택한 뒤 <b>코드 기준 검증</b>을 눌러주세요.</div>';
 }
 function normalizeCode(letter,num){return String(letter||'').toUpperCase()+String(+num).padStart(2,'0');}
 function languageOCRNumber(token){
@@ -5698,7 +5735,7 @@ async function recheckLanguageBankK252(){
     console.error(e);
     alert('국어·영어 출제상태 재판정 저장 실패\n'+(e.message||e));
   }finally{
-    if(btn){btn.disabled=false;btn.textContent='🔄 기존 국어·영어 출제상태 재판정 · K252';}
+    if(btn){btn.disabled=false;btn.textContent='기존 국어·영어 출제상태 재판정';}
   }
 }
 
@@ -5763,6 +5800,558 @@ async function registerLanguageMatched(subject,title,pfName,sfName){
 if($('#langRecheckBank'))$('#langRecheckBank').onclick=recheckLanguageBankK252;
 if($('#langAnalyzeBtn'))$('#langAnalyzeBtn').onclick=analyzeLanguageSet;
 if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{$('#langProblemPdf').value='';$('#langSolutionPdf').value='';languageParsed=[];$('#langResult').innerHTML='<div class="empty">문제편과 해설편 PDF를 선택해주세요.</div>'};
+
+
+// ===== 국어·영어 코드 전용 등록 K261 =====
+let languageStrictK261={
+  rows:[],
+  subject:'',
+  title:'',
+  pfName:'',
+  sfName:'',
+  datasetKey:'',
+  problemCodes:[],
+  answerMap:new Map(),
+  answerSource:new Map(),
+  passageGroups:new Map()
+};
+
+function languageHashK261(s){
+  let h=2166136261>>>0;
+  for(const ch of String(s||'')){h^=ch.charCodeAt(0);h=Math.imul(h,16777619)>>>0;}
+  return h.toString(36).toUpperCase();
+}
+function languageDatasetKeyK261(subject,title,pfName){
+  const base=[subject,title||'',pfName||''].join('|').normalize('NFC').toLowerCase();
+  return languageHashK261(base).slice(0,9);
+}
+function languageIdK261(subject,datasetKey,code){
+  return `LANG2-${subject}-${datasetKey}-${code}`;
+}
+function normalizeLanguageCodeK261(v){
+  const m=String(v||'').trim().toUpperCase().match(/([A-H])\s*[-_.]?\s*([0-9OIL|S]{1,3})/);
+  if(!m)return '';
+  const n=languageOCRNumber(m[2]);
+  return n?normalizeCode(m[1],n):'';
+}
+function normalizeAnswerK261(v){
+  return normalizeLanguageAnswerK252(v);
+}
+
+async function pdfTextK261(file){
+  if(!file)return '';
+  if(typeof pdfjsLib==='undefined')throw new Error('PDF 분석 모듈을 불러오지 못했습니다.');
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let all='';
+  try{
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const tc=await page.getTextContent();
+      let text='';
+      try{
+        // E260의 좌표 기반 띄어쓰기 복원 사용
+        text=rawLines(rawPdfItems(tc),2.8).map(x=>x.text).join('\n');
+      }catch(e){
+        text=(tc.items||[]).map(x=>String(x.str||'')).join(' ');
+      }
+      all+=`\n\n[[PAGE:${i}]]\n${text}`;
+    }
+    return all;
+  }finally{
+    if(typeof pdf.destroy==='function')await pdf.destroy();
+  }
+}
+
+function languageProblemRecordsK261(text){
+  const best=new Map();
+  for(const page of languagePages(text)){
+    const hits=extractCodes(page.text);
+    hits.forEach((h,i)=>{
+      const end=i+1<hits.length?hits[i+1].index:page.text.length;
+      const chunk=page.text.slice(h.index,end).trim();
+      if(chunk.length<20)return;
+      const score=languageProblemChunkScore(chunk);
+      const old=best.get(h.code);
+      if(!old||score>old.score)best.set(h.code,{code:h.code,chunk,score,page:page.no});
+    });
+  }
+  return best;
+}
+
+function languageSolutionRecordsK261(text){
+  const best=new Map();
+  for(const page of languagePages(text)){
+    const hits=extractCodes(page.text);
+    hits.forEach((h,i)=>{
+      const end=i+1<hits.length?hits[i+1].index:page.text.length;
+      const chunk=page.text.slice(h.index,end).trim();
+      if(chunk.length<35)return;
+      const score=
+        ((chunk.match(/정답|해설|근거|선택지|오답/gu)||[]).length*800)+
+        Math.min(chunk.length,6000);
+      const old=best.get(h.code);
+      if(!old||score>old.score)best.set(h.code,{code:h.code,chunk,score,page:page.no});
+    });
+  }
+  return best;
+}
+
+function sharedPassageGroupsK261(passages){
+  const byText=new Map();
+  for(const [code,text] of passages.entries()){
+    const key=String(text||'').replace(/\s+/g,' ').trim();
+    if(!key)continue;
+    if(!byText.has(key))byText.set(key,[]);
+    byText.get(key).push(code);
+  }
+  const byCode=new Map(),groups=new Map();
+  for(const [text,codes] of byText.entries()){
+    const sorted=codes.slice().sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    const id=`PASS-${languageHashK261(text).slice(0,10)}`;
+    const group={id,codes:sorted,text};
+    groups.set(id,group);
+    sorted.forEach(c=>byCode.set(c,group));
+  }
+  return {byCode,groups};
+}
+
+async function readAnswerJsonK261(file){
+  const map=new Map();
+  if(!file)return map;
+  let raw;
+  try{raw=JSON.parse(await file.text())}
+  catch(e){throw new Error('정답 JSON 형식을 읽을 수 없습니다: '+e.message)}
+
+  const put=(code,answer)=>{
+    const c=normalizeLanguageCodeK261(code);
+    const a=normalizeAnswerK261(answer);
+    if(c&&a)map.set(c,a);
+  };
+
+  if(Array.isArray(raw)){
+    raw.forEach(x=>put(x?.code||x?.id,x?.answer));
+  }else if(Array.isArray(raw?.items)){
+    raw.items.forEach(x=>put(x?.code||x?.id,x?.answer));
+  }else if(raw?.answers && typeof raw.answers==='object'){
+    Object.entries(raw.answers).forEach(([k,v])=>put(k,v));
+  }else if(raw && typeof raw==='object'){
+    Object.entries(raw).forEach(([k,v])=>{
+      if(typeof v==='string'||typeof v==='number')put(k,v);
+    });
+  }
+  return map;
+}
+
+function answerFromExactSolutionK261(solution){
+  return extractLanguageAnswer(solution,'');
+}
+
+function problemNeedsContextK261(question){
+  return /\b윗글\b|\b위\s*글\b|앞글|위\s*자료|㉠|㉡|㉢|㉣|밑줄\s*친|밑줄친|다음\s*(?:글|지문|자료)/u.test(String(question||''));
+}
+
+function strictValidateLanguageK261(parsed,hasSolution){
+  const issues=[];
+  const choices=Array.isArray(parsed?.choicesData)?parsed.choicesData.filter(x=>x?.label&&String(x?.text||'').trim()):[];
+  const labels=choices.map(x=>x.label).join('');
+  if(!parsed?.question || String(parsed.question).trim().length<8)issues.push('문제 본문 누락');
+  if(labels!=='①②③④' && labels!=='①②③④⑤')issues.push(`선택지 구조 오류 (${choices.length}개)`);
+  if(!parsed?.answer)issues.push('정답 미연결');
+  else if(!choices.some(x=>x.label===parsed.answer))issues.push('정답-선택지 불일치');
+  if(!hasSolution)issues.push('해설 코드 미연결');
+
+  const view=String(parsed?.viewText||'').replace(/\s+/g,'').length;
+  if(problemNeedsContextK261(parsed?.question) && view<45)issues.push('공유지문·제시문 누락');
+
+  return {ok:issues.length===0,issues};
+}
+
+function answerTemplatePayloadK261(){
+  const rows=languageStrictK261.rows||[];
+  const codes=(rows.length?rows.map(x=>x.code):languageStrictK261.problemCodes||[])
+    .filter(Boolean);
+  return {
+    schema:'language-answer-map-v1',
+    subject:languageStrictK261.subject||$('#langSubject')?.value||'',
+    sourceTitle:languageStrictK261.title||$('#langTitle')?.value||'',
+    instructions:'code는 수정하지 말고 answer에 ①~⑤ 중 하나만 입력한다.',
+    items:[...new Set(codes)].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}))
+      .map(code=>({code,answer:languageStrictK261.answerMap?.get(code)||''}))
+  };
+}
+function downloadLanguageAnswerTemplateK261(){
+  const payload=answerTemplatePayloadK261();
+  if(!payload.items.length){
+    alert('먼저 문제편을 코드 기준으로 분석해주세요.');
+    return;
+  }
+  const name=`${payload.subject||'국어영어'}_정답맵_${languageStrictK261.datasetKey||'K261'}.json`;
+  downloadJson(name,payload);
+}
+
+async function renderLanguageProblemPageAssetsK261(file,rows,subject,datasetKey,button){
+  const pages=[...new Set(rows.map(x=>x.problemPage).filter(Boolean))].sort((a,b)=>a-b);
+  const assets=new Map();
+  if(!pages.length)return assets;
+
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  try{
+    for(let i=0;i<pages.length;i++){
+      const pageNo=pages[i];
+      if(button)button.textContent=`원본 페이지 저장 ${i+1}/${pages.length}`;
+      const page=await pdf.getPage(pageNo);
+      const vp=page.getViewport({scale:1.35});
+      const canvas=document.createElement('canvas');
+      canvas.width=Math.ceil(vp.width);canvas.height=Math.ceil(vp.height);
+      const ctx=canvas.getContext('2d',{alpha:false});
+      ctx.fillStyle='#fff';ctx.fillRect(0,0,canvas.width,canvas.height);
+      await page.render({canvasContext:ctx,viewport:vp}).promise;
+      const blob=await new Promise(res=>canvas.toBlob(res,'image/webp',0.76));
+      if(blob){
+        const url=await uploadViewAsset(`LANGPAGE-${subject}-${datasetKey}-${pageNo}`,blob);
+        assets.set(pageNo,url);
+      }
+    }
+  }finally{
+    if(typeof pdf.destroy==='function')await pdf.destroy();
+  }
+  return assets;
+}
+
+function languageRowForBankK261(x,subject,title,pfName,sfName,datasetKey,pageAsset){
+  const id=languageIdK261(subject,datasetKey,x.code);
+  const old=problems.find(p=>String(p.id)===id)||{};
+  const group=x.passageGroup||null;
+  return {
+    ...old,
+    id,
+    subject,
+    exam:old.exam||'교재기출',
+    year:old.year||'',
+    no:x.code,
+    languageCode:x.code,
+    languageDatasetKey:datasetKey,
+    unit:old.unit||'',
+    subunit:old.subunit||'',
+    type:old.type||'원문기출',
+    question:x.parsed.question,
+    viewText:x.parsed.viewText||'',
+    choices:x.parsed.choices||'',
+    choicesData:x.parsed.choicesData||[],
+    answer:x.parsed.answer,
+    answerSource:x.answerSource,
+    rawOriginalText:x.parsed.rawOriginalText||x.problem,
+    sourceMode:'languageText',
+    originalExplanation:x.solution||old.originalExplanation||'',
+    editedExplanation:old.editedExplanation||'',
+    explanation:old.explanation||'',
+    explanationStatus:x.solution?'원본 해설 등록':(old.explanationStatus||'작성 대기'),
+    sourceFile:pfName,
+    solutionSourceFile:sfName,
+    sourceTitle:title||pfName,
+    sourcePage:x.problemPage||null,
+    originalQuestionImageUrl:pageAsset||old.originalQuestionImageUrl||'',
+    sharedPassageId:group?.id||'',
+    sharedPassageCodes:group?.codes||[],
+    languageValidation:'K261',
+    languageIssues:[],
+    status:'출제 가능',
+    updatedAt:new Date().toISOString()
+  };
+}
+
+async function persistLanguageRowsK261(rows,button){
+  for(let i=0;i<rows.length;i+=25){
+    if(button)button.textContent=`검증 통과 문항 저장 ${Math.min(i+25,rows.length)}/${rows.length}`;
+    let chunk=rows.slice(i,i+25);
+    if(window.examBankLawGuard)chunk=window.examBankLawGuard.preserveBankReviews(chunk);
+    const r=await fetch('/api/problems/bulk',{
+      method:'PUT',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({problems:chunk})
+    });
+    if(!r.ok)throw new Error(await r.text());
+  }
+}
+
+async function deactivateLegacyLanguageRowsK261(subject,newIds,button){
+  const legacy=problems.filter(p=>
+    p.subject===subject &&
+    /^LANG-(?:국어|영어)-[A-H]\d+$/i.test(String(p.id||'')) &&
+    !newIds.has(String(p.id))
+  );
+  if(!legacy.length)return 0;
+  const updates=legacy.map(p=>({
+    ...p,
+    status:'출제 제외',
+    languageIssues:['K261 코드 전용 등록으로 교체된 구형 LANG 문항'],
+    languageReviewVersion:'K261-legacy-disabled',
+    updatedAt:new Date().toISOString()
+  }));
+  for(let i=0;i<updates.length;i+=25){
+    if(button)button.textContent=`구형 등록본 비활성화 ${Math.min(i+25,updates.length)}/${updates.length}`;
+    let chunk=updates.slice(i,i+25);
+    if(window.examBankLawGuard)chunk=window.examBankLawGuard.preserveBankReviews(chunk);
+    const r=await fetch('/api/problems/bulk',{
+      method:'PUT',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({problems:chunk})
+    });
+    if(!r.ok)throw new Error(await r.text());
+  }
+  const byId=new Map(problems.map(p=>[String(p.id),p]));
+  updates.forEach(p=>byId.set(String(p.id),p));
+  problems=[...byId.values()];
+  return updates.length;
+}
+
+function renderLanguageStrictResultK261(){
+  const box=$('#langResult');
+  if(!box)return;
+  const rows=languageStrictK261.rows||[];
+  const counts={
+    total:rows.length,
+    ready:rows.filter(x=>x.ready).length,
+    noAnswer:rows.filter(x=>x.issues.includes('정답 미연결')).length,
+    noSolution:rows.filter(x=>x.issues.includes('해설 코드 미연결')).length,
+    structure:rows.filter(x=>x.issues.some(v=>/본문|선택지|지문|불일치/.test(v))).length
+  };
+  const badge=$('#langStageBadge');
+  if(badge)badge.textContent=`정상 ${counts.ready} / 전체 ${counts.total}`;
+
+  const table=rows.map(x=>`
+    <tr>
+      <td><b>${esc(x.code)}</b></td>
+      <td>${x.problem?`확인 · p.${esc(String(x.problemPage||'-'))}`:'<span class="danger-text">미감지</span>'}</td>
+      <td>${x.passageGroup?`공유 ${esc(x.passageGroup.codes.join('·'))}`:(x.parsed?.viewText? '개별 제시문':'-')}</td>
+      <td>${x.answer?`${esc(x.answer)}<div class="help">${esc(x.answerSource||'')}</div>`:'<span class="danger-text">미연결</span>'}</td>
+      <td>${x.solution?`코드 일치 · p.${esc(String(x.solutionPage||'-'))}`:'<span class="danger-text">미연결</span>'}</td>
+      <td>${x.ready
+        ? '<span class="ok-text"><b>등록 가능</b></span>'
+        : `<span class="danger-text"><b>검수 필요</b></span><div class="help">${esc(x.issues.join(' · '))}</div>`}
+      </td>
+    </tr>`).join('');
+
+  box.innerHTML=`
+    <div class="notice">
+      <b>${esc(languageStrictK261.subject)} · ${esc(languageStrictK261.title||languageStrictK261.pfName)}</b><br>
+      문제 코드 ${counts.total}개 ·
+      <b>등록 가능 ${counts.ready}개</b> ·
+      정답 미연결 ${counts.noAnswer}개 ·
+      해설 미연결 ${counts.noSolution}개 ·
+      구조/지문 검수 ${counts.structure}개
+      <br><span class="help">
+      ※ K261은 코드가 같은 항목만 연결합니다. 코드 없는 해설을 번호·순서로 추측해서 붙이지 않습니다.
+      등록 버튼은 “등록 가능” 문항만 저장합니다.
+      </span>
+    </div>
+    <div class="actions">
+      <button class="btn primary" id="registerLanguageStrictK261">검증 통과 ${counts.ready}문항만 문제은행 등록 · K261</button>
+      <button class="btn ghost" id="downloadAnswerTemplateK261">정답 JSON 템플릿</button>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>코드</th><th>문제편</th><th>지문</th><th>정답</th><th>해설편</th><th>최종 상태</th></tr></thead>
+        <tbody>${table||'<tr><td colspan="6">감지된 문항 코드가 없습니다.</td></tr>'}</tbody>
+      </table>
+    </div>`;
+
+  const reg=$('#registerLanguageStrictK261');
+  if(reg)reg.onclick=registerLanguageStrictK261;
+  const tmpl=$('#downloadAnswerTemplateK261');
+  if(tmpl)tmpl.onclick=downloadLanguageAnswerTemplateK261;
+}
+
+async function analyzeLanguageStrictK261(){
+  const subject=$('#langSubject').value;
+  const title=$('#langTitle').value.trim();
+  const pf=$('#langProblemPdf').files[0];
+  const sf=$('#langSolutionPdf').files[0];
+  const af=$('#langAnswerJson')?.files?.[0]||null;
+
+  if(!pf||!sf){
+    alert('문제편 PDF와 해설편 PDF를 모두 선택해주세요.');
+    return;
+  }
+
+  const box=$('#langResult');
+  const badge=$('#langStageBadge');
+  if(badge)badge.textContent='분석 중';
+  box.innerHTML='<div class="empty"><b>K261 코드 기준 분석 중...</b><br>유사도·순서 매칭 없이 문제편 코드 → 정답 → 같은 코드 해설 → 공유지문 순서로 검증합니다.</div>';
+
+  try{
+    const [pt,st,jsonAnswers]=await Promise.all([
+      pdfTextK261(pf),
+      pdfTextK261(sf),
+      readAnswerJsonK261(af)
+    ]);
+
+    const problemRecords=languageProblemRecordsK261(pt);
+    const solutionRecords=languageSolutionRecordsK261(st);
+    const passages=languageRangePassages(pt);
+    const pg=sharedPassageGroupsK261(passages);
+    const xistory=isXistoryKoreanReading(subject,title,pf.name,sf.name,pt,st);
+
+    const codes=[...problemRecords.keys()]
+      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+
+    const answerMap=new Map(),answerSource=new Map();
+    for(const code of codes){
+      if(jsonAnswers.has(code)){
+        answerMap.set(code,jsonAnswers.get(code));
+        answerSource.set(code,'정답 JSON');
+        continue;
+      }
+      if(xistory){
+        const a=xistoryKnownAnswer(code);
+        if(a){
+          answerMap.set(code,a);
+          answerSource.set(code,'교재 빠른 정답표 고정맵');
+          continue;
+        }
+      }
+      const sol=solutionRecords.get(code)?.chunk||'';
+      const a=answerFromExactSolutionK261(sol);
+      if(a){
+        answerMap.set(code,a);
+        answerSource.set(code,'해설편 동일 코드');
+      }
+    }
+
+    const rows=codes.map(code=>{
+      const pr=problemRecords.get(code);
+      const sr=solutionRecords.get(code);
+      const answer=answerMap.get(code)||'';
+      const passage=passages.get(code)||'';
+      const parsed=parseLanguageProblem(
+        pr?.chunk||'',
+        sr?.chunk||'',
+        code,
+        {xistory,answer,passage}
+      );
+      const val=strictValidateLanguageK261(parsed,!!sr?.chunk);
+      return {
+        code,
+        problem:pr?.chunk||'',
+        problemPage:pr?.page||null,
+        solution:sr?.chunk||'',
+        solutionPage:sr?.page||null,
+        answer,
+        answerSource:answerSource.get(code)||'',
+        passage,
+        passageGroup:pg.byCode.get(code)||null,
+        parsed,
+        issues:val.issues,
+        ready:val.ok
+      };
+    });
+
+    languageStrictK261={
+      rows,
+      subject,
+      title,
+      pfName:pf.name,
+      sfName:sf.name,
+      datasetKey:languageDatasetKeyK261(subject,title,pf.name),
+      problemCodes:codes,
+      answerMap,
+      answerSource,
+      passageGroups:pg.groups,
+      problemFile:pf
+    };
+    // 기존 코드가 쓰는 상태와도 동기화
+    languageParsed=rows.map(x=>({
+      code:x.code,
+      problem:x.problem,
+      solution:x.solution,
+      matched:x.ready,
+      parsed:x.parsed,
+      knownAnswer:x.answer,
+      passage:x.passage,
+      method:'K261 정확 코드',
+      confidence:'high'
+    }));
+
+    renderLanguageStrictResultK261();
+  }catch(e){
+    console.error(e);
+    if(badge)badge.textContent='분석 실패';
+    box.innerHTML=`<div class="empty danger-text"><b>K261 분석 실패</b><br>${esc(e.message||String(e))}</div>`;
+  }
+}
+
+async function registerLanguageStrictK261(){
+  const ready=(languageStrictK261.rows||[]).filter(x=>x.ready);
+  if(!ready.length){
+    alert('검증을 모두 통과한 등록 가능 문항이 없습니다.');
+    return;
+  }
+
+  const subject=languageStrictK261.subject;
+  const title=languageStrictK261.title;
+  const pfName=languageStrictK261.pfName;
+  const sfName=languageStrictK261.sfName;
+  const datasetKey=languageStrictK261.datasetKey;
+  const pf=languageStrictK261.problemFile||$('#langProblemPdf').files[0];
+  const btn=$('#registerLanguageStrictK261');
+
+  btn.disabled=true;
+  try{
+    const pageAssets=await renderLanguageProblemPageAssetsK261(
+      pf,ready,subject,datasetKey,btn
+    );
+    const rows=ready.map(x=>languageRowForBankK261(
+      x,subject,title,pfName,sfName,datasetKey,pageAssets.get(x.problemPage)||''
+    ));
+
+    await persistLanguageRowsK261(rows,btn);
+
+    const existing=new Map(problems.map(p=>[String(p.id),p]));
+    rows.forEach(p=>existing.set(String(p.id),p));
+    problems=[...existing.values()];
+
+    // 과거 LANG-국어-A01 형태의 구형 전용 등록은 출제에서 자동 제외
+    const newIds=new Set(rows.map(x=>String(x.id)));
+    const legacyDisabled=await deactivateLegacyLanguageRowsK261(subject,newIds,btn);
+
+    try{localStorage.setItem(K_PROBLEMS,JSON.stringify(problems))}catch(e){
+      console.warn('국어·영어 로컬 캐시 용량 초과 — D1 저장은 완료됨',e);
+    }
+    renderBank();fillSubjects();renderExplanationEditor();
+
+    alert(
+      `${subject} K261 등록 완료\n\n`+
+      `검증 통과 등록 ${rows.length}개\n`+
+      `검수 필요 미등록 ${(languageStrictK261.rows||[]).length-rows.length}개\n`+
+      `구형 LANG 문항 비활성화 ${legacyDisabled}개\n\n`+
+      `새 ID는 LANG2-${subject}-${datasetKey}-A01 형식이라 다른 교재의 A01과 충돌하지 않습니다.`
+    );
+    window.examBankLawGuard?.onBankUpload(rows.map(x=>x.id),'국어·영어 코드 전용 등록 K261');
+  }catch(e){
+    console.error(e);
+    alert('K261 문제은행 저장 실패\n'+(e.message||e));
+  }finally{
+    btn.disabled=false;
+    btn.textContent=`검증 통과 ${(languageStrictK261.rows||[]).filter(x=>x.ready).length}문항만 문제은행 등록 · K261`;
+  }
+}
+
+// K261이 최종 핸들러를 가져간다.
+if($('#langAnalyzeBtn'))$('#langAnalyzeBtn').onclick=analyzeLanguageStrictK261;
+if($('#langAnswerTemplateBtn'))$('#langAnswerTemplateBtn').onclick=downloadLanguageAnswerTemplateK261;
+if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{
+  $('#langProblemPdf').value='';
+  $('#langSolutionPdf').value='';
+  if($('#langAnswerJson'))$('#langAnswerJson').value='';
+  languageParsed=[];
+  languageStrictK261={
+    rows:[],subject:'',title:'',pfName:'',sfName:'',datasetKey:'',
+    problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map()
+  };
+  if($('#langStageBadge'))$('#langStageBadge').textContent='분석 전';
+  $('#langResult').innerHTML='<div class="empty">문제편과 해설편을 선택한 뒤 <b>코드 기준 검증</b>을 눌러주세요.</div>';
+};
+
 
 // ===== 해설 편집실 v10 =====
 let explanationSelection=new Set();
@@ -6587,7 +7176,7 @@ async function generate(){
   }
   const order=$('#fOrder').value;if(order==='random')shuffle(pool);if(order==='yearDesc')pool.sort((a,b)=>(b.year||0)-(a.year||0));if(order==='yearAsc')pool.sort((a,b)=>(a.year||0)-(b.year||0));
   currentSet=pool.slice(0,count);
-  const summary=`<div class="notice no-print"><b>출제 결과 · ${NON_LEGAL_SUBJECTS.has(subject)?'K252':'L250'}</b> · 대상 ${stats.total} / 출제 가능 ${pool.length} / 저장된 개정 제외 ${stats.excluded} / 문제은행 검수 대기·보류 ${stats.pending} / 정답·구조 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}${NON_LEGAL_SUBJECTS.has(subject)?'<br>국어·영어: 예전 분석 실패 상태값이 아니라 현재 저장된 본문·선택지·정답 구조를 재판정해 출제합니다.':''}</div>`;
+  const summary=`<div class="notice no-print"><b>출제 결과 · ${NON_LEGAL_SUBJECTS.has(subject)?'K261':'L250'}</b> · 대상 ${stats.total} / 출제 가능 ${pool.length} / 저장된 개정 제외 ${stats.excluded} / 문제은행 검수 대기·보류 ${stats.pending} / 정답·구조 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}${NON_LEGAL_SUBJECTS.has(subject)?'<br>국어·영어: K261 검증 통과 문항을 우선 사용하며, 문제·선택지·정답·공유지문 구조를 다시 확인해 출제합니다.':''}</div>`;
   if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>현재 조건에서 출제할 수 있는 문항이 없습니다.</b><br>위 집계에서 정답 미확인·중복·문제은행 보류 사유를 확인해주세요. 법령 검수가 필요한 문항은 문제은행에서 관리합니다.<br>국어·영어는 법령 기록이 없다는 이유만으로 제외하지 않습니다.</div>';return;}
   history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,mode,lawGate:REV,reviewPolicy:'saved-bank-record',permanentDuplicateBlock:true},problemIds:currentSet.map(originId)});history=history.slice(0,1000);
   save();
