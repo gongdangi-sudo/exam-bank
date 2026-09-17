@@ -666,10 +666,10 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z243</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 자동분리 · Z243</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L243</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 전체 초기화 · R248</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L243</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
-        <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div>
+        <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R248: 전체 재등록이 필요하면 <b>문제은행 전체 초기화</b>를 사용하세요. 백업 → D1 초기화 → 서버 0건 재확인 순으로 처리됩니다.</div>
         <div class="table-wrap"><table><thead><tr><th>ID</th><th>과목</th><th>시험</th><th>연도</th><th>번호</th><th>단원</th><th>문제</th><th>관리</th></tr></thead><tbody id="bankBody"></tbody></table></div>
       </div>
     </section>
@@ -735,6 +735,52 @@
       <div class="panel"><div style="display:flex;align-items:center"><h2>출제 이력</h2><button class="btn danger right" id="clearHistory">이력 삭제</button></div><div id="historyList"></div></div>
     </section>
   </main>
+</div>
+
+
+<div id="fullResetModal" class="modal hidden">
+  <div class="modal-box" style="max-width:720px">
+    <div class="modal-head">
+      <div>
+        <h3>문제은행 전체 초기화 · R248</h3>
+        <div class="help">잘못 등록된 문제를 모두 비우고 원본 PDF/정답표로 다시 등록할 때 사용합니다.</div>
+      </div>
+      <button class="close" id="closeFullReset">×</button>
+    </div>
+
+    <div class="notice" style="margin-top:14px;border-color:#ef4444;background:#fff7f7;color:#991b1b">
+      <b>삭제 대상</b><br>
+      • 문제은행의 모든 문제<br>
+      • 기존 출제 이력<br>
+      • 현재 출제 중인 문제 세트<br><br>
+      <b>삭제하지 않는 것</b><br>
+      • 사이트 코드와 출력 양식<br>
+      • 업로드 원본 파일 자체<br>
+      • 서버에 남은 미사용 이미지 자산(문제와의 연결만 사라짐)
+    </div>
+
+    <div class="notice" style="margin-top:12px">
+      초기화 직전에 <b>문제은행 + 출제이력 JSON 백업 파일을 자동 다운로드</b>합니다.
+      서버에서 실제로 0개가 되었는지 다시 읽어 확인한 뒤에만 완료 처리합니다.
+    </div>
+
+    <div class="field" style="margin-top:16px">
+      <label>확인 문구</label>
+      <input id="fullResetPhrase" autocomplete="off" placeholder="전체삭제 입력">
+      <div class="help"><b>전체삭제</b>를 정확히 입력해야 실행됩니다.</div>
+    </div>
+
+    <label style="display:flex;gap:8px;align-items:flex-start;margin-top:14px;font-size:13px">
+      <input type="checkbox" id="fullResetConfirm">
+      <span>현재 등록된 문제와 출제 이력을 모두 비우고 다시 업로드할 것을 확인했습니다.</span>
+    </label>
+
+    <div id="fullResetStatus" class="help" style="margin-top:12px" role="status" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn danger" id="executeFullReset">백업 후 전체 초기화</button>
+      <button class="btn ghost" id="cancelFullReset">취소</button>
+    </div>
+  </div>
 </div>
 
 <div id="modal" class="modal hidden">
@@ -920,6 +966,120 @@ function setCloudStatus(text,ok=true){
   el.style.borderColor=ok?'#bbf7d0':'#fecaca';
   el.style.background=ok?'#f0fdf4':'#fff7ed';
 }
+
+// ===== R248: 안전한 문제은행 전체 초기화 =====
+function resetBackupNameR248(){
+  const d=new Date();
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  const hh=String(d.getHours()).padStart(2,'0'),mm=String(d.getMinutes()).padStart(2,'0');
+  return `기출문제은행_전체백업_${y}${m}${day}_${hh}${mm}.json`;
+}
+function openFullResetR248(){
+  const modal=$('#fullResetModal');
+  $('#fullResetPhrase').value='';
+  $('#fullResetConfirm').checked=false;
+  $('#fullResetStatus').textContent=`현재 문제 ${problems.length.toLocaleString()}개 · 출제이력 ${history.length.toLocaleString()}건`;
+  modal.classList.remove('hidden');
+}
+function closeFullResetR248(){
+  $('#fullResetModal').classList.add('hidden');
+}
+async function executeFullResetR248(){
+  const phrase=$('#fullResetPhrase').value.trim();
+  const checked=$('#fullResetConfirm').checked;
+  const status=$('#fullResetStatus');
+  const btn=$('#executeFullReset');
+
+  if(phrase!=='전체삭제'){
+    status.textContent='확인 문구에 “전체삭제”를 정확히 입력해주세요.';
+    status.style.color='#b91c1c';
+    return;
+  }
+  if(!checked){
+    status.textContent='삭제 확인 체크박스를 선택해주세요.';
+    status.style.color='#b91c1c';
+    return;
+  }
+  if(!problems.length && !history.length){
+    status.textContent='이미 문제은행과 출제 이력이 비어 있습니다.';
+    return;
+  }
+
+  const oldProblems=problems;
+  const oldHistory=history;
+  const backup={
+    schema:'exam-bank-full-backup-r248',
+    exportedAt:new Date().toISOString(),
+    problems:oldProblems,
+    history:oldHistory
+  };
+
+  // 항상 먼저 백업
+  downloadBlob(
+    new Blob([JSON.stringify(backup,null,2)],{type:'application/json;charset=utf-8'}),
+    resetBackupNameR248()
+  );
+
+  btn.disabled=true;
+  btn.textContent='D1 초기화 확인 중…';
+  status.style.color='';
+  status.textContent='백업 파일을 만들었습니다. D1의 문제은행과 출제 이력을 비우는 중입니다…';
+
+  try{
+    // 이전 저장 예약이 옛 데이터를 다시 쓰지 못하게 중지
+    try{clearTimeout(cloudSaveTimer)}catch(e){}
+
+    const r=await fetch('/api/state',{
+      method:'PUT',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({problems:[],history:[]})
+    });
+    if(!r.ok)throw new Error('D1 초기화 저장 실패: '+await r.text());
+
+    // 서버가 정말 비었는지 재확인
+    const check=await fetch('/api/state',{cache:'no-store'});
+    if(!check.ok)throw new Error('D1 재확인 실패: '+await check.text());
+    const state=await check.json();
+    const rp=Array.isArray(state.problems)?state.problems:[];
+    const rh=Array.isArray(state.history)?state.history:[];
+    if(rp.length || rh.length){
+      throw new Error(`서버 재확인 결과 문제 ${rp.length}개 / 이력 ${rh.length}건이 남아 있어 초기화를 완료하지 않았습니다.`);
+    }
+
+    // 서버 확인 성공 후에만 로컬도 비움
+    problems=[];
+    history=[];
+    currentSet=[];
+    try{
+      localStorage.removeItem(K_PROBLEMS);
+      localStorage.removeItem(K_HISTORY);
+      sessionStorage.removeItem('examBankCurrentSetV1');
+    }catch(e){}
+
+    try{renderBank()}catch(e){}
+    try{refreshFilters()}catch(e){}
+    try{fillSubjects()}catch(e){}
+    try{renderHistory()}catch(e){}
+    try{renderExplanationEditor()}catch(e){}
+    try{$('#generated').innerHTML=''}catch(e){}
+
+    setCloudStatus('☁ D1 연결 · 빈 문제은행');
+    status.style.color='#047857';
+    status.innerHTML='<b>초기화 완료.</b> D1 재확인 결과 문제 0개 / 출제이력 0건입니다. 이제 원본 자료를 다시 업로드하면 됩니다.';
+    btn.textContent='초기화 완료';
+    setTimeout(()=>closeFullResetR248(),1600);
+  }catch(e){
+    console.error(e);
+    // 실패하면 기존 화면 데이터를 지우지 않는다.
+    problems=oldProblems;
+    history=oldHistory;
+    status.style.color='#b91c1c';
+    status.textContent='초기화 실패 · 기존 데이터는 화면에 유지했습니다. '+(e.message||e);
+    btn.disabled=false;
+    btn.textContent='백업 후 전체 초기화';
+  }
+}
+
 async function pushCloudState(){
   if(cloudSaving)return;
   cloudSaving=true;
@@ -1584,6 +1744,10 @@ function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.
 function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
 function openModal(p=null){$('#modalTitle').textContent=p?'문제 수정':'문제 등록';$('#pId').value=p?.id||'';$('#pSubject').value=p?.subject||SUBJECTS[0];$('#pExam').value=p?.exam||'';$('#pYear').value=p?.year||'';$('#pNo').value=p?.no||'';$('#pUnit').value=p?.unit||'';$('#pSubunit').value=p?.subunit||'';$('#pType').value=p?.type||'';$('#pAnswer').value=p?.answer||'';$('#pQuestion').value=p?.question||'';$('#pChoices').value=p?.choices||'';$('#pExplanation').value=p?.explanation||'';$('#modal').classList.remove('hidden')}
 function closeModal(){$('#modal').classList.add('hidden')}
+const fullResetOpen=$('#openFullReset');if(fullResetOpen)fullResetOpen.onclick=openFullResetR248;
+const fullResetClose=$('#closeFullReset');if(fullResetClose)fullResetClose.onclick=closeFullResetR248;
+const fullResetCancel=$('#cancelFullReset');if(fullResetCancel)fullResetCancel.onclick=closeFullResetR248;
+const fullResetExec=$('#executeFullReset');if(fullResetExec)fullResetExec.onclick=executeFullResetR248;
 $('#addBtn').onclick=()=>openModal();$('#closeModal').onclick=closeModal;$('#cancelModal').onclick=closeModal;
 window.editProblem=id=>openModal(problems.find(p=>p.id===id));window.deleteProblem=id=>{if(confirm('이 문제를 삭제할까요?')){problems=problems.filter(p=>p.id!==id);save();renderBank();refreshFilters()}};
 $('#saveProblem').onclick=()=>{const data={id:$('#pId').value||uid(),subject:$('#pSubject').value,exam:$('#pExam').value.trim(),year:+$('#pYear').value,no:+$('#pNo').value||'',unit:$('#pUnit').value.trim(),subunit:$('#pSubunit').value.trim(),type:$('#pType').value.trim(),answer:$('#pAnswer').value.trim(),question:$('#pQuestion').value.trim(),choices:$('#pChoices').value.trim(),explanation:$('#pExplanation').value.trim(),updatedAt:new Date().toISOString()};if(!data.subject||!data.exam||!data.year||!data.answer||!data.question){alert('과목, 시험 구분, 연도, 정답, 문제 원문은 필수입니다.');return}const i=problems.findIndex(p=>p.id===data.id);if(i>=0)problems[i]={...problems[i],...data};else problems.push(data);save();closeModal();renderBank();refreshFilters();window.examBankLawGuard?.onBankUpload([data.id],'개별 등록·수정');};
