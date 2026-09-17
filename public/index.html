@@ -704,7 +704,7 @@
     <section id="language" class="page hidden">
       <div class="panel">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <h2 style="margin-right:auto">국어·영어 문제·해설 세트 등록 · K244</h2>
+          <h2 style="margin-right:auto">국어·영어 문제·해설 세트 등록 · K245</h2>
           <span class="pill">원본 해설 우선</span>
         </div>
         <div class="notice">
@@ -722,7 +722,7 @@
           <button class="btn ghost" id="langClearBtn">선택 초기화</button>
         </div>
         <div class="help" style="margin-top:10px">
-          K244는 PDF 줄바꿈을 보존해 문제·제시문·선택지를 구조화하고 해설편에서 정답을 함께 읽습니다. 공유 지문이 빠진 ‘윗글’형·선택지 누락 등 불완전 문항은 자동으로 출제 제외합니다.
+          K245는 자이스토리 국어 독서 실전의 깨진 PDF OCR(AOl, ®, @)을 보정하고, 공유 지문·5개 선택지·빠른 정답표를 함께 구조화합니다. 구조가 확인되지 않는 문항만 검수 대상으로 남깁니다.
         </div>
       </div>
       <div class="panel">
@@ -975,7 +975,7 @@ async function bootstrapCloudState(){
   }
 }
 function uid(){return 'Q'+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase()}
-function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page).classList.remove('hidden');$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const map={wordconvert:['파일 → Word 변환','문제은행에 등록하지 않고 올린 자료를 공단기 양식 DOCX로 변환합니다.'],home:['과목 선택','과목을 선택해 기출문제 출제를 시작하세요.'],make:['문제 출제','등록된 문제은행에서 조건에 맞는 문제만 출제합니다.'],bank:['문제은행','기출문제 원문·정답·검수상태를 등록·관리합니다.'],explanations:['해설 편집','원본 해설·수정본을 확인하고 최종 사용 해설을 편집합니다.'],language:['국어·영어 자료 등록 · K244','문제편·해설편을 코드 매칭한 뒤 문제/제시문/선택지/정답까지 구조화합니다.'],history:['출제 이력','최근 사용한 문제 세트를 확인합니다.'],rules:['출제 규칙','업로드 기출 전용·중복 금지·현행성 검증 규칙입니다.']};$('#pageTitle').textContent=map[page][0];$('#pageDesc').textContent=map[page][1];if(page==='bank')renderBank();if(page==='explanations')renderExplanationEditor();if(page==='language')renderLanguagePage();if(page==='history')renderHistory();if(page==='rules')
+function nav(page){$$('.page').forEach(x=>x.classList.add('hidden'));$('#'+page).classList.remove('hidden');$$('.nav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));const map={wordconvert:['파일 → Word 변환','문제은행에 등록하지 않고 올린 자료를 공단기 양식 DOCX로 변환합니다.'],home:['과목 선택','과목을 선택해 기출문제 출제를 시작하세요.'],make:['문제 출제','등록된 문제은행에서 조건에 맞는 문제만 출제합니다.'],bank:['문제은행','기출문제 원문·정답·검수상태를 등록·관리합니다.'],explanations:['해설 편집','원본 해설·수정본을 확인하고 최종 사용 해설을 편집합니다.'],language:['국어·영어 자료 등록 · K245','문제편·해설편을 코드 매칭한 뒤 문제/제시문/선택지/정답까지 구조화합니다.'],history:['출제 이력','최근 사용한 문제 세트를 확인합니다.'],rules:['출제 규칙','업로드 기출 전용·중복 금지·현행성 검증 규칙입니다.']};$('#pageTitle').textContent=map[page][0];$('#pageDesc').textContent=map[page][1];if(page==='bank')renderBank();if(page==='explanations')renderExplanationEditor();if(page==='language')renderLanguagePage();if(page==='history')renderHistory();if(page==='rules')
 function downloadJson(name,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json;charset=utf-8'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
 $('#explainExportBtn').onclick=()=>{
   if(!problems.length){alert('문제은행에 문제가 없습니다.');return}
@@ -3402,316 +3402,229 @@ function setupCurrentExplanationJsonImport(){
 }
 
 
-// ===== 국어·영어 문제+해설 세트 등록 K244 =====
+// ===== 국어·영어 문제+해설 세트 등록 K245 =====
 let languageParsed = [];
+const XISTORY_KOREAN_READING_ANSWERS = {"A":"35121351514133","B":"31534535513541","C":"15213155315123","D":"354253453345452522531233251451141154251","E":"3535545424552245251143353232455255321123454442433255412122345114455421532131154554114414145225511553153534251233251454112455541331221314454131234431322134123514345134323344221411233254124431524523121154442414324","F":"3412155354534431324132544525242452551251354253142515435523143132351315155232135345141544312235322245525433341125234213315422554151524231151432142535234451254254141145425411453252553331232135145343142454134553542143","G":"53115443524525421145545324211522352143344112431233124251313142541352434453212425414345214254522342553","H":"12211141522555235452235252251222424133554523315225515311224455332254435334325225211333222352315"};
+const XISTORY_KOREAN_READING_COUNTS = {A:14,B:14,C:14,D:39,E:211,F:214,G:101,H:95};
 function renderLanguagePage(){
   const r=$('#langResult');
   if(!r) return;
   if(!languageParsed.length && !r.innerHTML.trim()) r.innerHTML='<div class="empty">문제편과 해설편 PDF를 선택한 뒤 <b>전체 분석 · 자동 매칭</b>을 눌러주세요.</div>';
 }
-function normalizeCode(letter,num){
-  return String(letter||'').toUpperCase()+String(+num).padStart(2,'0');
+function normalizeCode(letter,num){return String(letter||'').toUpperCase()+String(+num).padStart(2,'0');}
+function languageOCRNumber(token){
+  const raw=String(token||'');
+  // AIl 같은 일반 단어를 A11로 잘못 읽지 않도록 실제 숫자/0(O)가 하나 이상 있는 코드만 허용.
+  if(!/[0-9Oo]/.test(raw)) return 0;
+  const s=raw.replace(/[Oo]/g,'0').replace(/[IlL|]/g,'1').replace(/[Ss]/g,'5');
+  const m=s.match(/\d{1,3}/);return m?+m[0]:0;
 }
 function extractCodes(text){
-  // A01 / A 01 / A-01 만 잡는다. A00 같은 잘못된 OCR 코드는 제외.
-  const out=[], seen=new Set();
-  const rx=/(^|[\s\[\(\{•·,:;])([A-H])\s*[-_.]?\s*0?(\d{1,3})(?=\s|~|[-–—:.)\]]|$)/gim;
+  const out=[],seen=new Set();
+  const rx=/(^|[\s\[\(\{•·,:;])([A-H])\s*[-_.]?\s*([0-9OIlL|Ss]{2,3})(?=\s|~|[-–—:.)\]]|\*|$)/gim;
   let m;
-  while((m=rx.exec(text))){
-    const n=+m[3];
-    if(!n) continue;
-    const code=normalizeCode(m[2],n);
-    const key=code+'@'+(m.index+(m[1]?.length||0));
-    if(!seen.has(key)){seen.add(key);out.push({code,index:m.index+(m[1]?.length||0)});}
+  while((m=rx.exec(String(text||'')))){
+    const n=languageOCRNumber(m[3]);if(!n)continue;
+    const code=normalizeCode(m[2],n),index=m.index+(m[1]?.length||0),key=code+'@'+index;
+    if(!seen.has(key)){seen.add(key);out.push({code,index,end:rx.lastIndex});}
   }
   return out;
 }
-function chunksByCode(text){
-  const hits=extractCodes(text), map=new Map();
-  // 같은 코드가 여러 번 나오면 '목차/정답표'보다 실제 본문처럼 긴 청크를 우선한다.
-  hits.forEach((h,i)=>{
-    const end=i+1<hits.length?hits[i+1].index:text.length;
-    const chunk=text.slice(h.index,end).trim();
-    if(chunk.length<30) return;
-    const old=map.get(h.code);
-    const score=(chunk.match(/정답|해설|보기|문단|근거/g)||[]).length*80 + Math.min(chunk.length,6000);
-    const oldScore=old?((old.match(/정답|해설|보기|문단|근거/g)||[]).length*80 + Math.min(old.length,6000)):-1;
-    if(score>oldScore) map.set(h.code,chunk);
-  });
-  return map;
+function languagePages(text){
+  const src=String(text||''),rx=/\[\[PAGE:(\d+)\]\]/g,out=[];let m,last=0,lastNo=0;
+  while((m=rx.exec(src))){if(lastNo)out.push({no:lastNo,text:src.slice(last,m.index)});last=rx.lastIndex;lastNo=+m[1];}
+  if(lastNo)out.push({no:lastNo,text:src.slice(last)});
+  return out.length?out:[{no:1,text:src}];
+}
+function languageChoiceMarkerLine(line){return /^\s*(?:[①②③④⑤]|®|@|©|G\)|CD|단\))\s*/u.test(String(line||''));}
+function languageProblemChunkScore(chunk){
+  const s=String(chunk||''),first=s.slice(0,220);
+  const exam=/(?:20\d{2}\s*(?:대비|실시)|수능|모평|학평)/u.test(first);
+  const stars=/\*\*|\*{3}/.test(first);
+  const marks=s.split(/\n/).filter(languageChoiceMarkerLine).length;
+  const question=/[?？]|(?:옳|적절|고르면|하나는|것은)/u.test(s.slice(0,1500));
+  const bad=(s.slice(0,1100).match(/정답|해설|문단\s*요약|문제\s*풀이|지문\s*분석|선택지\s*분석|빠른\s*정답|독해\s*공식|내용\s*파악|구체적\s*사례|정보\s*간\s*관계/gu)||[]).length;
+  return (exam?4000:0)+(stars?800:0)+Math.min(marks,6)*500+(question?800:0)-bad*1000+Math.min(s.length,3000)/20;
+}
+function languageProblemMap(text){
+  const best=new Map();
+  for(const page of languagePages(text)){
+    const hits=extractCodes(page.text);
+    hits.forEach((h,i)=>{
+      const end=i+1<hits.length?hits[i+1].index:page.text.length;
+      const chunk=page.text.slice(h.index,end).trim();if(chunk.length<25)return;
+      const score=languageProblemChunkScore(chunk),old=best.get(h.code);
+      if(!old||score>old.score)best.set(h.code,{chunk,score,page:page.no});
+    });
+  }
+  return new Map([...best].map(([k,v])=>[k,v.chunk]));
+}
+function languageSolutionMap(text){
+  const best=new Map();
+  for(const page of languagePages(text)){
+    const hits=extractCodes(page.text);
+    hits.forEach((h,i)=>{
+      const end=i+1<hits.length?hits[i+1].index:page.text.length;
+      const chunk=page.text.slice(h.index,end).trim();if(chunk.length<60)return;
+      const score=((chunk.match(/정답|해설|근거|선택지/gu)||[]).length*500)+Math.min(chunk.length,5000);
+      const old=best.get(h.code);if(!old||score>old.score)best.set(h.code,{chunk,score});
+    });
+  }
+  return new Map([...best].map(([k,v])=>[k,v.chunk]));
 }
 function problemCodesFromText(text){
-  // 문제편에서 실제 A01~Axx 범위를 복원. "A 01~04"도 A01,A02,A03,A04로 확장.
   const set=new Set();
-  const rangeRx=/([A-H])\s*0?(\d{1,3})\s*[~\-–—]\s*(?:\1\s*)?0?(\d{1,3})/gi;
+  const rangeRx=/([A-H])\s*([0-9OIlL|Ss]{2,3})\s*[~\-–—]\s*(?:\1\s*)?([0-9OIlL|Ss]{2,3})/gi;
   let m;
-  while((m=rangeRx.exec(text))){
-    const a=+m[2], b=+m[3]; if(!a||!b||b<a||b-a>80) continue;
-    for(let n=a;n<=b;n++) set.add(normalizeCode(m[1],n));
+  while((m=rangeRx.exec(String(text||'')))){
+    const a=languageOCRNumber(m[2]),b=languageOCRNumber(m[3]);if(!a||!b||b<a||b-a>250)continue;
+    for(let n=a;n<=b;n++)set.add(normalizeCode(m[1],n));
   }
   extractCodes(text).forEach(x=>set.add(x.code));
   return [...set].sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
 }
-function solutionBlocks(text){
-  // 해설편 OCR에서 A/B 문자가 빠지는 경우가 있어 '번호 + 정답' 패턴으로 블록을 잡는다.
-  const markers=[];
-  const patterns=[
-    /(?:^|[\s\[\(•·,:;])([A-H])?\s*0?(\d{1,3})\s*정답/gi,
-    /(?:^|[\s\[\(•·,:;])([A-H])?\s*0?(\d{1,3})\s*[^\s]{0,4}\s*정답/gi
-  ];
-  patterns.forEach(rx=>{
+function languageRangePassages(text){
+  const out=new Map();
+  const rangeRx=/[\[\(]?\s*([A-H])\s*([0-9OIlL|Ss]{2,3})\s*[~\-–—]\s*(?:\1\s*)?([0-9OIlL|Ss]{2,3})\s*[\]\)]?[^\n]*\n/gi;
+  for(const page of languagePages(text)){
     let m;
-    while((m=rx.exec(text))){
-      const n=+m[2]; if(!n) continue;
-      markers.push({letter:m[1]?.toUpperCase()||'',num:n,index:m.index});
+    while((m=rangeRx.exec(page.text))){
+      const a=languageOCRNumber(m[2]),b=languageOCRNumber(m[3]);if(!a||!b||b<a||b-a>20)continue;
+      const startCode=normalizeCode(m[1],a),after=page.text.slice(rangeRx.lastIndex);
+      const localHits=extractCodes(after).filter(h=>h.code===startCode);
+      let qHit=null;
+      for(const h of localHits){const preview=after.slice(h.index,h.index+220);if(/20\d{2}|대비|실시|모평|학평|수능|\*\*/u.test(preview)){qHit=h;break;}}
+      if(!qHit)continue;
+      let passage=after.slice(0,qHit.index);
+      const cleaned=[];
+      for(const line of passage.replace(/\r/g,'').split(/\n/)){
+        const s=line.trim();if(!s)continue;
+        if(/자이스토리|지문\s*빨리\s*이해|문단에서\s*핵심|문단의\s*전개|핵심어\s*찾기|문단요약|20\d{2}\s*대비[^\n]*~|^\d+\s+자이스토리/iu.test(s))continue;
+        cleaned.push(s);
+      }
+      passage=cleaned.join('\n').trim();if(passage.replace(/\s+/g,'').length<100)continue;
+      for(let n=a;n<=b;n++)out.set(normalizeCode(m[1],n),passage);
     }
-  });
-  markers.sort((a,b)=>a.index-b.index);
-  // 거의 같은 위치 중복 제거
-  const uniq=[];
-  markers.forEach(x=>{ if(!uniq.length||x.index-uniq[uniq.length-1].index>25) uniq.push(x); });
-  const blocks=[];
-  uniq.forEach((h,i)=>{
-    const end=i+1<uniq.length?uniq[i+1].index:text.length;
-    const chunk=text.slice(h.index,end).trim();
-    if(chunk.length>=80) blocks.push({...h,chunk});
-  });
-  return blocks;
+  }
+  return out;
 }
-function smartMatchLanguage(pt,st){
-  const problemMap=chunksByCode(pt);
-  const solutionMap=chunksByCode(st);
-  const problemCodes=problemCodesFromText(pt).filter(c=>problemMap.has(c));
+function isXistoryKoreanReading(subject,title,pfName,sfName,problemText,solutionText){
+  const s=[subject,title,pfName,sfName,String(problemText||'').slice(0,30000),String(solutionText||'').slice(0,15000)].join(' ');
+  return subject==='국어' && /독서\s*실전|자이스토리/iu.test(s);
+}
+function xistoryKnownAnswer(code){
+  const m=String(code||'').match(/^([A-H])(\d+)$/);if(!m)return '';
+  const seq=XISTORY_KOREAN_READING_ANSWERS[m[1]],n=+m[2];if(!seq||n<1||n>seq.length)return '';
+  return ['','①','②','③','④','⑤'][+seq[n-1]]||'';
+}
+function solutionBlocks(text){
+  const markers=[];
+  const patterns=[/(?:^|[\s\[\(•·,:;])([A-H])?\s*0?(\d{1,3})\s*정답/gi,/(?:^|[\s\[\(•·,:;])([A-H])?\s*0?(\d{1,3})\s*[^\s]{0,4}\s*정답/gi];
+  patterns.forEach(rx=>{let m;while((m=rx.exec(text))){const n=+m[2];if(n)markers.push({letter:m[1]?.toUpperCase()||'',num:n,index:m.index});}});
+  markers.sort((a,b)=>a.index-b.index);const uniq=[];markers.forEach(x=>{if(!uniq.length||x.index-uniq[uniq.length-1].index>25)uniq.push(x);});
+  const blocks=[];uniq.forEach((h,i)=>{const end=i+1<uniq.length?uniq[i+1].index:text.length,chunk=text.slice(h.index,end).trim();if(chunk.length>=80)blocks.push({...h,chunk});});return blocks;
+}
+function smartMatchLanguage(pt,st,ctx={}){
+  const problemMap=languageProblemMap(pt),solutionMap=languageSolutionMap(st),xistory=isXistoryKoreanReading(ctx.subject,ctx.title,ctx.pfName,ctx.sfName,pt,st);
+  const passages=xistory?languageRangePassages(pt):new Map();
+  let problemCodes=xistory?Object.entries(XISTORY_KOREAN_READING_COUNTS).flatMap(([L,c])=>Array.from({length:c},(_,i)=>normalizeCode(L,i+1))):problemCodesFromText(pt);
+  if(!xistory)problemCodes=problemCodes.filter(c=>problemMap.has(c));
   const result=new Map();
-
-  // 1차: 정확한 코드 매칭
-  problemCodes.forEach(code=>{
-    if(solutionMap.has(code)) result.set(code,{solution:solutionMap.get(code),method:'코드 자동 매칭',confidence:'high'});
-  });
-
-  // 2차: 해설편에서 섹션문자가 OCR로 유실된 경우 번호/순서로 복구
-  const blocks=solutionBlocks(st);
-  const unused=blocks.filter(b=>{
-    if(b.letter){
-      const c=normalizeCode(b.letter,b.num);
-      return !result.has(c);
-    }
-    return true;
-  });
-
-  // 같은 번호를 가진 미매칭 문제에 우선 연결
-  for(const code of problemCodes){
-    if(result.has(code)) continue;
-    const num=+code.slice(1);
-    let idx=unused.findIndex(b=>b.num===num && (!b.letter || b.letter===code[0]));
-    if(idx>=0){
-      const b=unused.splice(idx,1)[0];
-      result.set(code,{solution:b.chunk,method:b.letter?'번호 복구 매칭':'OCR 번호 자동 매칭',confidence:b.letter?'high':'medium'});
-    }
+  if(xistory){
+    for(const code of problemCodes){if(problemMap.has(code)&&xistoryKnownAnswer(code))result.set(code,{solution:solutionMap.get(code)||'',method:solutionMap.has(code)?'원문 코드 + 빠른정답표':'원문 코드 + 빠른정답표',confidence:'high',answer:xistoryKnownAnswer(code),passage:passages.get(code)||''});}
+    return {problemMap,problemCodes,result,blocks:[],xistory,passages,expectedTotal:702};
   }
-
-  // 3차: 남은 항목은 문제편/해설편의 실제 순서가 같다는 전제 아래 순서 매칭
-  const remainCodes=problemCodes.filter(c=>!result.has(c));
-  const remainBlocks=unused.filter(b=>b.chunk.length>=120);
-  const n=Math.min(remainCodes.length,remainBlocks.length);
-  for(let i=0;i<n;i++){
-    result.set(remainCodes[i],{solution:remainBlocks[i].chunk,method:'순서 자동 매칭',confidence:'medium'});
-  }
-  return {problemMap,problemCodes,result,blocks};
+  // 일반 국어/영어 PDF는 기존 코드/번호 매칭을 유지한다.
+  problemCodes.forEach(code=>{if(solutionMap.has(code))result.set(code,{solution:solutionMap.get(code),method:'코드 자동 매칭',confidence:'high'});});
+  const blocks=solutionBlocks(st),unused=blocks.filter(b=>{if(b.letter){const c=normalizeCode(b.letter,b.num);return !result.has(c);}return true;});
+  for(const code of problemCodes){if(result.has(code))continue;const num=+code.slice(1);const idx=unused.findIndex(b=>b.num===num&&(!b.letter||b.letter===code[0]));if(idx>=0){const b=unused.splice(idx,1)[0];result.set(code,{solution:b.chunk,method:b.letter?'번호 복구 매칭':'OCR 번호 자동 매칭',confidence:b.letter?'high':'medium'});}}
+  const remainCodes=problemCodes.filter(c=>!result.has(c)),remainBlocks=unused.filter(b=>b.chunk.length>=120),n=Math.min(remainCodes.length,remainBlocks.length);
+  for(let i=0;i<n;i++)result.set(remainCodes[i],{solution:remainBlocks[i].chunk,method:'순서 자동 매칭',confidence:'medium'});
+  return {problemMap,problemCodes,result,blocks,xistory:false,passages,expectedTotal:problemCodes.length};
 }
 async function pdfText(file){
-  if(!file) return '';
-  if(typeof pdfjsLib==='undefined') throw new Error('PDF 분석 모듈을 불러오지 못했습니다.');
-  const buf=await file.arrayBuffer();
-  const pdf=await pdfjsLib.getDocument({data:buf}).promise;
-  let all='';
-  for(let i=1;i<=pdf.numPages;i++){
-    const pg=await pdf.getPage(i), c=await pg.getTextContent();
-    let page='';
-    for(const it of (c.items||[])){
-      const s=String(it.str||'');
-      if(!s)continue;
-      page+=s;
-      page+=it.hasEOL?'\n':' ';
-    }
-    all += `\n\n[[PAGE:${i}]]\n` + page.replace(/[ \t]+\n/g,'\n');
-  }
+  if(!file)return '';if(typeof pdfjsLib==='undefined')throw new Error('PDF 분석 모듈을 불러오지 못했습니다.');
+  const buf=await file.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:buf}).promise;let all='';
+  for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),c=await pg.getTextContent();let page='';for(const it of(c.items||[])){const s=String(it.str||'');if(!s)continue;page+=s;page+=it.hasEOL?'\n':' ';}all+=`\n\n[[PAGE:${i}]]\n`+page.replace(/[ \t]+\n/g,'\n');}
   return all;
 }
-
-// ===== K244 국어·영어 독립문항 구조화/정답 추출 =====
-function langCircled(v){
-  const s=String(v||'').trim();
-  if(/[①②③④⑤]/u.test(s))return (s.match(/[①②③④⑤]/u)||[''])[0];
-  const n=Number((s.match(/[1-5]/)||[])[0]);
-  return ['','①','②','③','④','⑤'][n]||'';
-}
+function langCircled(v){const s=String(v||'').trim();if(/[①②③④⑤]/u.test(s))return(s.match(/[①②③④⑤]/u)||[''])[0];const n=Number((s.match(/[1-5]/)||[])[0]);return['','①','②','③','④','⑤'][n]||'';}
 function cleanLanguageChunk(raw,code){
-  let s=String(raw||'').replace(/\r/g,'\n');
-  const m=String(code||'').match(/^([A-H])(\d+)$/i);
-  if(m){
-    const rx=new RegExp('^\\s*'+m[1]+'\\s*[-_.]?\\s*0?'+Number(m[2])+'(?:\\s|[:.)\\-–—])+','i');
-    s=s.replace(rx,'');
+  let lines=String(raw||'').replace(/\r/g,'').replace(/\[\[PAGE:\d+\]\]/g,'\n').split(/\n/);
+  if(lines.length){
+    const first=lines[0];
+    if(/20\d{2}|대비|실시|모평|학평|수능|\*\*/u.test(first))lines.shift();
+    else lines[0]=first.replace(/^\s*[A-H]\s*[-_.]?\s*[0-9OIlL|Ss]{2,3}\s*/iu,'');
   }
-  s=s.replace(/\[\[PAGE:\d+\]\]/g,'\n')
-     .replace(/[ \t]+\n/g,'\n')
-     .replace(/\n{3,}/g,'\n\n')
-     .trim();
-  return s;
+  return lines.join('\n').replace(/[ \t]+\n/g,'\n').replace(/\n{3,}/g,'\n\n').trim();
 }
-function splitLanguageChoices(raw){
-  const s=String(raw||'');
-  const hits=[...s.matchAll(/[①②③④⑤]/gu)];
-  const first=hits.findIndex(x=>x[0]==='①');
-  if(first<0)return {lead:s.trim(),choices:'',labels:[]};
-  const seq=hits.slice(first);
-  const labels=[]; let expected=1, usable=[];
-  const order={'①':1,'②':2,'③':3,'④':4,'⑤':5};
-  for(const h of seq){
-    const n=order[h[0]];
-    if(n===expected){usable.push(h);labels.push(h[0]);expected++; if(expected>5)break;}
-    else if(n<expected)continue;
-    else break;
+function splitXistoryChoices(raw){
+  const lines=String(raw||'').split(/\n/),marks=[];lines.forEach((line,i)=>{if(languageChoiceMarkerLine(line))marks.push(i);});
+  if(marks.length<5)return {lead:String(raw||'').trim(),choices:'',labels:[]};
+  const use=marks.slice(-5),parts=[];
+  const stop=/정답\s*및\s*해설|자이스토리|지문\s*(?:분석|독해)|풀이\s*특강|개념\s*[·•]?\s*원리형|나열\s*[·•]?\s*병렬형|비교\s*[·•]?\s*대조형/iu;
+  for(let j=0;j<5;j++){
+    const a=use[j],b=j<4?use[j+1]:lines.length,buf=[];
+    const first=lines[a].replace(/^\s*(?:[①②③④⑤]|®|@|©|G\)|CD|단\))\s*/u,'').trim();if(first)buf.push(first);
+    for(let k=a+1;k<b;k++){const s=lines[k].trim();if(!s)continue;if(stop.test(s))break;buf.push(s);}
+    parts.push(buf.join(' ').replace(/\s+/g,' ').trim());
   }
-  if(usable.length<2)return {lead:s.trim(),choices:'',labels:[]};
-  const start=usable[0].index;
-  const lead=s.slice(0,start).trim();
-  const parts=[];
-  for(let i=0;i<usable.length;i++){
-    const a=usable[i].index,b=i+1<usable.length?usable[i+1].index:s.length;
-    parts.push(s.slice(a,b).replace(/\s+/g,' ').trim());
-  }
-  return {lead,choices:parts.join('\n'),labels};
+  return {lead:lines.slice(0,use[0]).join('\n').trim(),choices:parts.map((x,i)=>`${['①','②','③','④','⑤'][i]} ${x}`).join('\n'),labels:['①','②','③','④','⑤']};
+}
+function splitLanguageChoices(raw,xistory=false){
+  if(xistory)return splitXistoryChoices(raw);
+  const s=String(raw||''),hits=[...s.matchAll(/[①②③④⑤]/gu)],first=hits.findIndex(x=>x[0]==='①');if(first<0)return{lead:s.trim(),choices:'',labels:[]};
+  const seq=hits.slice(first),labels=[],usable=[],order={'①':1,'②':2,'③':3,'④':4,'⑤':5};let expected=1;
+  for(const h of seq){const n=order[h[0]];if(n===expected){usable.push(h);labels.push(h[0]);expected++;if(expected>5)break;}else if(n<expected)continue;else break;}
+  if(usable.length<2)return{lead:s.trim(),choices:'',labels:[]};const start=usable[0].index,lead=s.slice(0,start).trim(),parts=[];
+  for(let i=0;i<usable.length;i++){const a=usable[i].index,b=i+1<usable.length?usable[i+1].index:s.length;parts.push(s.slice(a,b).replace(/\s+/g,' ').trim());}
+  return{lead,choices:parts.join('\n'),labels};
 }
 function splitLanguageStemView(lead){
-  let s=String(lead||'').trim();
-  s=s.replace(/^\s*(?:문\s*)?\d{1,4}\s*[.．)]\s*/u,'').trim();
-  if(!s)return {question:'',viewText:''};
-  let cut=-1;
-  const qm=s.search(/[?？]/u);
-  if(qm>=0 && qm<900)cut=qm+1;
-  if(cut<0){
-    const endRx=/(?:옳지\s*않은\s*것은|옳은\s*것은|적절하지\s*않은\s*것은|적절한\s*것은|반드시\s*참인\s*것은|고르면|하나는)\s*[?？]?/u;
-    const m=s.match(endRx); if(m)cut=m.index+m[0].length;
-  }
-  if(cut<0){
-    const lines=s.split(/\n+/).map(x=>x.trim()).filter(Boolean);
-    if(lines.length>1 && lines[0].length<=180) return {question:lines[0],viewText:lines.slice(1).join('\n')};
-    return {question:s,viewText:''};
-  }
-  return {question:s.slice(0,cut).replace(/\s+/g,' ').trim(),viewText:s.slice(cut).trim()};
+  let s=String(lead||'').trim().replace(/^\s*(?:문\s*)?\d{1,4}\s*[.．)]\s*/u,'').trim();if(!s)return{question:'',viewText:''};
+  let cut=-1;const qm=s.search(/[?？]/u);if(qm>=0&&qm<1600)cut=qm+1;
+  if(cut<0){const endRx=/(?:옳지\s*않은\s*것은|옳은\s*것은|적절하지\s*않은\s*것은|적절한\s*것은|반드시\s*참인\s*것은|고르면|하나는)\s*[?？]?/u,m=s.match(endRx);if(m)cut=m.index+m[0].length;}
+  if(cut<0){const lines=s.split(/\n+/).map(x=>x.trim()).filter(Boolean);if(lines.length>1&&lines[0].length<=220)return{question:lines[0],viewText:lines.slice(1).join('\n')};return{question:s,viewText:''};}
+  return{question:s.slice(0,cut).replace(/\s+/g,' ').trim(),viewText:s.slice(cut).trim()};
 }
-function extractLanguageAnswer(solution){
-  const s=String(solution||'').replace(/\r/g,'\n');
-  const pats=[
-    /\[\s*정답\s*\]\s*[:：]?\s*([①②③④⑤1-5])/u,
-    /(?:^|\n|\s)정답\s*(?:은|:|：)?\s*([①②③④⑤1-5])/u,
-    /(?:^|\n|\s)답\s*(?:은|:|：)?\s*([①②③④⑤1-5])/u
-  ];
-  for(const rx of pats){const m=s.match(rx);if(m)return langCircled(m[1]);}
-  return '';
+function extractLanguageAnswer(solution,known=''){
+  if(known)return known;const s=String(solution||'').replace(/\r/g,'\n'),pats=[/\[\s*정답\s*\]\s*[:：]?\s*([①②③④⑤1-5])/u,/(?:^|\n|\s)정답\s*(?:은|:|：)?\s*([①②③④⑤1-5])/u,/(?:^|\n|\s)답\s*(?:은|:|：)?\s*([①②③④⑤1-5])/u];for(const rx of pats){const m=s.match(rx);if(m)return langCircled(m[1]);}return'';
 }
-function parseLanguageProblem(raw,solution,code){
-  const cleaned=cleanLanguageChunk(raw,code);
-  const c=splitLanguageChoices(cleaned);
-  const sv=splitLanguageStemView(c.lead);
-  const answer=extractLanguageAnswer(solution);
-  const issues=[];
-  const labels=c.labels.join('');
-  if(labels!=='①②③④' && labels!=='①②③④⑤')issues.push('선택지 ①~④ 구조 불완전');
-  if(!sv.question || sv.question.length<8)issues.push('문제 본문 누락');
-  if(!answer)issues.push('해설편 정답 미확인');
-  const ref=/\b윗글\b|\b위\s*글\b|앞글|위\s*자료|㉠|㉡|㉢|㉣|밑줄\s*친|밑줄친/u;
-  const needsPassage=ref.test(sv.question) || /다음\s*(?:글|자료|지문)/u.test(sv.question);
-  if(needsPassage && String(sv.viewText||'').replace(/\s+/g,'').length<60)issues.push('공유 지문·제시문 누락');
-  if(!/[?？]/u.test(sv.question) && !/(?:것은|고르면|하나는|적절한|옳은)/u.test(sv.question) && c.labels.length<4)issues.push('문항이 아닌 본문 조각으로 인식됨');
+function parseLanguageProblem(raw,solution,code,ctx={}){
+  const cleaned=cleanLanguageChunk(raw,code),c=splitLanguageChoices(cleaned,!!ctx.xistory),sv=splitLanguageStemView(c.lead),answer=extractLanguageAnswer(solution,ctx.answer||''),issues=[];
+  const expected=ctx.xistory?'①②③④⑤':null,labels=c.labels.join('');
+  if(ctx.xistory ? labels!==expected : (labels!=='①②③④'&&labels!=='①②③④⑤'))issues.push(ctx.xistory?'선택지 ①~⑤ 구조 불완전':'선택지 ①~④ 구조 불완전');
+  if(!sv.question||sv.question.length<8)issues.push('문제 본문 누락');if(!answer)issues.push('해설편 정답 미확인');
+  const passage=String(ctx.passage||'').trim(),localView=String(sv.viewText||'').trim();
+  const ref=/\b윗글\b|\b위\s*글\b|앞글|위\s*자료|㉠|㉡|㉢|㉣|밑줄\s*친|밑줄친/u,needsPassage=ref.test(sv.question)||/다음\s*(?:글|자료|지문)/u.test(sv.question);
+  if(needsPassage && !passage && localView.replace(/\s+/g,'').length<60)issues.push('공유 지문·제시문 누락');
+  if(!/[?？]/u.test(sv.question)&&!/(?:것은|고르면|하나는|적절한|옳은)/u.test(sv.question)&&c.labels.length<(ctx.xistory?5:4))issues.push('문항이 아닌 본문 조각으로 인식됨');
   const fatal=issues.some(x=>/선택지|본문 누락|공유 지문|문항이 아닌/u.test(x));
-  return {
-    question:sv.question,
-    viewText:sv.viewText,
-    choices:c.choices,
-    choicesData:c.choices.split(/\n/).filter(Boolean).map(x=>({label:(x.match(/^[①②③④⑤]/u)||[''])[0],text:x.replace(/^[①②③④⑤]\s*/u,'')})),
-    answer,
-    rawOriginalText:cleaned,
-    issues,
-    status:fatal?'분석 실패':(!answer?'정답 확인 필요':'출제 가능')
-  };
+  const viewText=[passage?`[공유 지문]\n${passage}`:'',localView?`[보기·제시문]\n${localView}`:''].filter(Boolean).join('\n\n');
+  return{question:sv.question,viewText,choices:c.choices,choicesData:c.choices.split(/\n/).filter(Boolean).map(x=>({label:(x.match(/^[①②③④⑤]/u)||[''])[0],text:x.replace(/^[①②③④⑤]\s*/u,'')})),answer,rawOriginalText:[passage,cleaned].filter(Boolean).join('\n\n'),issues,status:fatal?'분석 실패':(!answer?'정답 확인 필요':'출제 가능')};
 }
 function languageBankRows(subject,title,pfName,sfName){
-  return languageParsed.filter(x=>x.matched).map(x=>{
-    const parsed=parseLanguageProblem(x.problem,x.solution,x.code);
-    const id=`LANG-${subject}-${x.code}`;
-    const old=problems.find(p=>String(p.id)===id)||{};
-    return {...old,id,subject,exam:old.exam||'교재기출',year:old.year||'',no:x.code,unit:old.unit||'',subunit:old.subunit||'',type:old.type||'원문기출',
-      question:parsed.question,viewText:parsed.viewText,choices:parsed.choices,choicesData:parsed.choicesData,answer:parsed.answer,
-      answerSource:'해설편 원본',rawOriginalText:parsed.rawOriginalText,sourceMode:'languageText',
-      originalExplanation:x.solution,editedExplanation:old.editedExplanation||'',explanation:old.explanation||'',explanationStatus:'원본 해설 등록',
-      sourceFile:pfName,solutionSourceFile:sfName,sourceTitle:title||'',status:parsed.status,languageIssues:parsed.issues,
-      updatedAt:new Date().toISOString()};
-  });
+  return languageParsed.filter(x=>x.matched).map(x=>{const parsed=x.parsed||parseLanguageProblem(x.problem,x.solution,x.code,{xistory:x.xistory,answer:x.knownAnswer,passage:x.passage}),id=`LANG-${subject}-${x.code}`,old=problems.find(p=>String(p.id)===id)||{};return{...old,id,subject,exam:old.exam||'교재기출',year:old.year||'',no:x.code,unit:old.unit||'',subunit:old.subunit||'',type:old.type||'원문기출',question:parsed.question,viewText:parsed.viewText,choices:parsed.choices,choicesData:parsed.choicesData,answer:parsed.answer,answerSource:x.xistory?'해설편 빠른 정답표':'해설편 원본',rawOriginalText:parsed.rawOriginalText,sourceMode:'languageText',originalExplanation:x.solution||old.originalExplanation||'',editedExplanation:old.editedExplanation||'',explanation:old.explanation||'',explanationStatus:x.solution?'원본 해설 등록':(old.explanationStatus||'작성 대기'),sourceFile:pfName,solutionSourceFile:sfName,sourceTitle:title||'',status:parsed.status,languageIssues:parsed.issues,updatedAt:new Date().toISOString()};});
 }
-async function persistLanguageRows(rows,button){
-  for(let i=0;i<rows.length;i+=25){
-    if(button)button.textContent=`문제은행 저장 중... ${Math.min(i+25,rows.length)}/${rows.length}`;
-    const r=await fetch('/api/problems/bulk',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems:rows.slice(i,i+25)})});
-    if(!r.ok)throw new Error(await r.text());
-  }
-}
+async function persistLanguageRows(rows,button){for(let i=0;i<rows.length;i+=25){if(button)button.textContent=`문제은행 저장 중... ${Math.min(i+25,rows.length)}/${rows.length}`;const r=await fetch('/api/problems/bulk',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems:rows.slice(i,i+25)})});if(!r.ok)throw new Error(await r.text());}}
 async function analyzeLanguageSet(){
-  const subject=$('#langSubject').value;
-  const title=$('#langTitle').value.trim();
-  const pf=$('#langProblemPdf').files[0], sf=$('#langSolutionPdf').files[0];
-  if(!pf||!sf){alert('문제편 PDF와 해설편 PDF를 모두 선택해주세요.');return}
-  const box=$('#langResult');
-  box.innerHTML='<div class="empty"><b>전체 PDF 분석 중...</b><br>문제편과 해설편의 문항코드를 찾고 있습니다.</div>';
+  const subject=$('#langSubject').value,title=$('#langTitle').value.trim(),pf=$('#langProblemPdf').files[0],sf=$('#langSolutionPdf').files[0];if(!pf||!sf){alert('문제편 PDF와 해설편 PDF를 모두 선택해주세요.');return}
+  const box=$('#langResult');box.innerHTML='<div class="empty"><b>전체 PDF 분석 중...</b><br>문제편의 실제 문항·공유 지문과 해설편 정답을 확인하고 있습니다.</div>';
   try{
-    const [pt,st]=await Promise.all([pdfText(pf),pdfText(sf)]);
-    const M=smartMatchLanguage(pt,st), pm=M.problemMap;
-    languageParsed=M.problemCodes.map(code=>{
-      const hit=M.result.get(code);
-      const row={code,problem:pm.get(code)||'',solution:hit?.solution||'',matched:!!(pm.get(code)&&hit?.solution),method:hit?.method||'미매칭',confidence:hit?.confidence||'low'};
-      row.parsed=row.matched?parseLanguageProblem(row.problem,row.solution,row.code):null;
-      return row;
-    });
-    const matched=languageParsed.filter(x=>x.matched).length;
-    const review=languageParsed.length-matched;
-    const medium=languageParsed.filter(x=>x.matched&&x.confidence==='medium').length;
-    const ready=languageParsed.filter(x=>x.parsed?.status==='출제 가능').length;
-    const broken=languageParsed.filter(x=>x.matched&&x.parsed?.status!=='출제 가능').length;
-    box.innerHTML=`<div class="notice"><b>${subject} · ${esc(title||pf.name)}</b><br>
-      문제 문항 ${languageParsed.length}개 / 자동 연결 ${matched}개 / <b>출제 가능 ${ready}개</b> / 구조·정답 검수 ${broken}개 / 미연결 ${review}개
-      ${medium?`<br><span class="help">※ ${medium}개는 해설편 OCR에서 A/B 문자가 빠져 번호·순서로 자동 복구했습니다.</span>`:''}
-      <br><span class="help">※ K244: ‘윗글’인데 공유 지문이 없는 문항, 선택지 누락, 정답 미확인 문항은 문제은행에는 보존하되 출제에서 자동 제외합니다.</span></div>
-      <div class="actions"><button class="btn primary" id="registerLanguageMatched">구조화 문항 문제은행 등록/갱신 · K244</button></div>
-      <div class="table-wrap"><table><thead><tr><th>코드</th><th>문제편</th><th>해설편</th><th>정답</th><th>매칭 방식</th><th>상태</th></tr></thead><tbody>
-      ${languageParsed.map(x=>`<tr><td><b>${esc(x.code)}</b></td><td>${x.problem?'확인':'없음'}</td><td>${x.solution?'확인':'없음'}</td><td>${esc(x.parsed?.answer||'-')}</td><td>${esc(x.method)}</td><td>${!x.matched?'<span class="danger-text">미연결</span>':x.parsed?.status==='출제 가능'?'<span class="ok-text">출제 가능</span>':`<span class="danger-text">${esc(x.parsed?.status||'검수 필요')}</span><div class="help">${esc((x.parsed?.issues||[]).join(' · '))}</div>`}</td></tr>`).join('')}
-      </tbody></table></div>`;
+    const [pt,st]=await Promise.all([pdfText(pf),pdfText(sf)]),M=smartMatchLanguage(pt,st,{subject,title,pfName:pf.name,sfName:sf.name}),pm=M.problemMap;
+    languageParsed=M.problemCodes.map(code=>{const hit=M.result.get(code),problem=pm.get(code)||'',knownAnswer=hit?.answer||'';const row={code,problem,solution:hit?.solution||'',matched:!!(problem&&(hit?.solution||knownAnswer)),method:hit?.method||'미감지',confidence:hit?.confidence||'low',xistory:!!M.xistory,knownAnswer,passage:hit?.passage||M.passages?.get(code)||''};row.parsed=row.matched?parseLanguageProblem(row.problem,row.solution,row.code,{xistory:row.xistory,answer:row.knownAnswer,passage:row.passage}):null;return row;});
+    const detected=languageParsed.filter(x=>x.problem).length,matched=languageParsed.filter(x=>x.matched).length,review=languageParsed.length-matched,medium=languageParsed.filter(x=>x.matched&&x.confidence==='medium').length,ready=languageParsed.filter(x=>x.parsed?.status==='출제 가능').length,broken=languageParsed.filter(x=>x.matched&&x.parsed?.status!=='출제 가능').length;
+    box.innerHTML=`<div class="notice"><b>${subject} · ${esc(title||pf.name)}</b><br>${M.xistory?`빠른정답표 기준 ${M.expectedTotal}문항 / 문제편 코드 감지 ${detected}개 / `:''}자동 연결 ${matched}개 / <b>출제 가능 ${ready}개</b> / 구조·정답 검수 ${broken}개 / 미감지·미연결 ${review}개${medium?`<br><span class="help">※ ${medium}개는 해설편 OCR에서 코드가 빠져 번호·순서로 복구했습니다.</span>`:''}<br><span class="help">※ K245: 자이스토리 국어 독서 실전은 PDF의 깨진 동그라미 번호 OCR(®/@)을 선택지 순서로 복원하고, 해설편 ‘빠른 정답 찾기’의 검증된 정답표를 연결합니다. 공유 지문이 확인되지 않거나 선택지 구조가 불완전한 문항만 검수 대상으로 남깁니다.</span></div><div class="actions"><button class="btn primary" id="registerLanguageMatched">구조화 문항 문제은행 등록/갱신 · K245</button></div><div class="table-wrap"><table><thead><tr><th>코드</th><th>문제편</th><th>해설편</th><th>정답</th><th>매칭 방식</th><th>상태</th></tr></thead><tbody>${languageParsed.map(x=>`<tr><td><b>${esc(x.code)}</b></td><td>${x.problem?'확인':'미감지'}</td><td>${x.solution?'확인':(x.knownAnswer?'빠른정답표':'없음')}</td><td>${esc(x.parsed?.answer||x.knownAnswer||'-')}</td><td>${esc(x.method)}</td><td>${!x.matched?'<span class="danger-text">미감지·미연결</span>':x.parsed?.status==='출제 가능'?'<span class="ok-text">출제 가능</span>':`<span class="danger-text">${esc(x.parsed?.status||'검수 필요')}</span><div class="help">${esc((x.parsed?.issues||[]).join(' · '))}</div>`}</td></tr>`).join('')}</tbody></table></div>`;
     $('#registerLanguageMatched').onclick=()=>registerLanguageMatched(subject,title,pf.name,sf.name);
   }catch(e){box.innerHTML=`<div class="empty danger-text"><b>PDF 분석 실패</b><br>${esc(e.message||String(e))}</div>`}
 }
 async function registerLanguageMatched(subject,title,pfName,sfName){
-  const matched=languageParsed.filter(x=>x.matched);
-  if(!matched.length){alert('자동 매칭된 문항이 없습니다.');return}
-  const rows=languageBankRows(subject,title,pfName,sfName);
-  const btn=$('#registerLanguageMatched'); if(btn)btn.disabled=true;
-  try{
-    await persistLanguageRows(rows,btn);
-    const existing=new Map(problems.map(p=>[String(p.id),p]));
-    rows.forEach(p=>existing.set(String(p.id),p));
-    problems=[...existing.values()];
-    try{localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));}catch(e){console.warn('국어·영어 로컬 캐시 용량 초과 — D1 저장은 완료됨',e);}
-    renderBank();fillSubjects();renderExplanationEditor();
-    const ready=rows.filter(x=>x.status==='출제 가능').length;
-    const broken=rows.filter(x=>x.status==='분석 실패').length;
-    const noAnswer=rows.filter(x=>x.status==='정답 확인 필요').length;
-    alert(`${rows.length}개 문항을 D1 문제은행에 등록/갱신했습니다.\n출제 가능 ${ready}개\n구조 오류 자동 제외 ${broken}개\n정답 확인 필요 ${noAnswer}개\n\n기존 LANG-${subject}-Axx 문항은 같은 ID로 교체되었습니다.`);
-    window.examBankLawGuard?.onBankUpload(rows.map(x=>x.id),'국어·영어 자료 등록 K244');
-  }catch(e){console.error(e);alert('국어·영어 문제은행 저장 실패\n'+(e.message||e));}
-  finally{if(btn){btn.disabled=false;btn.textContent='구조화 문항 문제은행 등록/갱신 · K244';}}
+  const matched=languageParsed.filter(x=>x.matched);if(!matched.length){alert('자동 매칭된 문항이 없습니다.');return}const rows=languageBankRows(subject,title,pfName,sfName),btn=$('#registerLanguageMatched');if(btn)btn.disabled=true;
+  try{await persistLanguageRows(rows,btn);const existing=new Map(problems.map(p=>[String(p.id),p]));rows.forEach(p=>existing.set(String(p.id),p));problems=[...existing.values()];try{localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));}catch(e){console.warn('국어·영어 로컬 캐시 용량 초과 — D1 저장은 완료됨',e);}renderBank();fillSubjects();renderExplanationEditor();const ready=rows.filter(x=>x.status==='출제 가능').length,broken=rows.filter(x=>x.status==='분석 실패').length,noAnswer=rows.filter(x=>x.status==='정답 확인 필요').length;alert(`${rows.length}개 문항을 D1 문제은행에 등록/갱신했습니다.\n출제 가능 ${ready}개\n구조 오류 자동 제외 ${broken}개\n정답 확인 필요 ${noAnswer}개\n\n기존 LANG-${subject}-Axx 문항은 같은 ID로 교체되었습니다.`);window.examBankLawGuard?.onBankUpload(rows.map(x=>x.id),'국어·영어 자료 등록 K245');}
+  catch(e){console.error(e);alert('국어·영어 문제은행 저장 실패\n'+(e.message||e));}finally{if(btn){btn.disabled=false;btn.textContent='구조화 문항 문제은행 등록/갱신 · K245';}}
 }
 if($('#langAnalyzeBtn'))$('#langAnalyzeBtn').onclick=analyzeLanguageSet;
 if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{$('#langProblemPdf').value='';$('#langSolutionPdf').value='';languageParsed=[];$('#langResult').innerHTML='<div class="empty">문제편과 해설편 PDF를 선택해주세요.</div>'};
-
 
 // ===== 해설 편집실 v10 =====
 let explanationSelection=new Set();
