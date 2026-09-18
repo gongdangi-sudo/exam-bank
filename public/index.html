@@ -606,7 +606,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P277 빠른업로드 · 자동범위분류 · 문항저장호환 · E260 원문보존</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P278 누적저장 · 빠른업로드 · 자동범위분류 · E260 원문보존</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -669,7 +669,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn success" id="openAutoRangeP276">📚 전범위 문항 자동 범위 분류 · P276</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 전체과목 자동분리 · Z268 / P277 빠른업로드</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn success" id="openAutoRangeP276">📚 전범위 문항 자동 범위 분류 · P276</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 전체과목 자동분리 · P278 누적저장 / P277 빠른업로드</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L250</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R249: 완전 재등록이 필요하면 <b>문제은행 완전 초기화</b>를 사용하세요. 문제·이력뿐 아니라 업로드 이미지 자산과 저장 상태까지 모두 삭제합니다.</div>
@@ -1231,7 +1231,7 @@
 
     <div class="form-grid">
       <div class="field"><label>시험 구분 *</label><input id="zExam" value="국가직" placeholder="예: 국가직"></div>
-      <div class="field"><label>연도 *</label><input id="zYear" type="number" value="2026"></div>
+      <div class="field"><label>연도 *</label><input id="zYear" type="number" value="2026"><div class="help">P278: ZIP/정답표 파일명에서 연도를 자동 감지합니다. 감지값은 등록 전에 꼭 확인해주세요.</div></div>
       <div class="field"><label>시험문제 ZIP *</label><input id="zQuestionZip" type="file" accept=".zip,application/zip"></div>
       <div class="field"><label>공식 정답표 PDF *</label><input id="zAnswerPdf" type="file" accept=".pdf,application/pdf"></div>
     </div>
@@ -1282,7 +1282,7 @@
     <div class="form-grid" style="margin-top:16px">
       <div class="field"><label>과목 *</label><select id="oSubject"></select></div>
       <div class="field"><label>시험 구분 *</label><input id="oExam" value="국가직" placeholder="예: 국가직"></div>
-      <div class="field"><label>연도 *</label><input id="oYear" type="number" value="2026"></div>
+      <div class="field"><label>연도 *</label><input id="oYear" type="number" value="2026"><div class="help">P278: PDF 파일명에서 연도를 자동 감지합니다.</div></div>
       <div class="field"><label>책형 *</label><select id="oBook"><option>가</option><option>나</option></select></div>
       <div class="field"><label>기본 단원</label><input id="oUnit" placeholder="선택 입력"></div>
     </div>
@@ -3772,10 +3772,23 @@ if(zipRegisterBtn){
     }
   };
 }
-['zQuestionZip','zAnswerPdf'].forEach(id=>$('#'+id).addEventListener('change',()=>{zipSubjectRows=[];zipAnswerMap=new Map();$('#zipImportBody').innerHTML='';$('#zipImportResult').classList.add('hidden');$('#registerZipSubjects').disabled=true;}));
+['zQuestionZip','zAnswerPdf'].forEach(id=>$('#'+id).addEventListener('change',()=>{
+  zipSubjectRows=[];zipAnswerMap=new Map();$('#zipImportBody').innerHTML='';$('#zipImportResult').classList.add('hidden');$('#registerZipSubjects').disabled=true;
+  const f=$('#'+id).files?.[0];
+  if(f)autoFillUploadMetaP278(f.name,'z');
+}));
 $('#closeOfficial').onclick=closeOfficialModal;
 $('#cancelOfficial').onclick=closeOfficialModal;
 $('#clearOfficial').onclick=()=>{officialParsed=[];$('#oProblemPdf').value='';$('#oAnswerPdf').value='';$('#officialResult').classList.add('hidden');};
+
+['oProblemPdf','oAnswerPdf'].forEach(id=>{
+  const el=$('#'+id);
+  if(el)el.addEventListener('change',()=>{
+    const f=el.files?.[0];
+    if(f)autoFillUploadMetaP278(f.name,'o');
+  });
+});
+
 $('#analyzeOfficial').onclick=analyzeOfficialSource;
 $('#registerOfficial').onclick=registerOfficialSource;
 initOfficialSubjectSelect();$('#closeBatch').onclick=closeBatch;$('#cancelBatch').onclick=closeBatch;
@@ -5424,6 +5437,7 @@ function mergeExistingLearningDataE260(row){
 
 async function registerOfficialSource(){
   const selected=officialParsed.filter(x=>x.checked&&x.answer);
+  const beforeIdsP278=new Set(problems.map(p=>String(p.id)));
   if(!selected.length){alert('등록할 문항이 없습니다.');return}
 
   const subject=$('#oSubject').value,exam=$('#oExam').value.trim(),year=+$('#oYear').value,book=$('#oBook').value,unit=$('#oUnit').value.trim();
@@ -5433,6 +5447,10 @@ async function registerOfficialSource(){
   btn.disabled=true;
 
   try{
+    const sourceFile=$('#oProblemPdf').files[0];
+    if(!sourceFile)throw new Error('문제 PDF를 다시 선택해주세요.');
+    const sourceHash=await sha256ShortP278(await sourceFile.arrayBuffer());
+
     // P277: 20개 문항 crop을 각각 만들지 않고, 사용 페이지를 한 번씩만 저장.
     btn.textContent='원본 페이지 저장 중…';
     const pageAssets=officialProblemDoc
@@ -5448,7 +5466,7 @@ async function registerOfficialSource(){
     for(let i=0;i<selected.length;i++){
       const p=selected[i];
       btn.textContent=`문항 구조 준비 ${i+1}/${selected.length}`;
-      const id=`OFFICIAL-${subject}-${exam}-${year}-${book}-${p.no}`;
+      const id=p278ProblemId('OFF2',sourceHash,subject,book,p.no);
 
       let fallbackImageUrl='';
       if(p.parseMode==='image'&&p.blob){
@@ -5469,6 +5487,9 @@ async function registerOfficialSource(){
         sourceBook:book,
         sourceProblemFile:$('#oProblemPdf').files[0]?.name||'',
         sourceAnswerFile:$('#oAnswerPdf').files[0]?.name||'',
+        sourceHashP278:sourceHash,
+        sourceIdentityP278:`${sourceHash}:${subject}:${book}`,
+        uploadIdMode:'content-hash-p278',
         originalPageImageUrl:p.region?pageAssets.get(+p.region.pageNo)||'':'',
         originalRegion:originalRegionMetaP277(p.region),
         originalAssetMode:'page-crop-p277',
@@ -5501,8 +5522,12 @@ async function registerOfficialSource(){
 
     renderBank();refreshFilters();fillSubjects();
 
+    const newCountP278=rows.filter(p=>!beforeIdsP278.has(String(p.id))).length;
+    const updateCountP278=rows.length-newCountP278;
     alert(
-      `공식 원본 ${rows.length}문항 등록 완료 · P277 빠른 업로드\n`+
+      `공식 원본 등록 완료 · P278\n`+
+      `신규 추가 ${newCountP278}문항 · 기존 갱신 ${updateCountP278}문항\n`+
+      `현재 문제은행 총 ${problems.length}문항\n`+
       `원본 이미지는 문항별 ${rows.length}장이 아니라 페이지 ${pageAssets.size}장만 저장했습니다.\n`+
       `텍스트 구조: ${rows.filter(x=>x.sourceMode==='officialText').length}개\n`+
       `이미지 예외: ${rows.filter(x=>x.sourceMode==='officialImageFallback').length}개`
@@ -5531,6 +5556,50 @@ function closeOfficialModal(){
 }
 
 // ===== 시험문제 ZIP 전체과목 자동분리 · Z268 / P277 빠른업로드 (구형 문항번호/1·2단 자동 인식) =====
+
+// ===== P278: 업로드 20문항 덮어쓰기 방지 =====
+// 기존 ID는 과목+시험+연도+책형+문항번호라 메타데이터가 같으면
+// 다른 PDF도 같은 1~20 ID를 사용해 갱신(덮어쓰기)될 수 있었다.
+// P278부터 PDF 바이트 해시를 ID의 핵심 키로 사용한다.
+
+async function sha256ShortP278(buffer){
+  const bytes=buffer instanceof ArrayBuffer ? buffer : await buffer.arrayBuffer();
+  const digest=await crypto.subtle.digest('SHA-256',bytes);
+  return [...new Uint8Array(digest)].slice(0,10).map(b=>b.toString(16).padStart(2,'0')).join('');
+}
+
+function detectYearFromNameP278(name){
+  const s=String(name||'').normalize('NFC');
+  let m=s.match(/(?:^|[^\d])(20\d{2})(?=[^\d]|$)/);
+  if(m)return +m[1];
+  // 250621 같은 날짜형 파일명
+  m=s.match(/(?:^|[^\d])(\d{2})(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])(?=[^\d]|$)/);
+  if(m){
+    const y=2000+(+m[1]);
+    if(y>=2010&&y<=2099)return y;
+  }
+  return 0;
+}
+function detectExamFromNameP278(name){
+  const s=String(name||'').normalize('NFC');
+  if(/지방(?:공무원|직)|시[·ㆍ.]?도|지방공채/u.test(s))return '지방직';
+  if(/국가(?:공무원|직)|국가공채/u.test(s))return '국가직';
+  return '';
+}
+function autoFillUploadMetaP278(name,prefix){
+  const year=detectYearFromNameP278(name);
+  const exam=detectExamFromNameP278(name);
+  const y=$('#'+prefix+'Year'),e=$('#'+prefix+'Exam');
+  if(year&&y)y.value=String(year);
+  if(exam&&e)e.value=exam;
+  return {year,exam};
+}
+function p278ProblemId(kind,hash,subject,book,no){
+  const cleanSubject=String(subject||'과목').normalize('NFC').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'');
+  const cleanBook=String(book||'X').normalize('NFC').replace(/[^\p{L}\p{N}]+/gu,'-').replace(/^-|-$/g,'')||'X';
+  return `${kind}-${hash}-${cleanSubject}-${cleanBook}-${no}`;
+}
+
 let zipSubjectRows=[];
 let zipAnswerMap=new Map();
 
@@ -5987,7 +6056,7 @@ function renderZipImportRows(){
       ?`<span class="pill">정답표 충돌 보류 ${zipAnswerMap._conflicts.size}건</span>`:'')+
     (unknown?`<span class="pill">확인 필요 ${unknown}개</span>`:'')+
     `<div class="help" style="margin:8px 0">
-      <b>P277 빠른 업로드:</b> 문제마다 원본 이미지를 만들지 않고 PDF 페이지를 한 번만 저장해 원본 보기 때 자동으로 해당 문항만 잘라 보여줍니다. 최대 3과목을 동시에 분석하고 전체 문항은 D1에 한 번에 전송합니다.
+      <b>P278 누적 저장:</b> PDF 자체 해시로 문항 ID를 만듭니다. 같은 PDF를 다시 올리면 갱신되고, 다른 PDF는 연도/책형 입력이 같아도 새 문항으로 누적됩니다. 파일명에서 연도·국가직/지방직도 자동 감지합니다.
       기존 운영과목(행정학개론→행정학 등)은 기존 과목명으로 합쳐집니다.
       정답표가 연결되지 않은 PDF만 등록 대상에서 제외합니다.
     </div>`;
@@ -6158,7 +6227,10 @@ async function zipEntryToFile(row){
 
 async function parseOneZipSubject(row,exam,year,progressCb){
   const file=await zipEntryToFile(row);
-  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  const sourceBuffer=await file.arrayBuffer();
+  const sourceHash=await sha256ShortP278(sourceBuffer);
+  row.sourceHashP278=sourceHash;
+  const pdf=await pdfjsLib.getDocument({data:sourceBuffer}).promise;
   const regions=[];
 
   try{
@@ -6224,7 +6296,7 @@ async function parseOneZipSubject(row,exam,year,progressCb){
     const rows=[];
     for(const x of parsedRows){
       const region=x.region,parsed=x.parsed;
-      const id=`ZIP-${row.sourceSubject}-${exam}-${year}-${row.book}-${region.no}`;
+      const id=p278ProblemId('ZIP2',sourceHash,row.sourceSubject,row.book,region.no);
       rows.push(mergeExistingLearningDataE260({
         id,
         subject:row.appSubject,
@@ -6248,6 +6320,9 @@ async function parseOneZipSubject(row,exam,year,progressCb){
         sourceBook:row.book,
         sourceProblemFile:row.fileName,
         sourceAnswerFile:$('#zAnswerPdf').files[0]?.name||'',
+        sourceHashP278:sourceHash,
+        sourceIdentityP278:`${sourceHash}:${row.sourceSubject}:${row.book}`,
+        uploadIdMode:'content-hash-p278',
         explanation:'',
         explanationStatus:'작성 대기',
         status:'출제 가능',
@@ -6287,6 +6362,7 @@ async function saveZipProblemRowsZ268(rows,btn,progressText){
 
 async function registerZipSubjects(){
   const selected=zipSubjectRows.filter(r=>r.checked&&zipSourceReadyZ242(r));
+  const beforeIdsP278=new Set(problems.map(p=>String(p.id)));
   if(!selected.length){
     alert('등록할 과목을 선택해주세요.');
     return;
@@ -6421,10 +6497,13 @@ async function registerZipSubjects(){
     const imageCount=allRows.filter(p=>p.sourceMode==='officialImageFallback').length;
     const pageCount=successes.reduce((n,x)=>n+(x.row.pageAssetCountP277||0),0);
 
+    const newCountP278=allRows.filter(p=>!beforeIdsP278.has(String(p.id))).length;
+    const updateCountP278=allRows.length-newCountP278;
     let message=
-      `ZIP 빠른 업로드 완료 · P277\n\n`+
+      `ZIP 빠른 업로드 완료 · P278\n\n`+
       `등록 성공 과목 ${successes.length}/${selected.length}개\n`+
-      `등록 문항 ${allRows.length}개\n`+
+      `신규 추가 ${newCountP278}문항 · 기존 갱신 ${updateCountP278}문항\n`+
+      `이번 처리 ${allRows.length}문항 · 현재 문제은행 총 ${problems.length}문항\n`+
       `원본 이미지: 문항별 저장 대신 페이지 ${pageCount}장만 저장\n`+
       `텍스트 구조 ${textCount}개 · 이미지 예외 ${imageCount}개`;
 
