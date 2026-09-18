@@ -606,7 +606,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P273 화면복구 · 이력개별삭제 · E260 원문보존</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P274 문항저장복구 · 이력개별삭제 · E260 원문보존</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -1032,7 +1032,7 @@
     </div>
 
     <div class="notice" style="margin-top:12px">
-      <b>수정 범위:</b> 선택한 문항 1개만 바뀝니다. 저장 시 현재 시험지에 즉시 반영되고,
+      <b>P274 저장:</b> 저장 버튼 이벤트를 복구했고, D1 전체가 아니라 현재 문항 1개만 저장·재확인합니다.<br><b>수정 범위:</b> 선택한 문항 1개만 바뀝니다. 저장 시 현재 시험지에 즉시 반영되고,
       아래 체크가 켜져 있으면 문제은행에도 저장되어 다음 출제부터 수정본을 사용합니다.
     </div>
 
@@ -1096,7 +1096,7 @@
       <span><b>문제은행에도 저장</b> — 다음 출제에서도 수정된 문항 사용</span>
     </label>
 
-    <div class="help" id="cqEditStatus" role="status" aria-live="polite"></div>
+    <div class="help" id="cqEditStatus" role="status" aria-live="polite" style="min-height:22px;margin-top:8px;font-weight:700"></div>
 
     <div class="actions">
       <button class="btn ghost" id="cqOpenOriginal">📄 원본 보기</button><button class="btn primary" id="saveCurrentQuestionEdit">이 문항만 저장</button>
@@ -2862,66 +2862,106 @@ function invalidateLegalReviewAfterManualEditE251(p,reason){
 
 async function saveCurrentQuestionEditE251(){
   const idx=currentQuestionEditIndex;
-  if(idx<0 || !currentSet[idx])return;
-
-  const p=currentSet[idx];
   const status=$('#cqEditStatus');
   const btn=$('#saveCurrentQuestionEdit');
+
+  if(idx<0 || !Array.isArray(currentSet) || !currentSet[idx]){
+    if(status){
+      status.style.color='#b91c1c';
+      status.textContent='수정할 현재 문항을 찾지 못했습니다. 수정창을 닫고 다시 열어주세요.';
+    }
+    return;
+  }
+
+  const p=currentSet[idx];
+  const bankId=String(originId(p)||p.id||'');
   const question=$('#cqQuestion').value.trim();
   const viewText=$('#cqViewText').value.trim();
-  const choices=formatChoicesAutoE259($('#cqChoices').value,currentSet[idx]?.choicesData||[]).trim();
+  const choices=formatChoicesAutoE259(
+    $('#cqChoices').value,
+    currentSet[idx]?.choicesData||[]
+  ).trim();
   $('#cqChoices').value=choices;
+
   const answer=$('#cqAnswer').value;
   const reason=$('#cqEditReason').value.trim();
   const saveBank=$('#cqSaveBank').checked;
   const choicesData=parseChoicesForEditE251(choices);
 
   if(!question){
+    status.style.color='#b91c1c';
     status.textContent='문제 본문을 입력해주세요.';
-    status.style.color='#b91c1c';
     return;
   }
-  if(choices && !choicesData.length){
+  if(choices && choicesData.length<2){
+    status.style.color='#b91c1c';
     status.textContent='선택지를 한 줄에 하나씩 입력해주세요. ① ② ③ ④ 번호는 자동으로 붙습니다.';
-    status.style.color='#b91c1c';
     return;
   }
+  if(saveBank && !bankId){
+    status.style.color='#b91c1c';
+    status.textContent='문제은행 ID를 확인할 수 없습니다. 이 문항은 시험지에만 수정할 수 있습니다.';
+    return;
+  }
+
+  const beforeCurrent=JSON.parse(JSON.stringify(p));
+  const bankIndex=saveBank
+    ? problems.findIndex(x=>String(x.id)===bankId)
+    : -1;
+  const beforeBank=bankIndex>=0
+    ? JSON.parse(JSON.stringify(problems[bankIndex]))
+    : null;
 
   btn.disabled=true;
-  status.style.color='';
-  status.textContent='선택한 문항만 저장 중입니다…';
-
-  const before=JSON.parse(JSON.stringify(p));
+  btn.textContent='저장 중…';
+  status.style.color='#475569';
+  status.textContent=saveBank
+    ? `문제은행에 이 문항만 저장 중입니다. · ${bankId}`
+    : '현재 시험지에 이 문항만 반영 중입니다.';
 
   try{
+    const now=new Date().toISOString();
+
     Object.assign(p,{
-      question,viewText,choices,choicesData,answer,
+      question,
+      viewText,
+      choices,
+      choicesData,
+      answer,
       manualEdited:true,
       manualEditReason:reason,
-      manualEditedAt:new Date().toISOString(),
+      manualEditedAt:now,
       sourceMode:'officialText',
       textRecoveryMode:'manual-edit',
       status:'수동 수정 확인',
-      updatedAt:new Date().toISOString()
+      updatedAt:now
     });
 
     if(saveBank){
-      const bank=problems.find(x=>String(x.id)===String(p.id));
-      if(!bank)throw new Error('문제은행에서 같은 ID 문항을 찾지 못했습니다.');
+      if(bankIndex<0){
+        throw new Error(`문제은행에서 같은 원문 ID를 찾지 못했습니다: ${bankId}`);
+      }
 
+      const bank=problems[bankIndex];
       Object.assign(bank,{
-        question,viewText,choices,choicesData,answer,
+        question,
+        viewText,
+        choices,
+        choicesData,
+        answer,
         manualEdited:true,
         manualEditReason:reason,
-        manualEditedAt:p.manualEditedAt,
+        manualEditedAt:now,
         sourceMode:'officialText',
         textRecoveryMode:'manual-edit',
         status:'수동 수정 확인',
-        updatedAt:p.updatedAt
+        updatedAt:now
       });
 
       invalidateLegalReviewAfterManualEditE251(bank,reason);
-      if(bank.legalReview)p.legalReview=JSON.parse(JSON.stringify(bank.legalReview));
+      if(bank.legalReview){
+        p.legalReview=JSON.parse(JSON.stringify(bank.legalReview));
+      }
 
       const payload=window.examBankLawGuard
         ? window.examBankLawGuard.preserveBankReviews([bank])
@@ -2932,40 +2972,206 @@ async function saveCurrentQuestionEditE251(){
         headers:{'content-type':'application/json'},
         body:JSON.stringify({problems:payload})
       });
-      if(!r.ok)throw new Error('문제은행 저장 실패: '+await r.text());
-
-      const verify=await fetch('/api/state',{cache:'no-store'});
-      if(verify.ok){
-        const state=await verify.json();
-        const saved=(state.problems||[]).find(x=>String(x.id)===String(p.id));
-        if(!saved || String(saved.question||'')!==question || String(saved.choices||'')!==choices){
-          throw new Error('D1 저장 후 재확인에서 수정 내용이 일치하지 않습니다.');
-        }
+      if(!r.ok){
+        throw new Error('D1 저장 실패: '+await r.text());
       }
+
+      status.textContent='D1 저장 완료 · 해당 문항만 다시 확인 중입니다…';
+
+      // P274: 전체 /api/state를 다시 읽지 않고 이 문항 1개만 확인.
+      const verify=await fetch('/api/problem?id='+encodeURIComponent(bankId),{
+        cache:'no-store'
+      });
+      if(!verify.ok){
+        throw new Error('D1 저장 후 문항 재확인 실패: '+await verify.text());
+      }
+      const verifyData=await verify.json();
+      const saved=verifyData?.problem;
+      if(!saved){
+        throw new Error('D1 저장 후 문항을 다시 찾지 못했습니다.');
+      }
+
+      const same =
+        String(saved.question||'')===question &&
+        String(saved.viewText||'')===viewText &&
+        String(saved.choices||'')===choices &&
+        String(saved.answer||'')===answer;
+
+      if(!same){
+        throw new Error(
+          'D1 저장 후 재확인 결과가 수정 내용과 일치하지 않습니다.'
+        );
+      }
+
+      // 서버에서 확인된 값을 로컬 문제은행에도 반영.
+      problems[bankIndex]=saved;
+      currentSet[idx]={
+        ...currentSet[idx],
+        question:saved.question||'',
+        viewText:saved.viewText||'',
+        choices:saved.choices||'',
+        choicesData:saved.choicesData||choicesData,
+        answer:saved.answer||'',
+        legalReview:saved.legalReview,
+        manualEdited:saved.manualEdited,
+        manualEditReason:saved.manualEditReason,
+        manualEditedAt:saved.manualEditedAt,
+        sourceMode:saved.sourceMode||'officialText',
+        textRecoveryMode:saved.textRecoveryMode||'manual-edit',
+        status:saved.status||'수동 수정 확인',
+        updatedAt:saved.updatedAt||now
+      };
+
+      // P271 속도모드가 있으면 이미 동기화된 버전으로 표시해 중복 재전송 방지.
+      try{
+        if(typeof p271ProblemVersions!=='undefined' && p271ProblemVersions instanceof Map){
+          p271ProblemVersions.set(bankId,problemVersionP271(saved));
+          p271KnownIds?.add?.(bankId);
+        }
+      }catch(e){}
     }
 
     try{
       sessionStorage.setItem('examBankCurrentSetV1',JSON.stringify(currentSet));
-      save();
-    }catch(e){}
+      if(!saveBank && typeof save==='function')save();
+    }catch(e){
+      console.warn('current set session save',e);
+    }
 
     const wasSolution=!!$('#generated')?.querySelector('.solution-sheet');
     renderGenerated(wasSolution?'solution':'problem');
 
     status.style.color='#047857';
     status.textContent=saveBank
-      ? '현재 시험지와 문제은행에 이 문항만 저장했습니다.'
-      : '현재 시험지에만 이 문항을 반영했습니다.';
-    setTimeout(()=>closeCurrentQuestionEditE251(),900);
+      ? '저장 완료 · D1에서 이 문항의 수정 내용을 다시 확인했습니다.'
+      : '현재 시험지에만 이 문항의 수정 내용을 반영했습니다.';
+
+    btn.textContent='저장 완료 ✓';
+
+    // 성공 메시지를 볼 수 있게 조금 더 오래 유지
+    setTimeout(()=>{
+      if($('#currentQuestionEditModal') && !$('#currentQuestionEditModal').classList.contains('hidden')){
+        closeCurrentQuestionEditE251();
+      }
+    },1600);
+
   }catch(e){
-    console.error(e);
-    currentSet[idx]=before;
+    console.error('P274 question save failed',e);
+
+    currentSet[idx]=beforeCurrent;
+    if(saveBank && bankIndex>=0 && beforeBank){
+      problems[bankIndex]=beforeBank;
+    }
+
     status.style.color='#b91c1c';
-    status.textContent='저장 실패 · 수정 전 상태를 유지했습니다. '+(e.message||e);
+    status.textContent='저장 실패 · '+(e?.message||e);
+    btn.textContent='다시 저장';
   }finally{
     btn.disabled=false;
+    if(btn.textContent==='저장 중…')btn.textContent='이 문항만 저장';
   }
 }
+
+
+// ===== P274: 수정 모달 버튼 이벤트 복구 =====
+function installEditModalHandlersP274(){
+  if(window.__p274EditHandlersInstalled)return;
+  window.__p274EditHandlersInstalled=true;
+
+  document.addEventListener('click',async e=>{
+    const id=e.target?.id;
+    if(!id)return;
+
+    if(id==='saveCurrentQuestionEdit'){
+      e.preventDefault();
+      e.stopPropagation();
+      await saveCurrentQuestionEditE251();
+      return;
+    }
+    if(id==='closeCurrentQuestionEdit' || id==='cancelCurrentQuestionEdit'){
+      e.preventDefault();
+      e.stopPropagation();
+      closeCurrentQuestionEditE251();
+      return;
+    }
+    if(id==='cqOpenOriginal'){
+      e.preventDefault();
+      e.stopPropagation();
+      if(currentQuestionEditIndex>=0){
+        try{
+          if(typeof openOriginalSourceE256==='function'){
+            openOriginalSourceE256(currentQuestionEditIndex);
+          }else if(typeof openOriginalSourceE255==='function'){
+            openOriginalSourceE255(currentQuestionEditIndex);
+          }
+        }catch(err){
+          console.error('P274 original view',err);
+        }
+      }
+      return;
+    }
+    if(id==='cqAutoNumberChoices'){
+      e.preventDefault();
+      e.stopPropagation();
+      normalizeCurrentChoiceTextareaE259();
+      return;
+    }
+    if(id==='cqOriginalImageLarge'){
+      e.preventDefault();
+      e.stopPropagation();
+      openLargeOriginalImageE259();
+      return;
+    }
+
+    // 해설 수정 버튼들도 같은 이유로 이벤트가 유실될 수 있어 같이 복구.
+    if(id==='saveCurrentExplanationEdit'){
+      e.preventDefault();
+      e.stopPropagation();
+      await saveCurrentExplanationEditE253();
+      return;
+    }
+    if(id==='closeCurrentExplanationEdit' || id==='cancelCurrentExplanationEdit'){
+      e.preventDefault();
+      e.stopPropagation();
+      closeCurrentExplanationEditE253();
+      return;
+    }
+
+    // 후보 선택 모달
+    if(id==='closeCurrentQuestionReplace' || id==='cancelCurrentQuestionReplace'){
+      e.preventDefault();
+      e.stopPropagation();
+      closeCurrentQuestionReplaceE253();
+      return;
+    }
+    if(id==='refreshReplaceCandidates'){
+      e.preventDefault();
+      e.stopPropagation();
+      refreshReplacementCandidatesE253();
+      return;
+    }
+    if(id==='randomReplaceCandidate'){
+      e.preventDefault();
+      e.stopPropagation();
+      await randomReplaceCandidateE253();
+      return;
+    }
+  },true);
+
+  const search=$('#crSearch');
+  if(search)search.oninput=renderReplacementCandidatesE253;
+  const used=$('#crIncludeUsed');
+  if(used)used.onchange=refreshReplacementCandidatesE253;
+
+  const inlineOriginal=$('#cqOriginalInlineImage');
+  if(inlineOriginal){
+    inlineOriginal.addEventListener('click',e=>{
+      if(e.target.closest?.('img'))openLargeOriginalImageE259();
+    });
+  }
+}
+installEditModalHandlersP274();
+
 
 function addCurrentQuestionEditButtonsE251(mode='problem'){
   installE256DelegatedActions();
