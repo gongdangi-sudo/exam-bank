@@ -606,7 +606,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P275 문항저장호환 · 이력개별삭제 · E260 원문보존</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P276 자동범위분류 · 문항저장호환 · 이력개별삭제 · E260 원문보존</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -624,7 +624,7 @@
           <div class="field"><label>연도</label><select id="fYear"><option value="">전체</option></select></div>
           <div class="field"><label>단원</label><select id="fUnit"><option value="">전체</option></select></div>
           <div class="field"><label>범위 시작 <span style="font-size:11px;color:#64748b">(등록 목차)</span></label><select id="fRangeStart"><option value="">전체</option></select></div>
-          <div class="field"><label>범위 끝 <span style="font-size:11px;color:#64748b">(등록 목차)</span></label><select id="fRangeEnd"><option value="">전체</option></select></div>
+          <div class="field"><label>범위 끝 <span style="font-size:11px;color:#64748b">(등록 목차)</span></label><select id="fRangeEnd"><option value="">전체</option></select></div><div class="field" style="grid-column:span 2"><div id="rangeHelpP276" class="help">목차가 있는 과목은 자동/수동 분류된 문항만 특정 범위 출제에 사용됩니다. 미분류 문항은 전체 출제에서는 그대로 사용됩니다.</div></div>
           <div class="field"><label for="fCount">문항 수 · Word 저장 문항 수</label><input id="fCount" type="number" min="1" max="100" step="1" value="10" aria-describedby="fCountHelp"><div style="display:flex;gap:6px;margin-top:6px"><button type="button" class="btn ghost" data-exam-count="10" aria-pressed="true">10문항</button><button type="button" class="btn ghost" data-exam-count="20" aria-pressed="false">20문항</button></div><div id="fCountHelp" class="help" role="status">10문항·20문항 선택 또는 1~100 직접 입력 → 문제 출제하기 → Word 저장</div></div>
           <div class="field"><label>문제 순서</label><select id="fOrder"><option value="random">랜덤</option><option value="yearDesc">최신 연도순</option><option value="yearAsc">오래된 연도순</option></select></div>
           <div class="field"><label>시험지 제목</label><input id="fTitle" value="공단기 관리반 매일 확인 테스트"></div>
@@ -669,7 +669,7 @@
     <section id="bank" class="page hidden">
       <div class="stat-row"><div class="stat"><strong id="statTotal">0</strong><span>전체 문제</span></div><div class="stat"><strong id="statSubjects">0</strong><span>등록 과목</span></div><div class="stat"><strong id="statUsed">0</strong><span>출제 이력</span></div></div>
       <div class="panel">
-        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 전체과목 자동분리 · Z268 / E260 원문보존</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><h2 style="margin-right:auto">문제은행 관리</h2><button class="btn primary" id="batchPdfBtn">📁 문제 PDF 일괄 업로드</button><button class="btn success" id="officialImportBtn">🏛 원본 문제 + 공식 정답표 등록</button><button class="btn ghost" id="batchTextifyBankT247">🧾 현재 과목 이미지→텍스트 · T247</button><button class="btn success" id="openAutoRangeP276">📚 전범위 문항 자동 범위 분류 · P276</button><button class="btn warn" id="zipImportBtn">📦 시험문제 ZIP 전체과목 자동분리 · Z268 / E260 원문보존</button><button class="btn warn" id="openLawReview">⚖ 등록 문항 검수 · L250</button><button class="btn ghost" id="addBtn">+ 개별 등록</button><button class="btn ghost" id="appliedExportBtn">🧩 응용기출 생성용 JSON</button><button class="btn ghost" id="appliedImportBtn">⬆ 응용기출 JSON 가져오기</button><input id="appliedImportFile" type="file" accept="application/json" class="hidden"><button class="btn ghost" id="explainExportBtn">🤖 상세 해설용 JSON 내보내기</button><button class="btn ghost" id="explainImportBtn">⬆ 해설 JSON 가져오기</button><button class="btn ghost" id="importBtn">JSON 가져오기</button><button class="btn ghost" id="exportBtn">JSON 백업</button><button class="btn danger" id="openFullReset">🗑 문제은행 완전 초기화 · R249</button><input id="importFile" type="file" accept="application/json" class="hidden"><input id="explainImportFile" type="file" accept="application/json" class="hidden"></div>
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L250</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R249: 완전 재등록이 필요하면 <b>문제은행 완전 초기화</b>를 사용하세요. 문제·이력뿐 아니라 업로드 이미지 자산과 저장 상태까지 모두 삭제합니다.</div>
@@ -1017,6 +1017,91 @@
 
     <div class="actions">
       <button class="btn ghost" id="cancelCurrentQuestionReplace">닫기</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="autoRangeModalP276" class="modal hidden">
+  <div class="modal-box" style="max-width:1180px">
+    <div class="modal-head">
+      <div>
+        <h3>전범위 문항 자동 범위 분류 · P276</h3>
+        <div class="help">문제 본문·보기·선택지를 등록 목차와 비교해 가장 가까운 범위를 제안합니다. 목차가 없는 과목은 전범위로 유지합니다.</div>
+      </div>
+      <button class="close" id="closeAutoRangeP276">×</button>
+    </div>
+
+    <div class="notice" style="margin-top:12px">
+      <b>안전 저장:</b> 문제·정답·해설·법령검수는 변경하지 않고
+      <b>tocIndex / tocLabel</b> 범위 정보만 추가합니다.
+      <b>신뢰도 높음</b>만 기본 선택하며, 보통·낮음은 검수 후 저장할 수 있습니다.
+    </div>
+
+    <div class="form-grid" style="margin-top:14px">
+      <div class="field">
+        <label>과목 *</label>
+        <select id="autoRangeSubjectP276"></select>
+      </div>
+      <div class="field">
+        <label>시험 구분</label>
+        <select id="autoRangeExamP276"><option value="">전체</option></select>
+      </div>
+      <div class="field">
+        <label>연도</label>
+        <select id="autoRangeYearP276"><option value="">전체</option></select>
+      </div>
+      <div class="field">
+        <label>분석 대상</label>
+        <select id="autoRangeScopeP276">
+          <option value="unclassified">전범위/미분류 문항만</option>
+          <option value="all">해당 조건 전체 다시 분석</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" id="runAutoRangeP276">자동 분류 실행</button>
+      <button class="btn ghost" id="selectHighRangeP276">신뢰도 높음만 선택</button>
+      <button class="btn ghost" id="selectMediumRangeP276">높음+보통 선택</button>
+      <button class="btn ghost" id="clearRangeSelectionP276">선택 해제</button>
+    </div>
+
+    <div id="autoRangeSummaryP276" class="notice hidden" style="margin-top:12px"></div>
+
+    <div class="form-grid" style="margin-top:12px">
+      <div class="field">
+        <label>결과 필터</label>
+        <select id="autoRangeConfidenceP276">
+          <option value="">전체</option>
+          <option value="high">신뢰도 높음</option>
+          <option value="medium">신뢰도 보통</option>
+          <option value="low">신뢰도 낮음</option>
+          <option value="none">자동 분류 불가</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>검색</label>
+        <input id="autoRangeSearchP276" placeholder="문제 내용 · 시험 · 연도 검색">
+      </div>
+      <div class="field">
+        <label>페이지</label>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button class="btn ghost" type="button" id="autoRangePrevP276">이전</button>
+          <span class="help" id="autoRangePageInfoP276"></span>
+          <button class="btn ghost" type="button" id="autoRangeNextP276">다음</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="autoRangeResultP276" style="max-height:520px;overflow:auto;border:1px solid #e2e8f0;border-radius:12px;margin-top:10px">
+      <div class="empty">과목을 선택하고 자동 분류를 실행해주세요.</div>
+    </div>
+
+    <div id="autoRangeStatusP276" class="help" style="margin-top:10px;min-height:22px" role="status" aria-live="polite"></div>
+    <div class="actions">
+      <button class="btn success" id="saveAutoRangeP276">선택 결과 일괄 저장</button>
+      <button class="btn ghost" id="cancelAutoRangeP276">닫기</button>
     </div>
   </div>
 </div>
@@ -3653,6 +3738,7 @@ function renderBank(){
       <td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}
         ${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}
         <div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation?'작성 완료':(p.explanationStatus||'작성 대기'))}</div>
+        <div class="source-tag">범위: ${problemTocIndex(p)>=0 ? esc(tocLabels(p.subject)[problemTocIndex(p)]||p.tocLabel||'지정') : '전범위/미분류'}</div>
       </td>
       <td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button>
           <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td>
@@ -7758,10 +7844,487 @@ fillSubjects();refreshFilters();renderBank();
 // ===== v9: 사용자 제공 과목별 목차 =====
 const TOC_DATA = {"행정법": ["[필수편]", "제1편 행정법통론", "제1강 행 정", "제1절 권력분립과 행정", "제2절 통치행위", "제2강 행정법의 의의", "제2절 법치행정의 원리(행정의 법률적합성원칙)", "제3강 행정법의 법원과 효력", "제1절 행정법의 법원", "제2절 행정법의 효력", "제4강 행정법의 일반원칙", "제1절 비례의 원칙(과잉금지의 원칙)", "제2절 신뢰보호의 원칙", "제3절 그 밖의 일반원칙", "제5강 행정법관계", "제1절 공법관계와 사법관계", "제3절 행정법관계의 당사자", "제6강 공권과 공의무관계", "제1절 공권과 공의무(공법관계 - 행정법관계의 내용)", "제2절 무하자재량행사청구권, 행정개입청구권", "제7강 특별권력관계 등", "제1절 특별권력관계", "제8강 행정법상의 법률요건과 법률사실", "제1절 행정법상의 사건", "제2절 공법상 사무관리·부당이득", "제9강 사인의 공법행위", "제1절 공법행위", "제2절 신고와 신청", "제2편 행정작용법", "제10강 법규명령", "제2절 법규명령", "제11강 행정규칙 등", "제1절 행정규칙", "제12강 행정행위의 기초개념", "제1절 행정행위의 의의 및 종류", "제2절 기속행위와 재량행위, 불확정개념과 판단여지", "제13강 행정행위의 내용", "제1절 법률행위적 행정행위", "제2절 준법률행위적 행정행위", "제14강 행정행위의 부관", "제1절 행정행위의 부관", "제2절 부관과 이를 기초로 한 후속조치", "제15강 행정행위의 요건과 효력", "제1절 행정행위의 성립 및 효력발생요건", "제2절 행정법령의 적용문제", "제3절 행정행위의 효력 및 구속력", "제16강 행정행위의 하자와 하자승계", "제1절 행정행위의 하자", "제2절 행정행위의 하자승계", "제17강 행정행위의 폐지(취소 · 철회) 및 실효", "제1절 행정행위의 폐지", "제2절 행정행위의 실효", "제18강 확약 등", "제1절 행정상의 확약", "제2절 행정계획", "제19강 공법상 계약 등", "제1절 그 밖의 행정의 주요 행정형식 1", "제2절 그 밖의 행정의 주요 행정형식 2", "제3편 행정절차, 행정공개", "제20강 행정절차법(총칙 등)", "제1절 행정절차법(총칙 등)", "제21강 행정절차법(처분 등)", "제1절 처분절차", "제22강 정보공개법과 개인정보 보호법", "제2절 정보공개법", "제3절 개인정보 보호법", "제4편 행정의 실효성 확보수단", "제23강 행정의 실효성 확보수단의 개설", "제2절 새로운 행정의 실효성 확보수단", "제24강 행정상 강제집행(대집행 등)", "제1절 일반론", "제2절 대집행", "제3절 이행강제금(집행벌)", "제5절 행정상 강제징수", "제25강 행정상 즉시강제와 행정조사", "제1절 행정상 즉시강제", "제2절 행정조사", "제26강 행정벌(행정형벌, 행정질서벌)", "제1절 행정벌", "제2절 행정형벌의 특수성", "제3절 행정질서벌의 특수성", "제5편 행정구제 1(행정상 손해전보)", "제28강 행정상 손해배상 1(국가배상법 제2조 등)", "제1절 공무원의 직무행위로 인한 손해배상책임의 요건", "제2절 배상책임자 등", "제3절 국가와 지방자치단체의 자동차손해배상책임", "제29강 행정상 손해배상 2(국가배상법 제5조 등)", "제1절 영조물의 설치·관리상의 하자로 인한 손해배상", "제2절 손해배상청구권", "제30강 행정상 손실보상 1(손실보상청구권의 요건)", "제1절 행정상 손실보상", "제2절 경계이론·분리이론", "제31강 행정상 손실보상 2(손실보상의 기준과 내용 등)", "제1절 손실보상의 기준과 내용", "제2절 손실보상의 유형과 지급", "제3절 사업인정요건 및 손실보상의 절차와 불복", "제32강 손해전보를 위한 그 밖의 제도 등", "제1절 손해전보를 위한 그 밖의 제도", "제2절 행정상의 결과제거청구", "제6편 행정구제 2(행정쟁송)", "제33강 행정심판의 개관 등", "제1절 행정심판의 개관", "제2절 행정심판의 당사자 등", "제3절 행정심판위원회", "제34강 행정심판절차 등", "제1절 행정심판의 청구", "제2절 행정심판의 심리·재결", "제3절 행정심판의 고지", "제35강 행정소송 개관, 당사자소송 및 객관적 소송", "제2절 주관적 소송", "제3절 객관적 소송", "제36강 항고소송 1(취소소송의 의의 등)", "제1절 취소소송의 일반론", "제2절 취소소송의 당사자 등", "제37강 항고소송 2(처분 등)", "제2절 처분 등의 존재(대상적격의 문제)", "제38강 항고소송 3(그 밖의 소송요건 및 소변경 등)", "제1절 그 밖의 소송요건", "제2절 소의 변경과 소제기의 효과", "제39강 항고소송 4(취소소송의 심리 등)", "제1절 취소소송의 심리 등", "제2절 취소소송의 판결 등", "제40강 항고소송 5(무효등확인소송, 부작위위법확인소송)", "제1절 무효등확인소송", "제2절 부작위위법확인소송"], "행정학": ["1권 [총론, 정책]", "1장 행정학의 기초이론", "제1절 행정의 본질", "01 행정의 개념", "02 공공재로서의 행정", "03 행정기능 & 행정과정", "제2절 행정과 환경", "01 행정의 정치", "02 행정과 경영", "03 시민사회와 제3섹터·NGO", "04 사회적 자본", "제3절 행정의 변천", "01 현대행정의 특징", "02 진보주의와 보수주의 정부관", "03 후기산업사회(포스트모더니티)의 행정", "제4절 행정의 존재이유 - 시장실패", "01 시장실패", "02 정부규제", "03 행정지도", "제5절 행정의 한계 - 정부실패와 대응", "01 정부실패", "02 공공재의 적정 공급규모", "03 감축관리론 - 작은 정부론", "04 공공부문의 민간화", "제6절 행정의 지향과 가치", "01 행정이념의 변천과 관계", "02 행정의 본질적 가치", "03 행정의 수단적 가치", "제7절 행정학의 특징과 체계", "01 행정학의 성격과 접근법", "02 행정학의 성립과 발달", "제8절 행정학의 주요 이론", "01 과학적 관리론", "02 인간관계론", "03 행태론적 접근", "04 생태론적 접근", "05 체제론적 접근", "06 비교행정론", "07 발전행정론", "08 신행정론", "09 현상학", "10 비판행정학과 담론이론", "11 공공선택이론", "12 신제도론", "13 신공공관리론", "14 거버넌스론", "15 신공공서비스론", "16 탈신공공관리론", "17 넛지이론과 공공가치관리론", "2장 정책론", "제1절 정책과 정책과학의 본질", "01 정책과학의 특성과 본질", "02 정책의 본질과 유형", "제2절 정책의제와 정책목표", "01 정책의제의 설정", "02 정책의제 설정에 관한 이론모형", "03 정책네트워크(정책망)모형", "04 정책목표", "제3절 정책분석과 미래예측", "01 정책대안의 탐색과 평가", "02 정책분석의 유형과 차원", "03 체제분석", "04 관리과학", "05 직관적(판단적) 예측", "06 불확실성과 미래예측", "제4절 정책결정", "01 정책결정의 본질과 과정", "02 정책결정요인이론", "03 개인차원의 의사결정모형", "04 집단차원의 의사결정모형", "제5절 정책집행", "01 정책집행의 본질", "02 정책집행에 관한 연구와 이론", "03 정책집행이론", "04 정책집행에 영향을 주는 요인", "제6절 기획", "01 기획의 본질", "02 기획의 발달과 유형", "제7절 정책평가와 환류", "01 정책평가의 본질과 목적", "02 정책평가의 유형과 방법", "03 정부업무평가", "04 인과관계·변수 및 타당성", "05 정책평가의 방법 : 실험", "06 정책변동과 환류", "2권 [조직, 인사]", "3장 조직론", "제1절 조직의 본질과 기초이론", "01 조직의 유형", "02 조직이론의 변천과 유형", "제2절 조직행동론", "01 인간관과 동기이론", "02 조직문화", "03 의사전달", "04 갈등", "05 권력", "06 리더십", "제3절 조직구조론", "01 조직의 구조변수", "02 조직의 원리", "03 관료제", "04 애드호크라시(adhocracy)", "05 공식조직과 비공식조직", "06 계선과 막료", "07 위원회(합의제 행정기관)", "08 정부조직체계", "09 책임운영기관", "10 공기업", "제4절 조직환경론", "01 거시조직이론", "02 혼돈이론", "제5절 조직관리론", "01 행정PR 및 정보공개", "02 목표관리(MBO)", "03 조직발전(OD)", "04 전략적 관리 & 위기관리", "05 리엔지니어링", "06 총체적 품질관리(TQM)", "07 시민헌장 - 행정서비스헌장", "08 성과관리 - 성과중심의 행정", "09 균형성과관리(BSC)", "4장 인사행정론", "제1절 인사행정의 기초이론", "01 인사행정의 특징과 흐름", "02 엽관주의", "03 실적주의", "04 직업공무원제도", "05 대표관료제", "06 중앙인사행정기관", "07 적극적 인사행정 & 인적자원관리", "제2절 공직의 분류", "01 경력직과 특수경력직", "02 개방형과 폐쇄형 인사", "03 계급제", "04 직위분류제", "05 고위공무원단 제도", "제3절 공무원의 임용", "01 임용", "02 시험", "제4절 공무원의 능력발전", "01 교육훈련", "02 근무성적평정", "03 승진·배치전환·경력개발", "04 역량중심의 인사", "제5절 공무원의 복지와 사기", "01 공무원의 사기", "02 공무원의 보수", "03 공무원 연금", "04 신분보장", "05 공무원단체 - 공무원노조", "제6절 공직 윤리와 부패", "01 정치적 중립", "02 공직윤리", "03 공직부패", "04 내부고발자 보호제도", "3권 [재무, 환류, 자치]", "5장 재무행정론", "제1절 예산의 개념과 본질", "01 예산과 재정", "02 예산 관련 법률", "03 계획과 예산, 중앙예산기관", "04 예산의 기능", "05 예산의 원칙", "06 예산의 분류", "제2절 예산의 종류", "01 세입·세출의 성질에 따른 구분", "02 정부기금", "03 통합재정", "04 조세지출예산", "05 남녀평등예산(성인지예산)", "06 본예산·수정예산·추경예산", "07 준예산·잠정예산·가예산", "제3절 예산결정이론", "01 예산이론의 전개와 유형", "02 예산의 합리주의와 점증주의", "03 자원의 희소성과 공공지출관리의 규율", "제4절 예산제도론", "01 품목별 예산(LIBS)", "02 성과주의 예산(PBS)", "03 계획예산(PPBS)", "04 영기준예산(ZBB)", "05 자본예산(CBS)", "06 신성과주의예산(NPB)", "제5절 예산과정", "01 예산주기", "02 예산편성", "03 예산심의", "04 예산집행", "05 구매행정(조달행정)", "06 결산", "07 정부회계", "08 회계검사", "6장 환류행정론", "제1절 행정책임", "01 행정책임", "02 행정통제", "03 옴부즈만제도", "04 민원 행정", "05 행정참여", "06 참여예산제도", "제2절 행정개혁", "01 행정개혁의 본질", "02 선진국의 행정개혁과 교훈", "03 우리나라의 행정개혁", "제3절 정보화와 행정", "01 지식정보화사회와 행정", "02 행정정보체계", "03 전자정부", "04 지식행정관리", "7장 지방자치론", "제1절 지방자치의 기초이론", "01 지방행정의 개념과 특징", "02 지방자치의 본질과 가치", "03 자치권", "04 지방자치의 변천과 역사", "05 우리나라의 지방자치", "제2절 지방자치단체와 국가와의 관계", "01 정부간 관계", "02 중앙통제", "03 특별지방행정기관(일선기관)", "04 정부 간 갈등과 분쟁", "05 광역행정", "제3절 지방자치단체의 조직", "01 지방자치단체의 종류", "02 자치단체의 계층구조", "03 지방자치단체의 구역", "04 자치단체의 기관 구성", "제4절 지방자치단체의 기능과 사무", "01 지방자치단체의 기능 배분", "02 지방자치단체의 사무", "제5절 지방자치단체의 재정", "01 지방재정의 본질과 체계", "02 지방재정력의 평가", "03 지방세", "04 세외수입", "05 지방공기업", "06 국고보조금", "07 지방교부세", "08 지방채", "제6절 지방자치와 주민", "01 주민참여", "02 주민소송", "03 주민투표", "04 주민소환"], "교육학": ["Chapter01 교육의 기초", "1. 교육의 개념과 정의", "2. 평생교육", "3. 영재교육", "4. 대안교육", "5. 다문화 교육", "Chapter02 교사론", "1. 교사 전문성", "Chapter03 한국교육사", "1. 삼국시대의 교육", "2. 고려시대 교육", "3. 조선시대의 교육", "4. 19세기의 근대교육", "5. 일제 강점 시기의 교육", "6. 현대의 교육", "Chapter04 서양교육사", "1. 고대의 교육", "2. 중세의 교육", "3. 문예부흥기의 교육", "4. 종교개혁기의 교육", "5. 실학주의 교육", "6. 계몽주의 교육", "7. 신인문주의 교육", "Chapter05 교육철학", "1. 미국의 4대 교육철학", "2. 현대의 교육철학", "Chapter6 교육심리학", "1. 발달이론", "2. 학습이론", "3. 인지적 특성과 교육", "4. 정의적 특성과 교육", "5. 성격과 적응", "6. 특수한 학습자", "Chapter07 생활지도 및 상담", "1. 생활지도의 이해", "2. 청소년 비행이론", "3. 진로교육 이론", "4. 상담기법", "5. 상담이론", "Chapter08 교수-학습", "1. 교수학습방법의 유형", "2. 교수학습이론", "3. 구성주의 교수이론", "4. 최신 교수학습이론", "Chapter09 교육공학", "1. 교수설계", "2. 교수매체", "3. 교수매체의 활용", "Chapter10 교육행정", "1. 교육행정의 기초", "2. 교육행정의 발달과정", "3. 동기론", "4. 지도성론", "5. 교육조직론", "6. 의사소통론", "7. 교육기획론", "8. 교육정책론", "9. 장학론", "10. 교육재정론", "11. 학교·학급경영론", "Chapter11 교육관계법", "1. 교육법의 기초", "2. 우리나라 교육", "3. 교직원", "4. 교육재정", "5. 평생교육", "6. 고등교육", "7. 초·중등교육", "8. 학교폭력 예방 및 대책에 관한 법률", "9. 지방교육자치에 관한 법률", "10. 공교육 정상화 촉진 및 선행교육 규제에 관한 특별법", "11. 학교 안전사고 예방 및 보상에 관한 법률", "Chapter12 교육사회학", "1. 교육사회학 연구의 관점", "2. 교육평등관", "3. 교육과 사회평등", "4. 시험의 기능", "5. 학업성취격차의 결정요인", "6. 학교팽창과 학력의 상승", "7. 학교교육의 위기와 교육개혁", "Chapter13 교육과정", "1. 교육과정의 역사", "2. 교육과정의 구성", "3. 교육과정의 유형", "4. 교육과정의 연구 패러다임", "5. 교육과정 개발모형", "6. 우리나라 교육과정", "Chapter14 교육평가", "1. 교육평가 모형", "2. 교육평가의 유형", "3. 평가도구의 조건", "Chapter15 교육통계", "1. 교육통계의 기초 - 척도", "2. 기술통계", "3. 추리통계", "4. 문항의 통계적 분석", "Chapter16 교육연구", "1. 실험적 연구법", "2. 자료수집방법"], "세법": ["PART 1. 조세총론", "PART 2. 국세기본법", "CHAPTER 01. 국세기본법 총론", "CHAPTER 02. 국세부과와 세법적용", "CHAPTER 03. 납세의무", "CHAPTER 04. 조세채권의 보전", "CHAPTER 05. 과세 및 환급", "CHAPTER 06. 조세불복제도", "CHAPTER 07. 납세자의 권리 및 보칙", "PART 3. 국세징수법", "CHAPTER 01. 총칙 및 보칙", "CHAPTER 02. 임의적 징수절차", "CHAPTER 03. 강제적 징수절차", "PART 4. 부가가치세법", "CHAPTER 01. 부가가치세법 총론", "CHAPTER 02. 과세거래", "CHAPTER 03. 영세율과 면세", "CHAPTER 04. 과세표준과 매출세액의 계산", "CHAPTER 05. 매입세액의 계산", "CHAPTER 06. 부가가치세의 납세절차", "CHAPTER 07. 간이과세제도", "PART 5. 법인세법", "CHAPTER 01. 법인세법 총론", "CHAPTER 02. 법인세의 계산구조", "CHAPTER 03. 익금", "CHAPTER 04. 손금Ⅰ(세금과공과, 인건비 등)", "CHAPTER 05. 손금Ⅱ(기업업무추진비, 기부금, 지급이자)", "CHAPTER 06. 손금Ⅲ(감가상각비, 충당금 및 준비금)", "CHAPTER 07. 손익의 귀속시기 및 자산부채의 평가", "CHAPTER 08. 부당행위계산의 부인", "CHAPTER 09. 과세표준과 세액계산", "CHAPTER 10. 법인세의 납세절차", "CHAPTER 11. 합병 및 분할의 과세특례", "CHAPTER 12. 법인세법의 기타사항", "PART 6. 소득세법", "CHAPTER 01. 소득세법 총론", "CHAPTER 02. 종합소득Ⅰ(이자소득, 배당소득)", "CHAPTER 03. 종합소득Ⅱ(사업소득)", "CHAPTER 04. 종합소득Ⅲ(근로소득, 연금소득, 기타소득)", "CHAPTER 05. 종합소득Ⅳ(소득금액 및 세액계산의 특례)", "CHAPTER 06. 종합소득과세표준의 계산", "CHAPTER 07. 종합·퇴직소득세의 계산", "CHAPTER 08. 종합·퇴직소득세의 납세절차", "CHAPTER 09. 양도소득세의 계산과 납부절차", "CHAPTER 10. 소득세법의 기타사항", "PART 7. 상속세 및 증여세법", "PART 8. 종합부동산세법"], "회계학": ["제 1 편 재무회계", "PART 01 회계의 첫걸음", "PART 02 재무보고를 위한 개념체계", "PART 03 재무제표", "PART 04 현금 및 수취채권과 지급채무", "PART 05 금융자산", "PART 06 재고자산", "PART 07 유형자산", "PART 08 투자부동산", "PART 09 무형자산", "PART 10 금융부채", "PART 11 충당부채", "PART 12 자본", "PART 13 수익인식", "PART 14 건설계약", "PART 15 회계변경과 오류수정", "PART 16 현금흐름표", "PART 17 주당이익", "PART 18 재무비율", "PART 19 생물자산", "PART 20 종업원급여", "PART 21 관계기업투자와 지분법", "PART 22 법인세회계", "PART 23 환율변동효과", "제 2 편 원가회계", "PART 01 원가관리회계의 기초", "PART 02 원가배분", "PART 03 개별원가", "PART 04 종합원가계산", "PART 05 활동기준원가계산", "PART 06 결합원가의 배분", "PART 07 변동원가계산", "PART 08 원가추정", "PART 09 CVP분석", "PART 10 표준원가", "PART 11 관련원가와 의사결정", "제 3 편 정부회계", "PART 01 정부회계"], "형법": ["『1권 형법 총론』", "PART 01 서론", "CHAPTER 01 죄형법정주의", "CHAPTER 02 형법의 적용범위", "PART 02 범죄론", "CHAPTER 01 범죄의 기본개념", "CHAPTER 02 구성요건론", "CHAPTER 03 위법성론", "CHAPTER 04 책임론", "CHAPTER 05 미수론", "CHAPTER 06 공범론", "CHAPTER 07 죄수론", "PART 03 형벌론", "CHAPTER 01 형벌의 종류", "CHAPTER 02 형의 양정", "CHAPTER 03 누범", "CHAPTER 04 선고유예·집행유예·가석방", "CHAPTER 05 형의 시효와 소멸", "『2권 형법 각론』", "PART 01 개인적 법익에 대한 죄", "CHAPTER 01 생명과 신체에 대한 죄", "CHAPTER 02 자유에 대한 죄", "CHAPTER 03 명예와 신용에 관한 죄", "CHAPTER 04 사생활의 평온에 대한 죄", "CHAPTER 05 재산에 대한 죄", "PART 02 사회적 법익에 대한 죄", "CHAPTER 01 공공의 안전과 평온에 대한 죄", "CHAPTER 02 공공의 신용에 관한 죄", "CHAPTER 03 사회의 도덕에 관한 죄", "PART 03 국가적 법익에 관한 죄", "CHAPTER 01 국가의 존립과 권위에 관한 죄", "CHAPTER 02 국가의 기능에 대한 죄"], "교정학": ["PART 01 교정학", "CHAPTER 01 교정학의 이해", "CHAPTER 02 교정시설과 수용제도론", "CHAPTER 03 수용자의 지위와 처우", "CHAPTER 04 시설 내 처우 Ⅰ", "CHAPTER 05 시설 내 처우 Ⅱ", "CHAPTER 06 사회적 처우", "CHAPTER 07 지역사회교정", "CHAPTER 08 가석방과 시설 내 처우의 종료", "CHAPTER 09 교정의 민영화와 한국교정의 과제", "PART 02 형사정책", "CHAPTER 01 형사정책 일반론", "CHAPTER 02 형사정책의 발전과정", "CHAPTER 03 범죄원인론", "CHAPTER 04 범죄예방 및 범죄방지대책", "CHAPTER 05 형벌론", "CHAPTER 06 보안처분론", "CHAPTER 07 소년범죄와 그 대책"]};
 function tocLabels(subject){ return TOC_DATA[subject] || []; }
-function buildRangeOptions(){ const labels=tocLabels($('#fSubject').value); const html='<option value="">전체</option>'+labels.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join(''); $('#fRangeStart').innerHTML=html; $('#fRangeEnd').innerHTML=html; }
+function buildRangeOptions(){
+  const start=$('#fRangeStart'),end=$('#fRangeEnd');
+  const oldStart=start?.value||'',oldEnd=end?.value||'';
+  const subject=$('#fSubject').value;
+  const labels=tocLabels(subject);
+
+  if(!labels.length){
+    const no='<option value="">목차 없음 · 전체 출제</option>';
+    if(start){start.innerHTML=no;start.disabled=true;}
+    if(end){end.innerHTML=no;end.disabled=true;}
+    if($('#rangeHelpP276'))$('#rangeHelpP276').textContent='이 과목은 등록 목차가 없어서 범위 시작/끝을 사용하지 않습니다. 문제은행 문항은 전범위로 출제됩니다.';
+    return;
+  }
+
+  const options='<option value="">전체</option>'+labels.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join('');
+  if(start){
+    start.disabled=false;start.innerHTML=options;
+    if(oldStart!=='' && +oldStart<labels.length)start.value=oldStart;
+  }
+  if(end){
+    end.disabled=false;end.innerHTML=options;
+    if(oldEnd!=='' && +oldEnd<labels.length)end.value=oldEnd;
+  }
+  if($('#rangeHelpP276'))$('#rangeHelpP276').textContent='전체 출제에서는 미분류 문항도 포함됩니다. 특정 범위를 선택하면 자동/수동으로 목차가 지정된 문항만 해당 범위에서 출제됩니다.';
+}
 function normTocText(s){return String(s||'').replace(/\s+/g,' ').replace(/[·ㆍ]/g,'·').trim()}
-function problemTocIndex(p){ const labels=tocLabels(p.subject); if(!labels.length)return -1; const vals=[p.subunit,p.unit,p.unit&&p.subunit?`${p.unit} > ${p.subunit}`:''].filter(Boolean).map(normTocText); for(let i=0;i<labels.length;i++){const l=normTocText(labels[i]);if(vals.some(v=>v===l||v.includes(l)||l.includes(v)))return i;} return -1;}
-function rangePass(p){ const s=$('#fRangeStart').value,e=$('#fRangeEnd').value;if(s===''&&e==='')return true;const idx=problemTocIndex(p);if(idx<0)return false;const labels=tocLabels($('#fSubject').value),a=s===''?0:+s,b=e===''?labels.length-1:+e;return idx>=Math.min(a,b)&&idx<=Math.max(a,b);}
+function problemTocIndex(p){
+  const labels=tocLabels(p.subject);
+  if(!labels.length)return -1;
+
+  const idx=Number(p?.tocIndex);
+  if(Number.isInteger(idx) && idx>=0 && idx<labels.length)return idx;
+
+  if(p?.tocLabel){
+    const target=normTocText(p.tocLabel);
+    const ti=labels.findIndex(x=>normTocText(x)===target);
+    if(ti>=0)return ti;
+  }
+
+  const vals=[p.subunit,p.unit,p.unit&&p.subunit?`${p.unit} > ${p.subunit}`:'']
+    .filter(Boolean).map(normTocText);
+  for(let i=0;i<labels.length;i++){
+    const l=normTocText(labels[i]);
+    if(vals.some(v=>v===l||v.includes(l)||l.includes(v)))return i;
+  }
+  return -1;
+}
+function rangePass(p){
+  const labels=tocLabels($('#fSubject').value);
+  if(!labels.length)return true;
+  const s=$('#fRangeStart').value,e=$('#fRangeEnd').value;
+  if(s===''&&e==='')return true;
+  const idx=problemTocIndex(p);
+  if(idx<0)return false;
+  const a=s===''?0:+s,b=e===''?labels.length-1:+e;
+  return idx>=Math.min(a,b)&&idx<=Math.max(a,b);
+}
+
+// ===== P276: 전범위 문항 자동 범위 분류 =====
+let autoRangeRowsP276=[];
+let autoRangePageP276=1;
+const AUTO_RANGE_PAGE_SIZE_P276=100;
+
+const AUTO_RANGE_STOP_P276=new Set([
+  '제','편','장','강','절','권','part','chapter','총론','각론','개론','기초','이해',
+  '본질','유형','일반론','관련','기타','사항','우리나라','이론','제도','과정','방법',
+  '특징','구분','등','및','대한','관한','으로','에서','법률','법'
+]);
+
+function cleanTocCoreP276(label){
+  return String(label||'').normalize('NFKC')
+    .replace(/^\s*\[[^\]]+\]\s*/,'')
+    .replace(/^\s*『[^』]+』\s*/,'')
+    .replace(/^\s*(?:제\s*)?\d+\s*(?:편|장|강|절|권)\s*/iu,'')
+    .replace(/^\s*(?:PART|CHAPTER)\s*\d+[\s.:_-]*/iu,'')
+    .replace(/^\s*\d+\s*[.)]?\s*/,'')
+    .replace(/[ⅠⅡⅢⅣⅤⅥⅦⅧⅨⅩ]/g,' ')
+    .replace(/[()[\]{}<>,.:;·ㆍ/&+\-–—]/g,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function normalizeSearchP276(s){
+  return String(s||'').normalize('NFKC').toLowerCase()
+    .replace(/[^\p{L}\p{N}]+/gu,' ')
+    .replace(/\s+/g,' ')
+    .trim();
+}
+function compactSearchP276(s){
+  return normalizeSearchP276(s).replace(/\s+/g,'');
+}
+function tocTokensP276(label){
+  const core=cleanTocCoreP276(label);
+  return normalizeSearchP276(core).split(' ')
+    .map(x=>x.trim())
+    .filter(x=>x.length>=2 && !AUTO_RANGE_STOP_P276.has(x));
+}
+function structuralTocP276(label){
+  return /^\s*(?:\[|『|제?\s*\d+\s*(?:편|장|권)|PART\b|CHAPTER\b|\d+권\b)/iu.test(String(label||''));
+}
+function problemTextP276(p){
+  return [
+    p.question||'',
+    p.viewText||'',
+    p.choices||'',
+    (!p.question && p.rawOriginalText)||''
+  ].join(' ');
+}
+function classifyProblemRangeP276(p){
+  const labels=tocLabels(p.subject);
+  if(!labels.length)return {index:-1,label:'',confidence:'none',score:0,margin:0,alternatives:[]};
+
+  const raw=problemTextP276(p);
+  const textNorm=normalizeSearchP276(raw);
+  const textCompact=textNorm.replace(/\s+/g,'');
+  const scored=[];
+
+  labels.forEach((label,index)=>{
+    const core=cleanTocCoreP276(label);
+    const coreNorm=normalizeSearchP276(core);
+    const coreCompact=coreNorm.replace(/\s+/g,'');
+    const tokens=tocTokensP276(label);
+
+    let score=0,hits=0,exact=false;
+    if(coreCompact.length>=4 && textCompact.includes(coreCompact)){
+      score+=22;
+      exact=true;
+    }
+
+    for(const tok of tokens){
+      const tc=tok.replace(/\s+/g,'');
+      if(tc.length<2)continue;
+      if(textCompact.includes(tc)){
+        hits++;
+        score+=tc.length>=6?6:tc.length>=4?5:tc.length===3?3.5:2.5;
+      }
+    }
+
+    if(tokens.length>=2 && hits>=2)score+=4;
+    if(tokens.length>=3 && hits===tokens.length)score+=4;
+    if(structuralTocP276(label))score-=2.5;
+
+    // 너무 짧고 일반적인 항목은 단독 매칭으로 확정하지 않음
+    if(tokens.length===1 && tokens[0].length<=2 && !exact)score-=2;
+
+    if(score>0)scored.push({index,label,score,hits,exact});
+  });
+
+  scored.sort((a,b)=>b.score-a.score || b.hits-a.hits || b.index-a.index);
+  const best=scored[0]||null;
+  const second=scored[1]||null;
+
+  if(!best || best.score<5){
+    return {index:-1,label:'',confidence:'none',score:best?.score||0,margin:0,alternatives:scored.slice(0,3)};
+  }
+
+  const margin=best.score-(second?.score||0);
+  let confidence='low';
+  if((best.exact && best.score>=16) || (best.score>=12 && margin>=3))confidence='high';
+  else if(best.score>=7 && margin>=1.5)confidence='medium';
+
+  return {
+    index:best.index,
+    label:best.label,
+    confidence,
+    score:+best.score.toFixed(1),
+    margin:+margin.toFixed(1),
+    alternatives:scored.slice(0,3)
+  };
+}
+
+function confidenceLabelP276(v){
+  return v==='high'?'높음':v==='medium'?'보통':v==='low'?'낮음':'분류 불가';
+}
+function confidenceClassP276(v){
+  return v==='high'?'ok-text':v==='medium'?'warn-text':'danger-text';
+}
+
+function autoRangeSubjectsP276(){
+  return Object.keys(TOC_DATA)
+    .filter(subject=>problems.some(p=>p.subject===subject))
+    .sort((a,b)=>a.localeCompare(b,'ko'));
+}
+function refreshAutoRangeFiltersP276(){
+  const subject=$('#autoRangeSubjectP276')?.value||'';
+  const rows=problems.filter(p=>p.subject===subject);
+  const exams=[...new Set(rows.map(p=>p.exam).filter(Boolean))].sort();
+  const years=[...new Set(rows.map(p=>p.year).filter(Boolean))].sort((a,b)=>b-a);
+
+  const exam=$('#autoRangeExamP276'),year=$('#autoRangeYearP276');
+  const oldExam=exam?.value||'',oldYear=year?.value||'';
+  if(exam){
+    exam.innerHTML='<option value="">전체</option>'+exams.map(x=>`<option>${esc(x)}</option>`).join('');
+    if(exams.includes(oldExam))exam.value=oldExam;
+  }
+  if(year){
+    year.innerHTML='<option value="">전체</option>'+years.map(x=>`<option>${esc(String(x))}</option>`).join('');
+    if(years.map(String).includes(String(oldYear)))year.value=oldYear;
+  }
+}
+
+function openAutoRangeP276(){
+  const subjects=autoRangeSubjectsP276();
+  if(!subjects.length){
+    alert('현재 문제은행에는 등록 목차가 있는 과목이 없습니다. 목차 없는 과목은 전범위로 유지됩니다.');
+    return;
+  }
+
+  const select=$('#autoRangeSubjectP276');
+  const current=$('#bankSubjectP271')?.value||$('#fSubject')?.value||'';
+  select.innerHTML=subjects.map(s=>`<option>${esc(s)}</option>`).join('');
+  if(subjects.includes(current))select.value=current;
+
+  autoRangeRowsP276=[];
+  autoRangePageP276=1;
+  refreshAutoRangeFiltersP276();
+  $('#autoRangeSummaryP276').classList.add('hidden');
+  $('#autoRangeResultP276').innerHTML='<div class="empty">자동 분류 실행을 눌러주세요.</div>';
+  $('#autoRangeStatusP276').textContent='';
+  $('#autoRangeModalP276').classList.remove('hidden');
+}
+function closeAutoRangeP276(){
+  $('#autoRangeModalP276').classList.add('hidden');
+}
+
+function runAutoRangeP276(){
+  const subject=$('#autoRangeSubjectP276').value;
+  const exam=$('#autoRangeExamP276').value;
+  const year=$('#autoRangeYearP276').value;
+  const scope=$('#autoRangeScopeP276').value;
+  const labels=tocLabels(subject);
+
+  if(!labels.length){
+    alert('이 과목에는 등록 목차가 없습니다. 전범위로 유지합니다.');
+    return;
+  }
+
+  let targets=problems.filter(p=>
+    p.subject===subject &&
+    (!exam||p.exam===exam) &&
+    (!year||String(p.year)===String(year))
+  );
+
+  if(scope==='unclassified'){
+    targets=targets.filter(p=>problemTocIndex(p)<0);
+  }
+
+  autoRangeRowsP276=targets.map(p=>{
+    const result=classifyProblemRangeP276(p);
+    return {
+      id:String(p.id),
+      p,
+      result,
+      chosenIndex:result.index,
+      selected:result.confidence==='high' && result.index>=0,
+      manual:false,
+      saved:false
+    };
+  });
+
+  autoRangePageP276=1;
+  renderAutoRangeP276();
+}
+
+function filteredAutoRangeRowsP276(){
+  const conf=$('#autoRangeConfidenceP276')?.value||'';
+  const q=String($('#autoRangeSearchP276')?.value||'').trim().toLowerCase();
+  return autoRangeRowsP276.filter(r=>{
+    if(conf && r.result.confidence!==conf)return false;
+    if(q){
+      const p=r.p;
+      const hay=[p.id,p.exam,p.year,p.no,p.question,p.choices].join(' ').toLowerCase();
+      if(!hay.includes(q))return false;
+    }
+    return true;
+  });
+}
+
+function renderAutoRangeP276(){
+  const subject=$('#autoRangeSubjectP276')?.value||'';
+  const labels=tocLabels(subject);
+  const rows=filteredAutoRangeRowsP276();
+
+  const counts={
+    total:autoRangeRowsP276.length,
+    high:autoRangeRowsP276.filter(r=>r.result.confidence==='high').length,
+    medium:autoRangeRowsP276.filter(r=>r.result.confidence==='medium').length,
+    low:autoRangeRowsP276.filter(r=>r.result.confidence==='low').length,
+    none:autoRangeRowsP276.filter(r=>r.result.confidence==='none').length,
+    selected:autoRangeRowsP276.filter(r=>r.selected&&r.chosenIndex>=0).length
+  };
+
+  const summary=$('#autoRangeSummaryP276');
+  summary.classList.remove('hidden');
+  summary.innerHTML=
+    `<b>${esc(subject)} 자동 분류 결과</b> · 대상 ${counts.total}문항 · `+
+    `<span class="ok-text">높음 ${counts.high}</span> · `+
+    `<span class="warn-text">보통 ${counts.medium}</span> · `+
+    `낮음 ${counts.low} · 분류 불가 ${counts.none} · <b>저장 선택 ${counts.selected}</b>`+
+    `<br><span class="help">목차 없는 과목은 분석하지 않습니다. 분류 불가 문항은 전범위로 유지됩니다.</span>`;
+
+  const totalPages=Math.max(1,Math.ceil(rows.length/AUTO_RANGE_PAGE_SIZE_P276));
+  autoRangePageP276=Math.min(Math.max(1,autoRangePageP276),totalPages);
+  const start=(autoRangePageP276-1)*AUTO_RANGE_PAGE_SIZE_P276;
+  const pageRows=rows.slice(start,start+AUTO_RANGE_PAGE_SIZE_P276);
+
+  $('#autoRangePageInfoP276').textContent=`${autoRangePageP276}/${totalPages} · ${rows.length}문항`;
+  $('#autoRangePrevP276').disabled=autoRangePageP276<=1;
+  $('#autoRangeNextP276').disabled=autoRangePageP276>=totalPages;
+
+  const options='<option value="">전범위 유지</option>'+labels.map((x,i)=>`<option value="${i}">${esc(x)}</option>`).join('');
+
+  $('#autoRangeResultP276').innerHTML=pageRows.length
+    ? `<table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="width:44px">저장</th>
+          <th style="width:155px">문항</th>
+          <th>문제</th>
+          <th style="width:130px">신뢰도</th>
+          <th style="min-width:310px">제안 범위</th>
+        </tr></thead>
+        <tbody>${pageRows.map(r=>{
+          const p=r.p;
+          const alt=r.result.alternatives?.slice(1,3).map(x=>x.label).join(' / ')||'';
+          return `<tr data-range-id="${esc(r.id)}">
+            <td><input type="checkbox" class="auto-range-check-p276" ${r.selected?'checked':''} ${r.chosenIndex<0?'disabled':''}></td>
+            <td><b>${esc(p.exam||'')}</b><br>${esc(String(p.year||''))} · ${esc(String(p.no||'-'))}번<div class="help">${esc(r.id)}</div></td>
+            <td>${esc(String(p.question||'').slice(0,150))}${String(p.question||'').length>150?'…':''}</td>
+            <td><span class="${confidenceClassP276(r.result.confidence)}"><b>${confidenceLabelP276(r.result.confidence)}</b></span><div class="help">점수 ${r.result.score} · 차이 ${r.result.margin}${alt?`<br>차선: ${esc(alt)}`:''}</div></td>
+            <td><select class="auto-range-select-p276" style="width:100%">${options}</select></td>
+          </tr>`;
+        }).join('')}</tbody>
+      </table>`
+    : '<div class="empty">조건에 맞는 결과가 없습니다.</div>';
+
+  pageRows.forEach(r=>{
+    const tr=$(`#autoRangeResultP276 tr[data-range-id="${CSS.escape(r.id)}"]`);
+    if(!tr)return;
+    const select=tr.querySelector('.auto-range-select-p276');
+    const check=tr.querySelector('.auto-range-check-p276');
+    select.value=r.chosenIndex>=0?String(r.chosenIndex):'';
+
+    select.onchange=()=>{
+      r.chosenIndex=select.value===''?-1:+select.value;
+      r.manual=true;
+      r.selected=r.chosenIndex>=0;
+      check.disabled=r.chosenIndex<0;
+      check.checked=r.selected;
+      renderAutoRangeSummaryOnlyP276();
+    };
+    check.onchange=()=>{
+      r.selected=check.checked && r.chosenIndex>=0;
+      renderAutoRangeSummaryOnlyP276();
+    };
+  });
+}
+
+function renderAutoRangeSummaryOnlyP276(){
+  const subject=$('#autoRangeSubjectP276')?.value||'';
+  const c={
+    total:autoRangeRowsP276.length,
+    high:autoRangeRowsP276.filter(r=>r.result.confidence==='high').length,
+    medium:autoRangeRowsP276.filter(r=>r.result.confidence==='medium').length,
+    low:autoRangeRowsP276.filter(r=>r.result.confidence==='low').length,
+    none:autoRangeRowsP276.filter(r=>r.result.confidence==='none').length,
+    selected:autoRangeRowsP276.filter(r=>r.selected&&r.chosenIndex>=0).length
+  };
+  const el=$('#autoRangeSummaryP276');
+  if(el)el.innerHTML=
+    `<b>${esc(subject)} 자동 분류 결과</b> · 대상 ${c.total}문항 · `+
+    `<span class="ok-text">높음 ${c.high}</span> · <span class="warn-text">보통 ${c.medium}</span> · `+
+    `낮음 ${c.low} · 분류 불가 ${c.none} · <b>저장 선택 ${c.selected}</b>`;
+}
+
+function setAutoRangeSelectionP276(mode){
+  autoRangeRowsP276.forEach(r=>{
+    if(r.chosenIndex<0){r.selected=false;return;}
+    if(mode==='high')r.selected=r.result.confidence==='high';
+    else if(mode==='medium')r.selected=['high','medium'].includes(r.result.confidence);
+    else r.selected=false;
+  });
+  renderAutoRangeP276();
+}
+
+async function saveAutoRangeP276(){
+  const selected=autoRangeRowsP276.filter(r=>r.selected&&r.chosenIndex>=0);
+  if(!selected.length){
+    alert('저장할 문항을 선택해주세요.');
+    return;
+  }
+
+  const labels=tocLabels($('#autoRangeSubjectP276').value);
+  const btn=$('#saveAutoRangeP276');
+  const status=$('#autoRangeStatusP276');
+  btn.disabled=true;
+
+  try{
+    const now=new Date().toISOString();
+    const updates=[];
+
+    for(const row of selected){
+      const p=problems.find(x=>String(x.id)===row.id);
+      if(!p)continue;
+      const idx=row.chosenIndex;
+      const label=labels[idx];
+      if(!label)continue;
+
+      p.tocIndex=idx;
+      p.tocLabel=label;
+      p.tocConfidence=row.manual?'manual':row.result.confidence;
+      p.tocAutoScore=row.result.score;
+      p.tocAutoMargin=row.result.margin;
+      p.tocClassifiedBy=row.manual?'manual-review-p276':'auto-p276';
+      p.tocClassifiedAt=now;
+      p.updatedAt=now;
+      updates.push(p);
+    }
+
+    for(let i=0;i<updates.length;i+=50){
+      const chunk=updates.slice(i,i+50);
+      status.textContent=`D1 범위 저장 중 ${Math.min(i+chunk.length,updates.length)}/${updates.length}…`;
+      const payload=window.examBankLawGuard
+        ? window.examBankLawGuard.preserveBankReviews(chunk)
+        : chunk;
+      const r=await fetch('/api/problems/bulk',{
+        method:'PUT',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({problems:payload})
+      });
+      if(!r.ok)throw new Error(await r.text());
+
+      try{
+        if(typeof p271ProblemVersions!=='undefined' && p271ProblemVersions instanceof Map){
+          chunk.forEach(p=>{
+            p271ProblemVersions.set(String(p.id),problemVersionP271(p));
+            p271KnownIds?.add?.(String(p.id));
+          });
+        }
+      }catch(e){}
+    }
+
+    selected.forEach(r=>r.saved=true);
+    status.style.color='#047857';
+    status.textContent=`범위 저장 완료 · ${updates.length}문항. 특정 범위 출제에서 바로 사용할 수 있습니다.`;
+
+    refreshFilters();
+    try{renderBank();}catch(e){}
+    renderAutoRangeP276();
+  }catch(e){
+    console.error('P276 range save',e);
+    status.style.color='#b91c1c';
+    status.textContent='범위 저장 실패 · '+(e?.message||e);
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+function installAutoRangeHandlersP276(){
+  const openBtn=$('#openAutoRangeP276');
+  if(openBtn)openBtn.onclick=openAutoRangeP276;
+  if($('#closeAutoRangeP276'))$('#closeAutoRangeP276').onclick=closeAutoRangeP276;
+  if($('#cancelAutoRangeP276'))$('#cancelAutoRangeP276').onclick=closeAutoRangeP276;
+  if($('#runAutoRangeP276'))$('#runAutoRangeP276').onclick=runAutoRangeP276;
+  if($('#selectHighRangeP276'))$('#selectHighRangeP276').onclick=()=>setAutoRangeSelectionP276('high');
+  if($('#selectMediumRangeP276'))$('#selectMediumRangeP276').onclick=()=>setAutoRangeSelectionP276('medium');
+  if($('#clearRangeSelectionP276'))$('#clearRangeSelectionP276').onclick=()=>setAutoRangeSelectionP276('clear');
+  if($('#saveAutoRangeP276'))$('#saveAutoRangeP276').onclick=saveAutoRangeP276;
+
+  if($('#autoRangeSubjectP276'))$('#autoRangeSubjectP276').onchange=()=>{
+    refreshAutoRangeFiltersP276();
+    autoRangeRowsP276=[];
+    $('#autoRangeSummaryP276').classList.add('hidden');
+    $('#autoRangeResultP276').innerHTML='<div class="empty">자동 분류 실행을 눌러주세요.</div>';
+  };
+  if($('#autoRangeConfidenceP276'))$('#autoRangeConfidenceP276').onchange=()=>{autoRangePageP276=1;renderAutoRangeP276();};
+  if($('#autoRangeSearchP276'))$('#autoRangeSearchP276').oninput=()=>{autoRangePageP276=1;renderAutoRangeP276();};
+  if($('#autoRangePrevP276'))$('#autoRangePrevP276').onclick=()=>{autoRangePageP276=Math.max(1,autoRangePageP276-1);renderAutoRangeP276();};
+  if($('#autoRangeNextP276'))$('#autoRangeNextP276').onclick=()=>{autoRangePageP276++;renderAutoRangeP276();};
+}
+installAutoRangeHandlersP276();
+
+
 const _refreshFiltersV8=refreshFilters;
 refreshFilters=function(){_refreshFiltersV8();buildRangeOptions();};
 function asOriginal(p){return {...p,_variant:'원문기출',_sourceId:p.id};}
