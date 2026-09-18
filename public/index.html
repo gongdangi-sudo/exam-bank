@@ -606,7 +606,7 @@
     </nav>
   </aside>
   <main class="main">
-    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · E260 원문보존</div></div>
+    <div class="top"><div><h1 id="pageTitle">과목 선택</h1><p id="pageDesc">과목을 선택해 기출문제 출제를 시작하세요.</p></div><div class="badge">원문기출 · 응용기출 · 범위 출제 · P271 속도모드 · E260 원문보존</div></div>
 
     <section id="home" class="page">
       <div class="notice">이 버전은 <b>문제 PDF만 업로드</b>합니다. 원본에서 검게 표시된 선택지 번호(예: ❸)를 정답으로 인식하고 학생용 문제지에서는 일반 ③으로 바꿉니다. 해설은 별도 파일 없이 ChatGPT 작성용으로 관리합니다.</div>
@@ -614,6 +614,7 @@
     </section>
 
     <section id="make" class="page hidden">
+      <div class="notice no-print" style="margin-bottom:12px"><b>P271 속도모드</b> · 출제 시 자동 OCR과 전체 문제은행 재렌더링을 하지 않습니다. 문제 변경분만 D1에 백그라운드 저장하고, 과거 중복검사는 인덱스로 처리합니다.</div>
       <div class="panel no-print">
         <h2>출제 조건</h2>
         <div class="form-grid">
@@ -672,6 +673,16 @@
         <div class="notice" style="margin-top:14px"><b>여러 과목 ZIP이면:</b> <b>📦 시험문제 ZIP 자동분리</b>에서 ZIP 1개 + 공식 정답표 1개만 올리면 과목별 PDF를 자동 분리하고 정답을 연결합니다.<br><br><b>한 과목만이면:</b> 공식 문제 원본 + 공식 정답표가 있으면 <b>🏛 원본 문제 + 공식 정답표 등록</b>을 사용하세요. 보기·표·박스를 원문 이미지로 그대로 보존합니다.<br><br><b>기존 방식:</b> 여러 PDF를 한 번에 선택하면 문항을 자동 분리하고, 문제 안에 표시된 정답을 찾아 등록합니다. 등록 전 검수 화면에서 정답이 안 잡힌 문항만 수정하면 됩니다. 원문기출은 문제·보기 문구를 그대로 보존합니다. 응용기출은 같은 핵심쟁점을 유지한 별도 응용본을 저장해 선택 출제할 수 있습니다.</div>
         <div id="lawBankPolicy" class="notice no-print" style="margin-top:12px"><b>등록 문항 검수 · L250</b><br>국어·영어는 기본 법령 검수 비대상입니다. 법령 관련 과목은 업로드한 문항을 이 문제은행에서 검수하고, 출제할 때는 저장된 판정만 적용합니다. 저장된 개정 제외·담당자 보류는 유지되며, 날짜만 바뀌었다고 완료된 검수를 다시 요구하지 않습니다.</div>
         <div id="lawUploadNotice" class="notice no-print hidden" role="status" aria-live="polite"></div><div class="help no-print" style="margin-top:8px">R249: 완전 재등록이 필요하면 <b>문제은행 완전 초기화</b>를 사용하세요. 문제·이력뿐 아니라 업로드 이미지 자산과 저장 상태까지 모두 삭제합니다.</div>
+        <div class="form-grid no-print" style="margin-top:12px">
+          <div class="field"><label>문제은행 과목</label><select id="bankSubjectP271"><option value="">전체</option></select></div>
+          <div class="field"><label>검색</label><input id="bankSearchP271" placeholder="문제·ID·시험명 검색"></div>
+          <div class="field"><label>표시 개수</label><select id="bankPageSizeP271"><option>50</option><option selected>100</option><option>200</option></select></div>
+        </div>
+        <div class="actions no-print" style="justify-content:flex-end">
+          <button class="btn ghost" id="bankPrevP271">이전</button>
+          <span class="help" id="bankPageInfoP271"></span>
+          <button class="btn ghost" id="bankNextP271">다음</button>
+        </div>
         <div class="table-wrap"><table><thead><tr><th>ID</th><th>과목</th><th>시험</th><th>연도</th><th>번호</th><th>단원</th><th>문제</th><th>관리</th></tr></thead><tbody id="bankBody"></tbody></table></div>
       </div>
     </section>
@@ -1418,55 +1429,150 @@ async function executeFullResetR248(){
   }
 }
 
-async function pushCloudState(){
-  if(cloudSaving)return;
-  cloudSaving=true;
-  try{
-    const r=await fetch('/api/state',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify({problems,history})});
-    if(!r.ok) throw new Error(await r.text());
-    cloudReady=true; setCloudStatus('☁ D1 저장 완료');
-  }catch(e){
-    console.error('Cloud save failed',e); setCloudStatus('⚠ D1 저장 실패 · 로컬 보관 중',false);
-  }finally{cloudSaving=false;}
+// ===== P271: 대용량 문제은행 저장 최적화 =====
+let p271ProblemVersions=new Map();
+let p271KnownIds=new Set();
+let p271FlushAgain=false;
+
+function problemVersionP271(p){
+  const lr=p?.legalReview||{};
+  return [
+    p?.updatedAt||'',
+    p?.manualEditedAt||'',
+    p?.explanationUpdatedAt||'',
+    p?.explanationEditedAt||'',
+    p?.appliedUpdatedAt||'',
+    p?.verifiedAt||'',
+    p?.sourceNoiseRepairedAt||'',
+    lr.approvedAt||'',lr.state||'',
+    p?.status||'',p?.answer||'',
+    String(p?.question||'').length,
+    String(p?.choices||'').length,
+    String(p?.viewText||'').length,
+    String(p?.explanation||'').length,
+    String(p?.editedExplanation||'').length,
+    String(p?.originalExplanation||'').length,
+    String(p?.appliedQuestion||'').length
+  ].join('|');
 }
+function resetProblemVersionsP271(){
+  p271ProblemVersions=new Map();
+  p271KnownIds=new Set();
+  for(const p of problems){
+    const id=String(p?.id||'');
+    if(!id)continue;
+    p271KnownIds.add(id);
+    p271ProblemVersions.set(id,problemVersionP271(p));
+  }
+}
+async function flushCloudChangesP271(){
+  if(cloudSaving){p271FlushAgain=true;return;}
+  cloudSaving=true;
+  p271FlushAgain=false;
+  try{
+    const currentIds=new Set();
+    const changed=[];
+    for(const p of problems){
+      const id=String(p?.id||'');
+      if(!id)continue;
+      currentIds.add(id);
+      const ver=problemVersionP271(p);
+      if(p271ProblemVersions.get(id)!==ver)changed.push(p);
+    }
+    const deleted=[...p271KnownIds].filter(id=>!currentIds.has(id));
+
+    // 출제 이력만 별도 저장: 문제은행 전체를 매번 전송하지 않는다.
+    const hr=await fetch('/api/history',{
+      method:'PUT',
+      headers:{'content-type':'application/json'},
+      body:JSON.stringify({history})
+    });
+    if(!hr.ok)throw new Error(await hr.text());
+
+    if(changed.length){
+      for(let i=0;i<changed.length;i+=50){
+        const chunk=changed.slice(i,i+50);
+        const r=await fetch('/api/problems/bulk',{
+          method:'PUT',
+          headers:{'content-type':'application/json'},
+          body:JSON.stringify({problems:chunk})
+        });
+        if(!r.ok)throw new Error(await r.text());
+      }
+    }
+
+    if(deleted.length){
+      const r=await fetch('/api/problems/delete-bulk',{
+        method:'POST',
+        headers:{'content-type':'application/json'},
+        body:JSON.stringify({ids:deleted})
+      });
+      if(!r.ok)throw new Error(await r.text());
+    }
+
+    p271KnownIds=currentIds;
+    for(const p of changed)p271ProblemVersions.set(String(p.id),problemVersionP271(p));
+    deleted.forEach(id=>p271ProblemVersions.delete(id));
+
+    cloudReady=true;
+    setCloudStatus(
+      changed.length||deleted.length
+        ? `☁ D1 동기화 · 변경 ${changed.length} / 삭제 ${deleted.length}`
+        : '☁ D1 연결'
+    );
+  }catch(e){
+    console.error('P271 cloud sync failed',e);
+    setCloudStatus('⚠ D1 저장 실패 · 재시도 예정',false);
+    p271FlushAgain=true;
+  }finally{
+    cloudSaving=false;
+    if(p271FlushAgain)queueCloudSave();
+  }
+}
+async function pushCloudState(){return flushCloudChangesP271();}
 function queueCloudSave(){
   clearTimeout(cloudSaveTimer);
-  cloudSaveTimer=setTimeout(pushCloudState,700);
+  cloudSaveTimer=setTimeout(()=>flushCloudChangesP271(),1200);
 }
 function save(){
-  // 화면 반응은 즉시: 브라우저 로컬 캐시
-  localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
-  localStorage.setItem(K_HISTORY,JSON.stringify(history));
-  // D1 저장은 백그라운드 디바운스
+  // 문제 수가 많을 때 가장 느렸던 전체 problems JSON.stringify/localStorage 저장을 제거.
+  // 이력은 작으므로 로컬 비상 캐시만 유지한다.
+  try{localStorage.setItem(K_HISTORY,JSON.stringify(history));}catch(e){}
   queueCloudSave();
 }
 async function bootstrapCloudState(){
   setCloudStatus('☁ D1 데이터 불러오는 중');
   try{
     const r=await fetch('/api/state',{cache:'no-store'});
-    if(!r.ok) throw new Error(await r.text());
+    if(!r.ok)throw new Error(await r.text());
     const d=await r.json();
     const remoteProblems=Array.isArray(d.problems)?d.problems:[];
     const remoteHistory=Array.isArray(d.history)?d.history:[];
-    if(remoteProblems.length || remoteHistory.length){
-      problems=remoteProblems; history=remoteHistory;
-      localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
-      localStorage.setItem(K_HISTORY,JSON.stringify(history));
+
+    if(remoteProblems.length||remoteHistory.length){
+      problems=remoteProblems;
+      history=remoteHistory;
+      try{localStorage.setItem(K_HISTORY,JSON.stringify(history));}catch(e){}
+      resetProblemVersionsP271();
       const repaired=repairExistingSourceNoise();
       setCloudStatus(`☁ D1 연결 · 문제 ${problems.length.toLocaleString()}개${repaired?` · 오류정리 ${repaired}개`:''}`);
-    }else if(problems.length || history.length){
-      // 기존 GitHub/localStorage 자료를 처음 한 번 D1로 자동 이전
+    }else if(problems.length||history.length){
+      // 최초 이전만 변경분 전체를 problems 테이블로 올린다.
+      p271ProblemVersions=new Map();
+      p271KnownIds=new Set();
       repairExistingSourceNoise();
-      await pushCloudState();
+      await flushCloudChangesP271();
       setCloudStatus(`☁ 기존 자료 D1 이전 · 문제 ${problems.length.toLocaleString()}개`);
     }else{
-      cloudReady=true; setCloudStatus('☁ D1 연결 · 빈 문제은행');
+      resetProblemVersionsP271();
+      cloudReady=true;
+      setCloudStatus('☁ D1 연결 · 빈 문제은행');
     }
-    try{renderBank();}catch(e){}
+
+    // 첫 화면에서 숨겨진 문제은행/해설 수천 건을 미리 렌더링하지 않는다.
     try{refreshFilters();}catch(e){}
     try{fillSubjects();}catch(e){}
     try{renderHistory();}catch(e){}
-    try{renderExplanationEditor();}catch(e){}
   }catch(e){
     console.error('Cloud bootstrap failed',e);
     setCloudStatus('⚠ D1 연결 실패 · 로컬 모드',false);
@@ -1511,13 +1617,18 @@ function fillSubjects(){
     $('#wcSubjectList').innerHTML=SUBJECTS.map(s=>`<option value="${esc(s)}">`).join('');
   }
 
-  const registered=SUBJECTS.filter(s=>problems.some(p=>p.subject===s));
+  const countBySubject=new Map();
+  for(const p of problems){
+    const s=String(p?.subject||'');
+    if(s)countBySubject.set(s,(countBySubject.get(s)||0)+1);
+  }
+  const registered=SUBJECTS.filter(s=>countBySubject.has(s));
   const displaySubjects=registered.length
-    ? [...CORE_SUBJECTS.filter(s=>registered.includes(s)), ...registered.filter(s=>!CORE_SUBJECTS.includes(s))]
+    ? [...CORE_SUBJECTS.filter(s=>countBySubject.has(s)), ...registered.filter(s=>!CORE_SUBJECTS.includes(s))]
     : CORE_SUBJECTS;
 
   $('#subjectGrid').innerHTML=displaySubjects.map(s=>{
-    const n=problems.filter(p=>p.subject===s).length;
+    const n=countBySubject.get(s)||0;
     return `<div class="subject" data-subject="${esc(s)}"><b>${esc(s)}</b><span>등록 문제 ${n}문항</span></div>`;
   }).join('');
 
@@ -3245,32 +3356,74 @@ window.examBankE257=Object.freeze({revision:'E257',originId,evaluate,replace:qui
 window.examBankWordEngine = Object.freeze({revision:'W239',build:buildWord230});
 
 function downloadBlob(blob,name){const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
-function renderBank(){fillSubjects();$('#statTotal').textContent=problems.length;$('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;$('#statUsed').textContent=history.length;$('#bankBody').innerHTML=problems.length?problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0)).map(p=>`<tr><td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td><td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td><td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}<div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation? '작성 완료' : (p.explanationStatus||'작성 대기'))}</div></td><td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button> <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="empty">등록된 문제가 없습니다. <b>PDF 일괄 업로드</b>로 기출문제를 한 번에 추가해주세요.</div></td></tr>`;}
-function openModal(p=null){$('#modalTitle').textContent=p?'문제 수정':'문제 등록';$('#pId').value=p?.id||'';$('#pSubject').value=p?.subject||SUBJECTS[0]||'';$('#pExam').value=p?.exam||'';$('#pYear').value=p?.year||'';$('#pNo').value=p?.no||'';$('#pUnit').value=p?.unit||'';$('#pSubunit').value=p?.subunit||'';$('#pType').value=p?.type||'';$('#pAnswer').value=p?.answer||'';$('#pQuestion').value=p?.question||'';$('#pChoices').value=p?.choices||'';$('#pExplanation').value=p?.explanation||'';$('#modal').classList.remove('hidden')}
-function closeModal(){$('#modal').classList.add('hidden')}
-const fullResetOpen=$('#openFullReset');if(fullResetOpen)fullResetOpen.onclick=openFullResetR248;
-const fullResetClose=$('#closeFullReset');if(fullResetClose)fullResetClose.onclick=closeFullResetR248;
-const fullResetCancel=$('#cancelFullReset');if(fullResetCancel)fullResetCancel.onclick=closeFullResetR248;
-const fullResetExec=$('#executeFullReset');if(fullResetExec)fullResetExec.onclick=executeFullResetR248;
-const osClose=$('#closeOriginalSource');if(osClose)osClose.onclick=closeOriginalSourceE255;
-const osCloseBottom=$('#closeOriginalSourceBottom');if(osCloseBottom)osCloseBottom.onclick=closeOriginalSourceE255;
-const cqOpenOriginal=$('#cqOpenOriginal');if(cqOpenOriginal)cqOpenOriginal.onclick=()=>{if(currentQuestionEditIndex>=0)openOriginalSourceE256(currentQuestionEditIndex);};
-const ceClose=$('#closeCurrentExplanationEdit');if(ceClose)ceClose.onclick=closeCurrentExplanationEditE253;
-const ceCancel=$('#cancelCurrentExplanationEdit');if(ceCancel)ceCancel.onclick=closeCurrentExplanationEditE253;
-const ceSave=$('#saveCurrentExplanationEdit');if(ceSave)ceSave.onclick=saveCurrentExplanationEditE253;
-const crClose=$('#closeCurrentQuestionReplace');if(crClose)crClose.onclick=closeCurrentQuestionReplaceE253;
-const crCancel=$('#cancelCurrentQuestionReplace');if(crCancel)crCancel.onclick=closeCurrentQuestionReplaceE253;
-const crRefresh=$('#refreshReplaceCandidates');if(crRefresh)crRefresh.onclick=refreshReplacementCandidatesE253;
-const crRandom=$('#randomReplaceCandidate');if(crRandom)crRandom.onclick=randomReplaceCandidateE253;
-const crSearch=$('#crSearch');if(crSearch)crSearch.oninput=renderReplacementCandidatesE253;
-const crUsed=$('#crIncludeUsed');if(crUsed)crUsed.onchange=refreshReplacementCandidatesE253;
-const cqAutoNumber=$('#cqAutoNumberChoices');if(cqAutoNumber)cqAutoNumber.onclick=normalizeCurrentChoiceTextareaE259;
-const cqOriginalLarge=$('#cqOriginalImageLarge');if(cqOriginalLarge)cqOriginalLarge.onclick=openLargeOriginalImageE259;
-const cqClose=$('#closeCurrentQuestionEdit');if(cqClose)cqClose.onclick=closeCurrentQuestionEditE251;
-const cqCancel=$('#cancelCurrentQuestionEdit');if(cqCancel)cqCancel.onclick=closeCurrentQuestionEditE251;
-const cqSave=$('#saveCurrentQuestionEdit');if(cqSave)cqSave.onclick=saveCurrentQuestionEditE251;
-const cqOriginalInline=$('#cqOriginalInlineImage');if(cqOriginalInline)cqOriginalInline.onclick=e=>{if(e.target.closest('img'))openLargeOriginalImageE259();};
-$('#addBtn').onclick=()=>openModal();$('#closeModal').onclick=closeModal;$('#cancelModal').onclick=closeModal;
+let bankPageP271=1;
+let bankVisibleRowsP271=[];
+
+function renderBank(){
+  fillSubjects();
+  $('#statTotal').textContent=problems.length;
+  $('#statSubjects').textContent=new Set(problems.map(p=>p.subject)).size;
+  $('#statUsed').textContent=history.length;
+
+  const subjectEl=$('#bankSubjectP271');
+  if(subjectEl){
+    const old=subjectEl.value;
+    const subjects=[...new Set(problems.map(p=>p.subject).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ko'));
+    subjectEl.innerHTML='<option value="">전체</option>'+subjects.map(s=>`<option>${esc(s)}</option>`).join('');
+    if(old&&subjects.includes(old))subjectEl.value=old;
+  }
+
+  const subject=subjectEl?.value||'';
+  const query=String($('#bankSearchP271')?.value||'').trim().toLowerCase();
+  const pageSize=Math.max(20,+($('#bankPageSizeP271')?.value||100));
+
+  let rows=problems.filter(p=>{
+    if(subject&&p.subject!==subject)return false;
+    if(query){
+      const hay=[p.id,p.subject,p.exam,p.year,p.no,p.unit,p.question].join(' ').toLowerCase();
+      if(!hay.includes(query))return false;
+    }
+    return true;
+  });
+
+  rows.sort((a,b)=>
+    String(a.subject).localeCompare(String(b.subject),'ko')||
+    (b.year||0)-(a.year||0)||
+    (a.no||0)-(b.no||0)
+  );
+
+  const totalPages=Math.max(1,Math.ceil(rows.length/pageSize));
+  bankPageP271=Math.min(Math.max(1,bankPageP271),totalPages);
+  const start=(bankPageP271-1)*pageSize;
+  bankVisibleRowsP271=rows.slice(start,start+pageSize);
+
+  $('#bankBody').innerHTML=bankVisibleRowsP271.length
+    ? bankVisibleRowsP271.map(p=>`<tr data-problem-id="${esc(p.id)}">
+      <td>${esc(p.id)}</td><td>${esc(p.subject)}</td><td>${esc(p.exam)}</td>
+      <td>${esc(p.year)}</td><td>${esc(p.no||'')}</td><td>${esc(p.unit||'')}</td>
+      <td style="min-width:260px">${esc((p.question||'').slice(0,80))}${(p.question||'').length>80?'…':''}
+        ${p.sourceFile?`<div class="source-tag">${esc(p.sourceFile)}</div>`:''}
+        <div class="source-tag">정답: ${esc(p.answer||'-')} · ${esc(p.answerSource||'수동 확인')} · 해설: ${esc(p.explanation?'작성 완료':(p.explanationStatus||'작성 대기'))}</div>
+      </td>
+      <td><button class="btn ghost" onclick="editProblem('${p.id}')">수정</button>
+          <button class="btn danger" onclick="deleteProblem('${p.id}')">삭제</button></td>
+    </tr>`).join('')
+    : `<tr><td colspan="8"><div class="empty">조건에 맞는 문제가 없습니다.</div></td></tr>`;
+
+  if($('#bankPageInfoP271')){
+    $('#bankPageInfoP271').textContent=
+      `총 ${rows.length.toLocaleString()}문항 · ${bankPageP271}/${totalPages}페이지`;
+  }
+  if($('#bankPrevP271'))$('#bankPrevP271').disabled=bankPageP271<=1;
+  if($('#bankNextP271'))$('#bankNextP271').disabled=bankPageP271>=totalPages;
+}
+
+if($('#bankSubjectP271'))$('#bankSubjectP271').onchange=()=>{bankPageP271=1;renderBank();};
+if($('#bankSearchP271'))$('#bankSearchP271').oninput=()=>{bankPageP271=1;renderBank();};
+if($('#bankPageSizeP271'))$('#bankPageSizeP271').onchange=()=>{bankPageP271=1;renderBank();};
+if($('#bankPrevP271'))$('#bankPrevP271').onclick=()=>{bankPageP271=Math.max(1,bankPageP271-1);renderBank();};
+if($('#bankNextP271'))$('#bankNextP271').onclick=()=>{bankPageP271++;renderBank();};
+
 window.editProblem=id=>openModal(problems.find(p=>p.id===id));window.deleteProblem=id=>{if(confirm('이 문제를 삭제할까요?')){problems=problems.filter(p=>p.id!==id);save();renderBank();refreshFilters()}};
 $('#saveProblem').onclick=()=>{const data={id:$('#pId').value||uid(),subject:$('#pSubject').value,exam:$('#pExam').value.trim(),year:+$('#pYear').value,no:+$('#pNo').value||'',unit:$('#pUnit').value.trim(),subunit:$('#pSubunit').value.trim(),type:$('#pType').value.trim(),answer:$('#pAnswer').value.trim(),question:$('#pQuestion').value.trim(),choices:$('#pChoices').value.trim(),explanation:$('#pExplanation').value.trim(),updatedAt:new Date().toISOString()};if(!data.subject||!data.exam||!data.year||!data.answer||!data.question){alert('과목, 시험 구분, 연도, 정답, 문제 원문은 필수입니다.');return}const i=problems.findIndex(p=>p.id===data.id);if(i>=0)problems[i]={...problems[i],...data};else problems.push(data);save();closeModal();renderBank();refreshFilters();window.examBankLawGuard?.onBankUpload([data.id],'개별 등록·수정');};
 $('#exportBtn').onclick=()=>downloadBlob(new Blob([JSON.stringify({version:1,exportedAt:new Date().toISOString(),problems},null,2)],{type:'application/json'}),'기출문제은행_백업.json');$('#importBtn').onclick=()=>$('#importFile').click();$('#importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);const arr=Array.isArray(d)?d:d.problems;if(!Array.isArray(arr))throw Error();if(confirm(`${arr.length}개 문제를 가져옵니다. 기존 ID가 같으면 덮어씁니다.`)){const map=new Map(problems.map(p=>[p.id,p]));const imported=arr.map(p=>({...p,id:p.id||uid()}));const prepared=window.examBankLawGuard?window.examBankLawGuard.preserveBankReviews(imported):imported;prepared.forEach(p=>map.set(p.id,p));problems=[...map.values()];save();renderBank();refreshFilters();window.examBankLawGuard?.onBankUpload(prepared,'JSON 등록');}}catch{alert('올바른 문제은행 JSON 파일이 아닙니다.')}};r.readAsText(f);e.target.value=''};
@@ -3767,7 +3920,6 @@ function repairExistingSourceNoise(){
     return p;
   });
   if(changed){
-    localStorage.setItem(K_PROBLEMS,JSON.stringify(problems));
     queueCloudSave();
     console.log(`[exam-bank] source-noise repaired: ${changed}`);
   }
@@ -4012,8 +4164,68 @@ function renderRules(){const el=$('#ruleText');if(el)el.textContent=RULE_TEXT;}
 function normText(s){return (s||'').toLowerCase().replace(/\s+/g,'').replace(/[①②③④⑤1-5]/g,'').replace(/[^가-힣a-z0-9]/g,'')}
 function grams(s){s=normText(s);const a=new Set();for(let i=0;i<Math.max(0,s.length-2);i++)a.add(s.slice(i,i+3));return a}
 function sim(a,b){const A=grams(a),B=grams(b);if(!A.size||!B.size)return 0;let n=0;A.forEach(x=>{if(B.has(x))n++});return n/(A.size+B.size-n)}
-function usedProblems(){const ids=new Set(history.flatMap(h=>h.problemIds||[]));return problems.filter(p=>ids.has(p.id))}
-function isHistoricalDuplicate(p){return usedProblems().some(u=>u.id===p.id||duplicateKey(u)===duplicateKey(p)||sim((u.question||'')+' '+(u.choices||''),(p.question||'')+' '+(p.choices||''))>=.72)}
+let duplicateIndexP271=null;
+let duplicateIndexKeyP271='';
+
+function duplicateHistoryKeyP271(){
+  const first=history[0]?.id||'';
+  const last=history[history.length-1]?.id||'';
+  return `${history.length}|${first}|${last}|${problems.length}`;
+}
+function buildDuplicateIndexP271(){
+  const key=duplicateHistoryKeyP271();
+  if(duplicateIndexP271&&duplicateIndexKeyP271===key)return duplicateIndexP271;
+
+  const ids=new Set();
+  for(const h of history)for(const id of (h.problemIds||[]))ids.add(String(id));
+
+  const used=[];
+  const exactKeys=new Set();
+  const exactIds=new Set();
+  const gramIndex=new Map();
+
+  for(const p of problems){
+    if(!ids.has(String(p.id)))continue;
+    const text=(p.question||'')+' '+(p.choices||'');
+    const gs=grams(text);
+    const idx=used.length;
+    used.push({p,gs,size:gs.size});
+    exactIds.add(String(p.id));
+    exactKeys.add(duplicateKey(p));
+    for(const g of gs){
+      let arr=gramIndex.get(g);
+      if(!arr){arr=[];gramIndex.set(g,arr);}
+      arr.push(idx);
+    }
+  }
+
+  duplicateIndexP271={used,exactKeys,exactIds,gramIndex};
+  duplicateIndexKeyP271=key;
+  return duplicateIndexP271;
+}
+function usedProblems(){return buildDuplicateIndexP271().used.map(x=>x.p);}
+function isHistoricalDuplicate(p){
+  const idx=buildDuplicateIndexP271();
+  if(idx.exactIds.has(String(p.id)))return true;
+  if(idx.exactKeys.has(duplicateKey(p)))return true;
+
+  const A=grams((p.question||'')+' '+(p.choices||''));
+  if(!A.size)return false;
+
+  const hits=new Map();
+  for(const g of A){
+    const docs=idx.gramIndex.get(g);
+    if(!docs)continue;
+    for(const di of docs)hits.set(di,(hits.get(di)||0)+1);
+  }
+
+  for(const [di,intersection] of hits){
+    const Bsize=idx.used[di].size;
+    const score=intersection/(A.size+Bsize-intersection);
+    if(score>=.72)return true;
+  }
+  return false;
+}
 // 모든 과거 출제 이력 + 사실상 동일 문항을 영구 제외하고, 검증 완료 상태만 출제한다.
 $('#generateBtn').onclick=()=>{const subject=$('#fSubject').value,exam=$('#fExam').value,year=$('#fYear').value,unit=$('#fUnit').value,count=Math.max(1,+$('#fCount').value||10);const scoped=problems.filter(p=>p.subject===subject&&(!exam||p.exam===exam)&&(!year||String(p.year)===year)&&(!unit||p.unit===unit));const stats={total:scoped.length,noAnswer:0,duplicate:0,review:0,eligible:0};let pool=[];for(const p of scoped){if(!p.answer){stats.noAnswer++;continue}if(isHistoricalDuplicate(p)){stats.duplicate++;continue}if(['정답 확인 필요','분석 실패','중복 제외'].includes(p.status)){stats.review++;continue}pool.push(p)}stats.eligible=pool.length;const order=$('#fOrder').value;if(order==='random')shuffle(pool);if(order==='yearDesc')pool.sort((a,b)=>(b.year||0)-(a.year||0));if(order==='yearAsc')pool.sort((a,b)=>(a.year||0)-(b.year||0));currentSet=pool.slice(0,count);const summary=`<div class="notice"><b>자동 출제 검사 결과</b> · 조건 대상 ${stats.total}문항 / 출제 가능 ${stats.eligible}문항 / 과거·유사 중복 ${stats.duplicate}문항 / 정답 미확인 ${stats.noAnswer}문항 / 분석·검수 제외 ${stats.review}문항</div>`;if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>현재 조건에서 출제할 수 있는 문제가 없습니다.</b><br><br>부족한 문항을 임의 생성하거나 중복 문제로 채우지 않습니다.</div>';return}history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,permanentDuplicateBlock:true},problemIds:currentSet.map(p=>p.id)});history=history.slice(0,1000);save();renderGenerated('problem');$('#generated').insertAdjacentHTML('afterbegin',summary);renderBank();fillSubjects();if(currentSet.length<count)alert(`요청: ${count}문항\n출제: ${currentSet.length}문항\n부족분은 중복·정답 미확인·분석 제외 문제로 채우지 않았습니다.`)};
 // 일괄 등록 시 모든 파일 분석이 완료된 경우에만 등록 가능. 자동 현행성 검증은 하지 않고 검수 필요 상태로 둔다.
@@ -7118,9 +7330,10 @@ function fillExplanationSubjects(){
 }
 function renderExplanationEditor(){
   fillExplanationSubjects();
-  const list=explanationFiltered();
-  const done=list.filter(p=>(p.editedExplanation||p.originalExplanation||p.explanation)&&String(p.editedExplanation||p.originalExplanation||p.explanation).trim()).length;
-  if($('#explainCount'))$('#explainCount').textContent=`현재 ${list.length}문항 · 해설 작성 ${done} · 미작성 ${list.length-done}`;
+  const allList=explanationFiltered();
+  const list=allList.slice(0,50);
+  const doneAll=allList.filter(p=>(p.editedExplanation||p.originalExplanation||p.explanation)&&String(p.editedExplanation||p.originalExplanation||p.explanation).trim()).length;
+  if($('#explainCount'))$('#explainCount').textContent=`조건 ${allList.length}문항 · 화면 최대 50문항 · 해설 작성 ${doneAll} · 미작성 ${allList.length-doneAll}`;
   const wrap=$('#explainList');if(!wrap)return;
   if(!list.length){wrap.innerHTML='<div class="panel"><div class="empty">조건에 맞는 문제가 없습니다.</div></div>';return;}
   wrap.innerHTML=list.map(p=>{
@@ -7230,7 +7443,15 @@ if($('#appliedImportFile')) $('#appliedImportFile').onchange=async e=>{const f=e
 
 // 문제은행 표에서 응용본 보유 여부 표시
 const _renderBankV8=renderBank;
-renderBank=function(){_renderBankV8();document.querySelectorAll('#bankBody tr').forEach((tr,i)=>{const sorted=problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0));const p=sorted[i];if(p){const td=tr.querySelector('td:nth-child(7)');if(td&&p.appliedQuestion)td.insertAdjacentHTML('beforeend','<span class="variant-tag">응용본 있음</span>')}})};
+renderBank=function(){
+  _renderBankV8();
+  document.querySelectorAll('#bankBody tr[data-problem-id]').forEach(tr=>{
+    const p=problems.find(x=>String(x.id)===String(tr.dataset.problemId));
+    if(!p)return;
+    const td=tr.querySelector('td:nth-child(7)');
+    if(td&&p.appliedQuestion)td.insertAdjacentHTML('beforeend','<span class="variant-tag">응용본 있음</span>');
+  });
+};
 refreshFilters();
 $$('[data-exam-count]').forEach(b=>{b.onclick=()=>{$('#fCount').value=b.dataset.examCount;syncExamCountHint();};});
 $('#fCount').addEventListener('input',syncExamCountHint);
@@ -8020,8 +8241,19 @@ function annotateCurrent(){
   ['wordProblem','wordSolution','printCurrent'].forEach(id=>{const el=$l(id);if(el){el.disabled=!!issues.length;el.title=issues.length?'문제은행에서 보류·제외된 문항이 포함되어 있습니다.':'';}});
 }
 function annotateBank(){
-  const sorted=problems.slice().sort((a,b)=>String(a.subject).localeCompare(String(b.subject),'ko')||(b.year||0)-(a.year||0)||(a.no||0)-(b.no||0));
-  document.querySelectorAll('#bankBody tr').forEach((tr,i)=>{const p=sorted[i];if(!p)return;const td=tr.cells[7];if(!td)return;const b=document.createElement('button');b.className='btn ghost';b.type='button';b.textContent='등록 검수';b.onclick=()=>{open();edit(String(p.id));};td.appendChild(b);const d=evaluate(p),small=document.createElement('div');small.className='help';small.textContent='L243 · '+(d.ok?d.reason:d.kind==='excluded'?'개정 영향 제외':'보류/재검수');td.appendChild(small);});
+  document.querySelectorAll('#bankBody tr[data-problem-id]').forEach(tr=>{
+    const p=problems.find(x=>String(x.id)===String(tr.dataset.problemId));
+    if(!p)return;
+    const td=tr.cells[7];if(!td)return;
+    const b=document.createElement('button');
+    b.className='btn ghost';b.type='button';b.textContent='등록 검수';
+    b.onclick=()=>{open();edit(String(p.id));};
+    td.appendChild(b);
+    const d=evaluate(p),small=document.createElement('div');
+    small.className='help';
+    small.textContent='P271 · '+(d.ok?d.reason:d.kind==='excluded'?'개정 영향 제외':'보류/재검수');
+    td.appendChild(small);
+  });
 }
 async function generate(){
   if(busy){alert('법령 검수 저장 중입니다. 완료 후 출제해주세요.');return;}
@@ -8041,12 +8273,14 @@ async function generate(){
   const summary=`<div class="notice no-print"><b>출제 결과 · ${NON_LEGAL_SUBJECTS.has(subject)?'K261':(!requiresLegalReviewZ267(subject)?'일반과목':'L250')}</b> · 대상 ${stats.total} / 출제 가능 ${pool.length} / 저장된 개정 제외 ${stats.excluded} / 문제은행 검수 대기·보류 ${stats.pending} / 정답·구조 제외 ${stats.noAnswer+stats.other} / 과거·유사 중복 ${stats.duplicate} / 응용본 미작성 ${stats.noApplied}${NON_LEGAL_SUBJECTS.has(subject)?'<br>국어·영어: K261 구조 검사를 적용합니다.':(!requiresLegalReviewZ267(subject)?'<br>일반 과목: 법령검수 기록이 없다는 이유만으로 출제를 막지 않습니다.':'')}</div>`;
   if(!currentSet.length){$('#generated').innerHTML=summary+'<div class="empty"><b>현재 조건에서 출제할 수 있는 문항이 없습니다.</b><br>위 집계에서 정답 미확인·중복·문제은행 보류 사유를 확인해주세요. 법령 검수가 필요한 문항은 문제은행에서 관리합니다.<br>국어·영어는 법령 기록이 없다는 이유만으로 제외하지 않습니다.</div>';return;}
   history.unshift({id:'H'+Date.now(),createdAt:new Date().toISOString(),title:$('#fTitle').value||'Daily Test',subject,filters:{exam,year,unit,mode,lawGate:REV,reviewPolicy:'saved-bank-record',permanentDuplicateBlock:true},problemIds:currentSet.map(originId)});history=history.slice(0,1000);
+  duplicateIndexP271=null;duplicateIndexKeyP271='';
   save();
-  const t247Conv=await autoTextifyCurrentSetT247();
+  // P271 속도 우선: 출제 버튼을 누를 때 OCR을 자동 실행하지 않는다.
+  // 이미지 문항은 즉시 표시하고, 필요할 때 '이미지 문항 텍스트 복구' 버튼으로만 OCR한다.
   renderGenerated('problem');
   const t247Remain=imageTargetsT247().length;
-  const t247Summary=summary.replace('</div>',` / 이미지→텍스트 ${t247Conv.success||0} / 이미지 잔여 ${t247Remain}</div>`);
-  $('#generated').insertAdjacentHTML('afterbegin',t247Summary);renderBank();fillSubjects();
+  const t247Summary=summary.replace('</div>',` / 이미지 잔여 ${t247Remain}${t247Remain?' · OCR은 필요 시 수동 실행':''}</div>`);
+  $('#generated').insertAdjacentHTML('afterbegin',t247Summary);
   if(currentSet.length<count)alert(`요청 ${count}문항 / 현재 출제 가능 ${currentSet.length}문항만 출제했습니다.\n문제은행의 보류·제외, 정답·중복 등 저장된 조건을 적용했습니다.`);
 }
 
