@@ -7573,7 +7573,7 @@ window.examBankStandaloneWord=Object.freeze({revision:'W239',inspect:()=>JSON.pa
 </script>
 
 <div id="lawModal" class="modal hidden"><div class="modal-box">
-<div class="modal-head"><div><h3 id="lawScopeName">문제은행 법령·판례 검수</h3><div class="law-help">문제은행 등록 단계에서 검수 · 전체 JSON 일괄 검수 · 오류 문항만 자동 보류 · L269</div></div><button type="button" class="close" id="lawClose">×</button></div>
+<div class="modal-head"><div><h3 id="lawScopeName">문제은행 법령·판례 검수</h3><div class="law-help">문제은행 등록 단계에서 검수 · 전체 JSON 일괄 검수 · 오류 문항만 자동 보류 · 저장완료 버튼 수정 · L270</div></div><button type="button" class="close" id="lawClose">×</button></div>
 <div class="notice"><b>검수와 자동 제외는 별개입니다.</b> 공식 근거를 확인한 결과만 승인하세요. 이 화면은 인터넷 법령을 자동 검색하지 않으며, AI가 돌려준 JSON도 담당자 승인 전에는 반영하지 않습니다.<br>원래 오답인 선택지, ‘구 ○○법’ 인용, 관련 없는 조문 개정만으로 제외하지 않습니다. 모든 보기의 판단·원문 정답·시행일·부칙을 대조해 영향 여부를 확인해야 합니다.</div>
 <div class="form-grid">
 <div class="field"><label for="lawSubject">과목</label><select id="lawSubject"><option value="">전체 과목</option></select></div>
@@ -7642,13 +7642,19 @@ function tallyDrafts(rows){const n={allow:0,exclude:0,pending:0,not_applicable:0
 function tallyText(n){return `현행 기준 확인 ${n.allow}건 · 비대상 확인 ${n.not_applicable}건 · 개정 영향 제외 ${n.exclude}건 · 검수 보류 ${n.pending}건`;}
 function syncReviewer(value){['lawReviewer','lawImportReviewer'].forEach(id=>{$l(id).value=value;$l(id).removeAttribute('aria-invalid');});}
 function focusReviewer(){if($l('lawReviewer').value.trim())return;const el=$l('lawImportPreview').classList.contains('hidden')?$l('lawReviewer'):$l('lawImportReviewer');el.setAttribute('aria-invalid','true');el.scrollIntoView({block:'center'});el.focus();}
-function syncImportControls(){const disabled=busy||!candidates.length;$l('lawApplyImport').disabled=disabled;$l('lawImportConfirm').disabled=disabled;$l('lawImportReviewer').disabled=disabled;}
+function syncImportControls(){
+ const savedDone=!!lastSaved && !candidates.length;
+ const noDraft=!candidates.length && !savedDone;
+ $l('lawApplyImport').disabled=busy||noDraft;
+ $l('lawImportConfirm').disabled=busy||savedDone||!candidates.length;
+ $l('lawImportReviewer').disabled=busy||savedDone||!candidates.length;
+}
 function importSummary(saved=false){
  const rows=saved?(lastSaved?.rows||[]):candidates,n=tallyDrafts(rows);
  const held=importInfo?.autoHeld||[];
  $l('lawImportSummary').textContent=`JSON 인식 ${importInfo?.count||rows.length}건 · ${saved?'D1 저장 재확인 '+rows.length+'건':'아직 D1에 저장하지 않음'}\n${tallyText(n)}${held.length?`\n자동 보류 ${held.length}건`:''}`;
  $l('lawImportWarning').textContent=held.length
-   ? `L269 자동 보류 ${held.length}건 · 검수 내용 오류가 있는 문항만 pending으로 남깁니다. 나머지 문항은 그대로 저장할 수 있습니다.`
+   ? `L270 자동 보류 ${held.length}건 · 검수 내용 오류가 있는 문항만 pending으로 남깁니다. 나머지 문항은 그대로 저장할 수 있습니다.`
    : (n.pending===rows.length&&rows.length
       ? '이 파일은 전부 ‘검수 보류’입니다. 저장해도 출제 가능으로 바뀌지 않습니다. 완료된 검수 결과라면 JSON의 legalReview.state와 reason을 확인하세요. 담당자 승인만으로 pending을 allow로 바꾸지 않습니다.'
       : n.pending?`검수 보류 ${n.pending}건은 저장 후에도 출제되지 않습니다. 개정 영향 제외 ${n.exclude}건도 계속 제외됩니다.`:'');
@@ -7787,7 +7793,7 @@ function open(scopeName='bank',ids=[]){
   $l('lawSubject').value=scope==='upload'?'':([...$l('lawSubject').options].some(o=>o.value===old)?old:'');
   $l('lawFilter').value='';
   if(scope==='upload')$l('lawSearch').value='';
-  $l('lawScopeName').textContent=scope==='upload'?`방금 등록·수정한 ${capturedCurrentIds.length}문항 검수 · L243`:'문제은행 등록 문항 검수 · L269';
+  $l('lawScopeName').textContent=scope==='upload'?`방금 등록·수정한 ${capturedCurrentIds.length}문항 검수 · L243`:'문제은행 등록 문항 검수 · L270';
   $l('lawModal').classList.remove('hidden');$l('lawEditor').classList.add('hidden');
   pageIndex=0;status('검수는 문제은행에서 관리합니다. 국어·영어는 기본 비대상입니다. 공식 근거를 확인한 결과만 승인하며, 출제 시에는 저장된 판정만 사용합니다.');render();
 }
@@ -7880,6 +7886,7 @@ async function exportReview(){
 }
 async function readReviewFile(file){
   lastSaved=null;writeAttempted=false;savePhase='JSON 읽기';importInfo={name:file.name,count:0,states:null,autoHeld:[]};
+  $l('lawApplyImport').textContent='확인한 검수 결과 승인·저장';
   $l('lawImportTitle').textContent='가져온 검수 결과 — 아직 미저장';
   candidates=[];$l('lawImportPreview').classList.add('hidden');$l('lawImportConfirm').checked=false;
   if(file.size>REVIEW_FILE_LIMIT)throw new Error('검수 JSON이 50MB를 초과합니다. 이 경우에만 과목별로 나눠주세요.');
@@ -7960,7 +7967,7 @@ async function readReviewFile(file){
   importSummary(false);
   if(autoHeld.length){
     const sample=autoHeld.slice(0,5).map(x=>`${x.id}: ${x.error}`).join('\n');
-    $l('lawImportWarning').textContent=`L269 자동 보류 ${autoHeld.length}건 · 이 문항들만 pending으로 남기고 나머지 결과는 정상 적용합니다.\n${sample}${autoHeld.length>5?`\n외 ${autoHeld.length-5}건`:''}`;
+    $l('lawImportWarning').textContent=`L270 자동 보류 ${autoHeld.length}건 · 이 문항들만 pending으로 남기고 나머지 결과는 정상 적용합니다.\n${sample}${autoHeld.length>5?`\n외 ${autoHeld.length-5}건`:''}`;
   }
   status(
     'JSON '+next.length+'건을 읽었습니다. 아직 저장하지 않았습니다.\n'+
@@ -7971,14 +7978,33 @@ async function readReviewFile(file){
   $l('lawImportActions').scrollIntoView({block:'end'});
 }
 async function applyImport(){
-  if(busy)return;writeAttempted=false;savePhase='입력 확인';
+  if(busy)return;
+  if(lastSaved && !candidates.length){
+    const savedCount=lastSaved.count||lastSaved.rows?.length||0;
+    $l('lawImportPreview').classList.add('hidden');
+    $l('lawModal').classList.add('hidden');
+    $l('lawImportConfirm').checked=false;
+    $l('lawImportTitle').textContent='가져온 검수 결과 — 아직 미저장';
+    importInfo=null;lastSaved=null;savePhase='완료';writeAttempted=false;
+    status(`검수 결과 ${savedCount}건 저장 확인을 완료했습니다.`);
+    syncImportControls();render();return;
+  }
+  writeAttempted=false;savePhase='입력 확인';
   if(!candidates.length){status('저장할 결과가 없습니다. JSON을 먼저 읽어주세요.',true);return;}
   if(!$l('lawImportConfirm').checked){status('표시된 판정과 근거를 확인한 뒤 승인 항목을 체크해주세요.',true);return;}
-  setBusy(true);
+  setBusy(true);let savedOk=false;
   try{
-    const n=await saveRows(candidates);lastSaved={count:n,rows:candidates.map(x=>({legalReview:{state:x.legalReview.state}}))};candidates=[];
-    $l('lawImportTitle').textContent='가져온 검수 결과 — D1 저장 재확인 완료';importSummary(true);status(savedMessage(n,lastSaved.rows));
-  }catch(e){reportSaveError(e);}finally{setBusy(false);render();focusReviewer();}
+    const savedRows=candidates.map(x=>({id:x.id,legalReview:{state:x.legalReview.state}}));
+    const n=await saveRows(candidates);lastSaved={count:n,rows:savedRows};candidates=[];savedOk=true;
+    $l('lawImportTitle').textContent='가져온 검수 결과 — D1 저장 재확인 완료';
+    importSummary(true);status(savedMessage(n,lastSaved.rows));
+  }catch(e){reportSaveError(e);}finally{
+    setBusy(false);render();
+    if(savedOk){
+      syncImportControls();
+      setTimeout(()=>{try{$l('lawApplyImport').scrollIntoView({block:'nearest'});$l('lawApplyImport').focus();}catch(e){}},0);
+    }else{focusReviewer();}
+  }
 }
 function annotateCurrent(){
   const host=document.getElementById('generated');if(!host)return;
@@ -8072,7 +8098,15 @@ $('#generateBtn').onclick=generate;
 $l('lawBasisDate').value=dateToday();$l('lawBasisDate').max=dateToday();
 $l('lawBasisDate').addEventListener('change',()=>{if(candidates.length){candidates=[];$l('lawImportPreview').classList.add('hidden');syncImportControls();status('이번 검수 기준일이 바뀌어 미저장 JSON 미리보기를 비웠습니다. 기존 승인·출제 상태는 변경하지 않았습니다.');}});
 $l('openLawReview').onclick=()=>open('bank');$l('lawAllBank').onclick=()=>open('bank');
-$l('lawClose').onclick=()=>{if(!busy)$l('lawModal').classList.add('hidden');};
+$l('lawClose').onclick=()=>{
+ if(busy)return;
+ $l('lawModal').classList.add('hidden');
+ if(lastSaved && !candidates.length){
+   $l('lawImportPreview').classList.add('hidden');
+   $l('lawImportConfirm').checked=false;
+   importInfo=null;lastSaved=null;savePhase='완료';writeAttempted=false;syncImportControls();
+ }
+};
 $l('lawPrev').onclick=()=>{pageIndex=Math.max(0,pageIndex-1);render();};$l('lawNext').onclick=()=>{pageIndex++;render();};
 ['lawSubject','lawFilter'].forEach(id=>$l(id).onchange=()=>{pageIndex=0;render();});$l('lawSearch').oninput=()=>{pageIndex=0;render();};
 $l('lawExport').onclick=exportReview;$l('lawSaveOne').onclick=saveManual;
