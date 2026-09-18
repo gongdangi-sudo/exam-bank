@@ -9770,5 +9770,242 @@ annotateBank();annotateCurrent();
 })();
 
 </script>
+
+<script>
+/* K264 — Word/인쇄 버튼 동작 복구
+   - 검수 이슈가 있어도 버튼 자체를 disabled 처리하지 않고 클릭 시 사유를 안내
+   - 동적 재렌더링 뒤에도 delegated click으로 Word/인쇄 이벤트를 항상 유지
+   - Chrome/Edge에서는 File System Access API를 우선 사용해 DOCX 저장을 안정화
+   - 인쇄 전 진행 상태를 화면에 표시하고, 기존 alert 없이 인쇄창을 직접 연다.
+*/
+(function(){
+'use strict';
+const K264_REV='K264-output-actions';
+
+function outputStatusK264(message, kind='normal'){
+  const host=document.querySelector('#generated');
+  if(!host)return;
+  let el=document.getElementById('outputActionStatusK264');
+  if(!el){
+    el=document.createElement('div');
+    el.id='outputActionStatusK264';
+    el.className='help no-print';
+    el.style.cssText='margin:8px 0 12px;padding:9px 11px;border-radius:9px;border:1px solid #dbe4f0;background:#f8fafc;font-weight:700;min-height:20px';
+    const tools=host.querySelector('.print-tools');
+    if(tools)tools.insertAdjacentElement('afterend',el);
+    else host.prepend(el);
+  }
+  el.textContent=message||'';
+  if(kind==='ok'){
+    el.style.color='#047857';el.style.borderColor='#a7f3d0';el.style.background='#ecfdf5';
+  }else if(kind==='error'){
+    el.style.color='#b91c1c';el.style.borderColor='#fecaca';el.style.background='#fff1f2';
+  }else{
+    el.style.color='#475569';el.style.borderColor='#dbe4f0';el.style.background='#f8fafc';
+  }
+}
+
+function syncOutputButtonsK264(){
+  const issues=(()=>{
+    try{return window.examBankLawGuard?.currentIssues?.()||[];}catch(e){return [];}
+  })();
+  ['wordProblem','wordSolution','printCurrent'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(!el)return;
+    // disabled면 클릭 자체가 발생하지 않아 사용자는 "아무 반응 없음"으로 보게 된다.
+    // 실제 출력 허용 여부는 클릭 시 allowCurrentExport()에서 다시 검사한다.
+    el.disabled=false;
+    el.removeAttribute('disabled');
+    el.title=issues.length
+      ? `클릭하면 출력 불가 사유 ${issues.length}문항을 안내합니다.`
+      : '';
+  });
+  return issues;
+}
+
+function outputPreflightK264(){
+  if(!Array.isArray(currentSet)||!currentSet.length){
+    alert('현재 출제된 문항이 없습니다. 먼저 문제를 출제해주세요.');
+    return false;
+  }
+  try{
+    if(window.examBankLawGuard?.allowCurrentExport){
+      return !!window.examBankLawGuard.allowCurrentExport();
+    }
+  }catch(e){
+    console.error('K264 export preflight',e);
+    alert('출력 가능 상태 확인 중 오류가 발생했습니다.\n'+(e?.message||e));
+    return false;
+  }
+  return true;
+}
+
+function suggestedWordNameK264(mode){
+  const subjects=[...new Set((currentSet||[]).map(p=>String(p?.subject||'').trim()).filter(Boolean))];
+  const subject=subjects.length===1?subjects[0]:(subjects.length>1?'혼합':'시험');
+  const clean=subject.replace(/[\\/:*?"<>|]/g,'_');
+  return `${clean}_${mode==='solution'?'해설':'문제'}_${currentSet.length}문항_W239.docx`;
+}
+
+function robustBlobDownloadK264(blob,filename){
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;
+  a.download=filename;
+  a.rel='noopener';
+  a.style.display='none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(()=>{
+    try{a.remove();}catch(e){}
+    try{URL.revokeObjectURL(url);}catch(e){}
+  },5000);
+}
+
+async function wordExportK264(mode){
+  if(!outputPreflightK264())return;
+
+  const targetId=mode==='solution'?'wordSolution':'wordProblem';
+  const btn=document.getElementById(targetId);
+  const wordButtons=['wordProblem','wordSolution'].map(id=>document.getElementById(id)).filter(Boolean);
+  const oldLabels=wordButtons.map(b=>b.textContent);
+  const suggested=suggestedWordNameK264(mode);
+  let handle=null;
+
+  // 사용자 클릭 직후에 먼저 저장 위치를 확보하면 긴 DOCX 생성 후에도 브라우저가 다운로드를 막지 않는다.
+  if(typeof window.showSaveFilePicker==='function' && window.isSecureContext){
+    try{
+      handle=await window.showSaveFilePicker({
+        suggestedName:suggested,
+        types:[{
+          description:'Microsoft Word 문서',
+          accept:{'application/vnd.openxmlformats-officedocument.wordprocessingml.document':['.docx']}
+        }]
+      });
+    }catch(e){
+      if(e?.name==='AbortError'){
+        outputStatusK264('Word 저장을 취소했습니다.');
+        return;
+      }
+      console.warn('K264 save picker unavailable; blob download fallback',e);
+      handle=null;
+    }
+  }
+
+  try{
+    wordButtons.forEach(b=>{b.disabled=true;b.textContent='Word 생성 중…';});
+    outputStatusK264(`${mode==='solution'?'해설지':'문제지'} Word ${currentSet.length}문항 생성 중…`);
+
+    const snapshot=JSON.parse(JSON.stringify(currentSet||[]));
+    const meta=sheetMeta();
+    const result=await buildWord230(snapshot,meta,mode);
+    const blob=new Blob([result.bytes],{type:WORD230_MIME});
+
+    if(handle){
+      const writable=await handle.createWritable();
+      await writable.write(blob);
+      await writable.close();
+      outputStatusK264(`Word 저장 완료 · ${result.filename}`,'ok');
+    }else{
+      robustBlobDownloadK264(blob,result.filename||suggested);
+      outputStatusK264(`Word 다운로드 요청 완료 · ${result.filename||suggested}`,'ok');
+    }
+
+    window.examBankLastWordExport={
+      engine:'W239',
+      revision:K264_REV,
+      file:result.filename,
+      ...result.inspection
+    };
+  }catch(error){
+    console.error('K264 Word export failed',error);
+    outputStatusK264('Word 생성 실패 · '+(error?.message||error),'error');
+    alert('Word 파일을 만들지 못했습니다.\n'+(error?.message||String(error)));
+  }finally{
+    wordButtons.forEach((b,i)=>{
+      b.disabled=false;
+      b.textContent=oldLabels[i]||b.textContent;
+    });
+    syncOutputButtonsK264();
+  }
+}
+
+async function printCurrentK264(){
+  if(!outputPreflightK264())return;
+  const btn=document.getElementById('printCurrent');
+  const old=btn?.textContent||'현재 양식 인쇄/PDF';
+
+  try{
+    if(btn){btn.disabled=true;btn.textContent='인쇄 페이지 준비 중…';}
+    outputStatusK264(`현재 ${currentSet.length}문항 인쇄 페이지를 만드는 중…`);
+
+    // 기존 A4 안정 배치 엔진을 그대로 사용한다.
+    await buildStablePrintPages();
+
+    outputStatusK264('인쇄창을 여는 중입니다. Chrome에서 머리글/바닥글은 OFF로 설정해주세요.','ok');
+    if(btn)btn.textContent='인쇄창 여는 중…';
+
+    // alert를 끼우지 않고 바로 print()를 호출한다.
+    await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+    window.print();
+  }catch(error){
+    console.error('K264 print failed',error);
+    outputStatusK264('인쇄 준비 실패 · '+(error?.message||error),'error');
+    alert('인쇄용 페이지 생성 중 오류가 발생했습니다.\n'+(error?.message||String(error)));
+  }finally{
+    if(btn){
+      btn.disabled=false;
+      btn.textContent=old;
+    }
+    syncOutputButtonsK264();
+  }
+}
+
+// 기존 annotateCurrent가 출력 버튼을 disabled로 만드는 경우에도
+// 클릭 시 이유를 확인할 수 있도록 마지막에 다시 활성화한다.
+try{
+  if(typeof annotateCurrent==='function'){
+    const oldAnnotateCurrentK264=annotateCurrent;
+    annotateCurrent=function(...args){
+      const r=oldAnnotateCurrentK264(...args);
+      syncOutputButtonsK264();
+      return r;
+    };
+  }
+}catch(e){console.warn('K264 annotate bridge',e);}
+
+// 동적 innerHTML 재생성으로 onclick이 사라져도 항상 동작하도록 캡처 단계에서 직접 처리한다.
+document.addEventListener('click',function(e){
+  const btn=e.target?.closest?.('#wordProblem,#wordSolution,#printCurrent');
+  if(!btn)return;
+  e.preventDefault();
+  e.stopImmediatePropagation();
+
+  if(btn.id==='wordProblem'){
+    void wordExportK264('problem');
+  }else if(btn.id==='wordSolution'){
+    void wordExportK264('solution');
+  }else if(btn.id==='printCurrent'){
+    void printCurrentK264();
+  }
+},true);
+
+// 현재 화면에 이미 버튼이 렌더링되어 있는 경우도 즉시 복구.
+setTimeout(()=>{
+  syncOutputButtonsK264();
+  if(document.querySelector('#generated .print-tools')){
+    outputStatusK264('출력 버튼 복구 K264 적용됨 · Word/인쇄 버튼을 사용할 수 있습니다.','ok');
+  }
+},0);
+
+window.examBankOutputK264=Object.freeze({
+  revision:K264_REV,
+  word:wordExportK264,
+  print:printCurrentK264,
+  sync:syncOutputButtonsK264
+});
+})();
+</script>
+
 </body>
 </html>
