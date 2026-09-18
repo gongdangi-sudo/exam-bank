@@ -776,18 +776,18 @@
 <section id="language" class="page hidden">
       <div class="panel">
         <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-          <h2 style="margin-right:auto">국어·영어 코드 전용 등록 · K261 / 선택초기화 K262</h2>
-          <span class="pill">A01 ↔ A01 정확 코드 연결</span>
-          <span class="pill">유사도·순서 매칭 사용 안 함</span>
+          <h2 style="margin-right:auto">국어·영어 기출 등록 · K263 / 선택초기화 K262</h2>
+          <span class="pill">교재 코드 · 수능/모평/학평 문항번호 자동 인식</span>
+          <span class="pill">영어 수능형 1~17 듣기 자동 제외</span>
         </div>
 
         <div class="notice">
           <b>국어·영어는 다른 과목과 별도로 등록합니다.</b><br>
-          ① 문제편에서 A01·A02 같은 <b>문항 코드로 문제 구조화</b> →
-          ② 정답 JSON 또는 해설편의 <b>같은 코드에서 정답 연결</b> →
-          ③ 해설편의 <b>같은 코드 해설만 연결</b> →
-          ④ 문제·선택지·정답·공유지문 검증을 모두 통과한 문항만 문제은행에 등록합니다.<br>
-          코드가 없는 해설을 번호나 순서로 추측하여 붙이지 않습니다.
+          ① 교재형은 A01·A02 같은 <b>문항 코드</b>로 정확 연결하고, 수능·모의평가·전국연합학력평가는 <b>1~45 문항번호</b>를 자동 인식합니다. →
+          ② 정답 JSON 또는 해설편의 <b>동일 문항</b>에서 정답을 연결합니다. →
+          ③ 해설편의 <b>동일 문항 해설</b>만 연결합니다. →
+          ④ 문제·선택지·정답·공유지문 검증을 통과한 문항만 문제은행에 등록합니다.<br>
+          <b>영어 수능형 자료는 1~17번 듣기 문항을 자동 제외하고 18~45번만 등록 대상</b>으로 처리합니다.
         </div>
 
         <div class="form-grid">
@@ -815,7 +815,7 @@
         </div>
 
         <div class="actions">
-          <button class="btn primary" id="langAnalyzeBtn">①~④ 코드 기준 검증 · K261</button>
+          <button class="btn primary" id="langAnalyzeBtn">①~④ 자동 유형 판별 · 검증 · K263</button>
           <button class="btn ghost" id="langAnswerTemplateBtn">정답 JSON 템플릿</button>
           <button class="btn ghost" id="langClearBtn">선택 초기화</button>
           <button class="btn ghost" id="langRecheckBank">기존 국어·영어 출제상태 재판정</button>
@@ -823,7 +823,7 @@
         </div>
 
         <div class="help" style="margin-top:10px;line-height:1.65">
-          <b>K261 안전 규칙</b> · A01을 A02 해설과 연결하지 않습니다 · 코드 없는 해설은 미연결 처리합니다 ·
+          <b>K263 안전 규칙</b> · 교재형은 A01을 A02 해설과 연결하지 않습니다 · 수능형은 동일 문항번호만 연결합니다 · 영어 1~17 듣기는 등록하지 않습니다 ·
           공유지문을 참조하는 문제는 실제 지문 연결이 있어야 합니다 · ①~④ 또는 ①~⑤ 선택지가 완전해야 합니다 ·
           정답이 선택지 안에 있어야 합니다 · 검증 실패 문항은 문제은행에 등록하지 않습니다.
         </div>
@@ -835,7 +835,7 @@
           <span class="pill" id="langStageBadge">분석 전</span>
         </div>
         <div id="langResult" class="empty">
-          문제편과 해설편을 선택한 뒤 <b>코드 기준 검증</b>을 눌러주세요.
+          문제편과 해설편을 선택한 뒤 <b>자동 유형 판별 · 검증</b>을 눌러주세요.
         </div>
       </div>
     </section>
@@ -7371,7 +7371,8 @@ async function executeLanguageResetK262(){
     languageParsed=[];
     languageStrictK261={
       rows:[],subject:'',title:'',pfName:'',sfName:'',datasetKey:'',
-      problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map()
+      problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map(),
+      mode:'code',excludedListening:0,examMeta:null
     };
     if($('#langProblemPdf'))$('#langProblemPdf').value='';
     if($('#langSolutionPdf'))$('#langSolutionPdf').value='';
@@ -7414,7 +7415,10 @@ let languageStrictK261={
   problemCodes:[],
   answerMap:new Map(),
   answerSource:new Map(),
-  passageGroups:new Map()
+  passageGroups:new Map(),
+  mode:'code',
+  excludedListening:0,
+  examMeta:null
 };
 
 function languageHashK261(s){
@@ -7462,6 +7466,223 @@ async function pdfTextK261(file){
     if(typeof pdf.destroy==='function')await pdf.destroy();
   }
 }
+
+
+// ===== K263: 수능·모의평가·전국연합학력평가 문항번호 등록 =====
+function examCodeK263(no){
+  const n=Number(no);
+  return Number.isInteger(n)&&n>0&&n<=99?normalizeCode('A',n):'';
+}
+function examNoK263(code){
+  const m=String(code||'').match(/^[A-H](\d{1,3})$/i);
+  return m?Number(m[1]):0;
+}
+function examQuestionHitsK263(pageText){
+  const out=[];
+  const rx=/(?:^|\n)\s*([1-9]|[1-3]\d|4[0-5])\.\s+/gm;
+  let m;
+  while((m=rx.exec(String(pageText||'')))){
+    out.push({no:Number(m[1]),index:m.index+(m[0].length-m[0].trimStart().length),end:rx.lastIndex});
+  }
+  return out;
+}
+function countSequentialExamQuestionsK263(text){
+  let expected=1,count=0;
+  for(const page of languagePages(text)){
+    const hits=examQuestionHitsK263(page.text);
+    for(const h of hits){
+      if(h.no===expected){count++;expected++;}
+      if(expected>45)return count;
+    }
+  }
+  return count;
+}
+function isExamStyleLanguageK263(subject,title,pfName,sfName,problemText,solutionText){
+  const head=[
+    subject,title||'',pfName||'',sfName||'',
+    String(problemText||'').slice(0,16000),
+    String(solutionText||'').slice(0,8000)
+  ].join(' ');
+  if(/전국연합학력평가|대학수학능력시험|수능|모의평가|모평|학력평가/u.test(head))return true;
+  return countSequentialExamQuestionsK263(problemText)>=20;
+}
+function detectEnglishListeningCutoffK263(text){
+  const s=String(text||'');
+  let m=s.match(/1\s*번부터\s*(\d{1,2})\s*번까지는?\s*듣고\s*답/u);
+  if(m){
+    const n=Number(m[1]);
+    if(n>=1&&n<45)return n;
+  }
+  m=s.match(/(\d{1,2})\s*번부터는?\s*문제지의\s*지시/u);
+  if(m){
+    const start=Number(m[1]);
+    if(start>=2&&start<=45)return start-1;
+  }
+  if(/듣기\s*문제가\s*끝났습니다/u.test(s))return 17;
+  return 17;
+}
+function detectLanguageExamMetaK263(subject,title,pfName,text){
+  const s=[title||'',pfName||'',String(text||'').slice(0,10000)].join(' ');
+  const yearM=s.match(/(20\d{2})\s*학년도/u) || s.match(/(?:^|[^\d])((?:20)?\d{2})(?=\s*(?:년|국어|영어|수능|월|$))/u);
+  let year=yearM?Number(yearM[1]):0;
+  if(year && year<100)year+=2000;
+  const monthM=s.match(/(?:20\d{2}\s*학년도\s*)?(\d{1,2})\s*월/u) || String(pfName||'').match(/(?:^|\D)(0?[369]|11)(?:\D|$)/);
+  const month=monthM?Number(monthM[1]):0;
+  const gradeM=s.match(/고\s*([123])/u);
+  const grade=gradeM?`고${gradeM[1]}`:'';
+  let type='수능형기출';
+  if(/전국연합학력평가/u.test(s))type='전국연합학력평가';
+  else if(/대학수학능력시험|수능/u.test(s))type='수능';
+  else if(/모의평가|모평/u.test(s))type='모의평가';
+  else if(/학력평가/u.test(s))type='학력평가';
+  const exam=[month?`${month}월`:'',grade,type].filter(Boolean).join(' ');
+  return {year,month,grade,type,exam:exam||type,subject};
+}
+async function pdfTextExamProblemK263(file){
+  if(!file)return '';
+  if(typeof pdfjsLib==='undefined')throw new Error('PDF 분석 모듈을 불러오지 못했습니다.');
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let all='';
+  try{
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const viewport=page.getViewport({scale:1});
+      const tc=await page.getTextContent();
+      const pageText=extractPageLayoutText(tc,viewport);
+      all+=`\n\n[[PAGE:${i}]]\n${pageText}`;
+    }
+    return all;
+  }finally{
+    if(typeof pdf.destroy==='function')await pdf.destroy();
+  }
+}
+async function pdfTextExamSolutionK263(file){
+  if(!file)return '';
+  if(typeof pdfjsLib==='undefined')throw new Error('PDF 분석 모듈을 불러오지 못했습니다.');
+  const pdf=await pdfjsLib.getDocument({data:await file.arrayBuffer()}).promise;
+  let all='';
+  try{
+    for(let i=1;i<=pdf.numPages;i++){
+      const page=await pdf.getPage(i);
+      const viewport=page.getViewport({scale:1});
+      const tc=await page.getTextContent();
+
+      // EBS 정답·해설 PDF는 3단 편집이 많다.
+      // 실제 칼럼 시작점이 정확히 1/3, 2/3이 아니라 약 0.32 / 0.64 지점인 경우가 많아
+      // text item의 시작 x좌표를 기준으로 3단을 분리한 뒤 왼쪽→가운데→오른쪽 순으로 읽는다.
+      const W=viewport.width,H=viewport.height;
+      const items=rawPdfItems(tc).filter(it=>it.y>H*0.02 && it.y<H*0.985);
+      const cuts=[0,W*0.32,W*0.64,W+1];
+      const parts=[];
+      for(let c=0;c<3;c++){
+        const col=items.filter(it=>it.x>=cuts[c] && it.x<cuts[c+1]);
+        parts.push(rawLines(col,2.8).map(x=>x.text).join('\n'));
+      }
+      all+=`\n\n[[PAGE:${i}]]\n${parts.join('\n')}`;
+    }
+    return all;
+  }finally{
+    if(typeof pdf.destroy==='function')await pdf.destroy();
+  }
+}
+
+function languageExamProblemRecordsK263(text){
+  const records=new Map();
+  let expected=1;
+  for(const page of languagePages(text)){
+    const allHits=examQuestionHitsK263(page.text);
+    const accepted=[];
+    for(const h of allHits){
+      if(h.no===expected){
+        accepted.push(h);
+        expected++;
+        if(expected>45)break;
+      }
+    }
+    for(let i=0;i<accepted.length;i++){
+      const h=accepted[i];
+      const end=i+1<accepted.length?accepted[i+1].index:page.text.length;
+      let chunk=page.text.slice(h.index,end).trim();
+      // 다음 문항군 안내가 같은 페이지 하단에 붙으면 현재 문항에서 제거한다.
+      const nextGroup=chunk.search(/\n\s*\[\s*\d{1,2}\s*[~\-–—]\s*\d{1,2}\s*\]/u);
+      if(nextGroup>20)chunk=chunk.slice(0,nextGroup).trim();
+      if(chunk.length<15)continue;
+      const code=examCodeK263(h.no);
+      records.set(code,{code,actualNo:h.no,chunk,page:page.no,score:10000});
+    }
+  }
+  return records;
+}
+function languageExamRangePassagesK263(text){
+  const pages=languagePages(text);
+  const src=pages.map(p=>p.text).join('\n');
+  const out=new Map();
+  const rx=/(?:^|\n)\s*\[\s*([1-9]|[1-3]\d|4[0-5])\s*[~\-–—]\s*([1-9]|[1-3]\d|4[0-5])\s*\][^\n]*\n/gm;
+  let m;
+  while((m=rx.exec(src))){
+    const a=Number(m[1]),b=Number(m[2]);
+    if(!a||!b||b<a||b-a>15)continue;
+    const afterStart=rx.lastIndex;
+    const tail=src.slice(afterStart);
+    const qrx=new RegExp(`(?:^|\\n)\\s*${a}\\.\\s+`,'m');
+    const qm=qrx.exec(tail);
+    if(!qm)continue;
+    let passage=tail.slice(0,qm.index).trim();
+    // 페이지 헤더/푸터 및 확인사항은 공유지문에서 제거.
+    passage=passage
+      .replace(/^\s*(?:고\s*\d|국어\s*영역|영어\s*영역|제\s*\d+\s*교시)[^\n]*$/gmu,'')
+      .replace(/^\s*\d+\s*\/?\s*\d+\s*$/gmu,'')
+      .replace(/\n{3,}/g,'\n\n')
+      .trim();
+    if(passage.replace(/\s+/g,'').length<25)continue;
+    for(let n=a;n<=b;n++)out.set(examCodeK263(n),passage);
+  }
+  return out;
+}
+function pageNoAtIndexK263(text,index){
+  const src=String(text||''),rx=/\[\[PAGE:(\d+)\]\]/g;
+  let m,last=1;
+  while((m=rx.exec(src))){
+    if(m.index>index)break;
+    last=Number(m[1])||last;
+  }
+  return last;
+}
+function languageExamSolutionRecordsK263(text){
+  const src=String(text||'');
+  const markers=[];
+  const rx=/(^|[^\d])([1-9]|[1-3]\d|4[0-5])\.\s*\[\s*출제의도\s*\]/gmu;
+  let m;
+  while((m=rx.exec(src))){
+    const index=m.index+(m[1]?.length||0);
+    markers.push({no:Number(m[2]),index,page:pageNoAtIndexK263(src,index)});
+  }
+  const best=new Map();
+  for(let i=0;i<markers.length;i++){
+    const h=markers[i],end=i+1<markers.length?markers[i+1].index:src.length;
+    const chunk=src.slice(h.index,end).trim();
+    if(chunk.length<18)continue;
+    const code=examCodeK263(h.no);
+    const old=best.get(code);
+    if(!old||chunk.length>old.chunk.length)best.set(code,{code,actualNo:h.no,chunk,page:h.page,score:chunk.length});
+  }
+  return best;
+}
+function languageExamAnswerMapK263(text){
+  // EBS 정답표는 보통 해설 PDF 1쪽 상단에 1~45 정답이 함께 있다.
+  // '정답 및 해설' 같은 제목의 '해설' 글자 때문에 중간에서 잘리지 않도록 첫 페이지만 직접 읽는다.
+  const firstPage=languagePages(text)[0]?.text||String(text||'');
+  const out=new Map();
+  const rx=/(^|[^\d])([1-9]|[1-3]\d|4[0-5])\s*([①②③④⑤])/gmu;
+  let m;
+  while((m=rx.exec(firstPage))){
+    const no=Number(m[2]);
+    const code=examCodeK263(no);
+    if(code&&!out.has(code))out.set(code,m[3]);
+  }
+  return out;
+}
+
 
 function languageProblemRecordsK261(text){
   const best=new Map();
@@ -7627,9 +7848,13 @@ function languageRowForBankK261(x,subject,title,pfName,sfName,datasetKey,pageAss
     ...old,
     id,
     subject,
-    exam:old.exam||'교재기출',
-    year:old.year||'',
-    no:x.code,
+    exam:languageStrictK261.mode==='exam'
+      ? (languageStrictK261.examMeta?.exam||'수능형기출')
+      : (old.exam||'교재기출'),
+    year:languageStrictK261.mode==='exam'
+      ? (languageStrictK261.examMeta?.year||old.year||'')
+      : (old.year||''),
+    no:languageStrictK261.mode==='exam' ? (x.actualNo||examNoK263(x.code)) : x.code,
     languageCode:x.code,
     languageDatasetKey:datasetKey,
     unit:old.unit||'',
@@ -7654,7 +7879,7 @@ function languageRowForBankK261(x,subject,title,pfName,sfName,datasetKey,pageAss
     originalQuestionImageUrl:pageAsset||old.originalQuestionImageUrl||'',
     sharedPassageId:group?.id||'',
     sharedPassageCodes:group?.codes||[],
-    languageValidation:'K261',
+    languageValidation:languageStrictK261.mode==='exam'?'K263-exam':'K261',
     languageIssues:[],
     status:'출제 가능',
     updatedAt:new Date().toISOString()
@@ -7717,43 +7942,53 @@ function renderLanguageStrictResultK261(){
     noSolution:rows.filter(x=>x.issues.includes('해설 코드 미연결')).length,
     structure:rows.filter(x=>x.issues.some(v=>/본문|선택지|지문|불일치/.test(v))).length
   };
+  const examMode=languageStrictK261.mode==='exam';
+  const excluded=Number(languageStrictK261.excludedListening||0);
   const badge=$('#langStageBadge');
-  if(badge)badge.textContent=`정상 ${counts.ready} / 전체 ${counts.total}`;
+  if(badge)badge.textContent=`정상 ${counts.ready} / 대상 ${counts.total}${excluded?` · 듣기 제외 ${excluded}`:''}`;
 
   const table=rows.map(x=>`
     <tr>
-      <td><b>${esc(x.code)}</b></td>
+      <td><b>${esc(examMode?`${x.actualNo||examNoK263(x.code)}번`:x.code)}</b></td>
       <td>${x.problem?`확인 · p.${esc(String(x.problemPage||'-'))}`:'<span class="danger-text">미감지</span>'}</td>
-      <td>${x.passageGroup?`공유 ${esc(x.passageGroup.codes.join('·'))}`:(x.parsed?.viewText? '개별 제시문':'-')}</td>
+      <td>${x.passageGroup?`공유 ${esc(x.passageGroup.codes.map(c=>examMode?`${examNoK263(c)}번`:c).join('·'))}`:(x.parsed?.viewText? '개별 제시문':'-')}</td>
       <td>${x.answer?`${esc(x.answer)}<div class="help">${esc(x.answerSource||'')}</div>`:'<span class="danger-text">미연결</span>'}</td>
-      <td>${x.solution?`코드 일치 · p.${esc(String(x.solutionPage||'-'))}`:'<span class="danger-text">미연결</span>'}</td>
+      <td>${x.solution?`${examMode?'동일 번호':'코드 일치'} · p.${esc(String(x.solutionPage||'-'))}`:'<span class="danger-text">미연결</span>'}</td>
       <td>${x.ready
         ? '<span class="ok-text"><b>등록 가능</b></span>'
         : `<span class="danger-text"><b>검수 필요</b></span><div class="help">${esc(x.issues.join(' · '))}</div>`}
       </td>
     </tr>`).join('');
 
+  const modeText=examMode
+    ? `수능형 문항번호 모드 · ${esc(languageStrictK261.examMeta?.exam||'시험형 자료')}${languageStrictK261.examMeta?.year?` · ${esc(String(languageStrictK261.examMeta.year))}학년도`:''}`
+    : '교재 코드 모드 · A01 ↔ A01 정확 연결';
+
   box.innerHTML=`
     <div class="notice">
       <b>${esc(languageStrictK261.subject)} · ${esc(languageStrictK261.title||languageStrictK261.pfName)}</b><br>
-      문제 코드 ${counts.total}개 ·
-      <b>등록 가능 ${counts.ready}개</b> ·
-      정답 미연결 ${counts.noAnswer}개 ·
-      해설 미연결 ${counts.noSolution}개 ·
-      구조/지문 검수 ${counts.structure}개
+      ${modeText}<br>
+      등록 대상 ${counts.total}문항 ·
+      <b>등록 가능 ${counts.ready}문항</b> ·
+      정답 미연결 ${counts.noAnswer}문항 ·
+      해설 미연결 ${counts.noSolution}문항 ·
+      구조/지문 검수 ${counts.structure}문항
+      ${excluded?` · <b>영어 듣기 자동 제외 ${excluded}문항</b>`:''}
       <br><span class="help">
-      ※ K261은 코드가 같은 항목만 연결합니다. 코드 없는 해설을 번호·순서로 추측해서 붙이지 않습니다.
+      ${examMode
+        ? '※ K263은 문제편의 문항번호와 해설편의 동일 번호만 연결합니다. 영어 수능형 자료는 듣기 종료 지점을 감지해 1~17번을 문제은행에 넣지 않습니다.'
+        : '※ K261은 코드가 같은 항목만 연결합니다. 코드 없는 해설을 번호·순서로 추측해서 붙이지 않습니다.'}
       등록 버튼은 “등록 가능” 문항만 저장합니다.
       </span>
     </div>
     <div class="actions">
-      <button class="btn primary" id="registerLanguageStrictK261">검증 통과 ${counts.ready}문항만 문제은행 등록 · K261</button>
+      <button class="btn primary" id="registerLanguageStrictK261">검증 통과 ${counts.ready}문항만 문제은행 등록 · ${examMode?'K263':'K261'}</button>
       <button class="btn ghost" id="downloadAnswerTemplateK261">정답 JSON 템플릿</button>
     </div>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>코드</th><th>문제편</th><th>지문</th><th>정답</th><th>해설편</th><th>최종 상태</th></tr></thead>
-        <tbody>${table||'<tr><td colspan="6">감지된 문항 코드가 없습니다.</td></tr>'}</tbody>
+        <thead><tr><th>${examMode?'문항':'코드'}</th><th>문제편</th><th>지문</th><th>정답</th><th>해설편</th><th>최종 상태</th></tr></thead>
+        <tbody>${table||'<tr><td colspan="6">감지된 문항이 없습니다.</td></tr>'}</tbody>
       </table>
     </div>`;
 
@@ -7778,29 +8013,62 @@ async function analyzeLanguageStrictK261(){
   const box=$('#langResult');
   const badge=$('#langStageBadge');
   if(badge)badge.textContent='분석 중';
-  box.innerHTML='<div class="empty"><b>K261 코드 기준 분석 중...</b><br>유사도·순서 매칭 없이 문제편 코드 → 정답 → 같은 코드 해설 → 공유지문 순서로 검증합니다.</div>';
+  box.innerHTML='<div class="empty"><b>K263 자동 유형 판별 중...</b><br>교재 코드는 코드끼리, 수능·모평·학평은 문항번호끼리 연결합니다. 영어 수능형 듣기는 자동 제외합니다.</div>';
 
   try{
-    const [pt,st,jsonAnswers]=await Promise.all([
+    const [probePt,probeSt,jsonAnswers]=await Promise.all([
       pdfTextK261(pf),
       pdfTextK261(sf),
       readAnswerJsonK261(af)
     ]);
 
-    const problemRecords=languageProblemRecordsK261(pt);
-    const solutionRecords=languageSolutionRecordsK261(st);
-    const passages=languageRangePassages(pt);
-    const pg=sharedPassageGroupsK261(passages);
-    const xistory=isXistoryKoreanReading(subject,title,pf.name,sf.name,pt,st);
+    const examMode=isExamStyleLanguageK263(subject,title,pf.name,sf.name,probePt,probeSt);
+    let pt=probePt,st=probeSt;
+    if(examMode){
+      [pt,st]=await Promise.all([
+        pdfTextExamProblemK263(pf),
+        pdfTextExamSolutionK263(sf)
+      ]);
+    }
 
-    const codes=[...problemRecords.keys()]
-      .sort((a,b)=>a.localeCompare(b,undefined,{numeric:true}));
+    const problemRecords=examMode
+      ? languageExamProblemRecordsK263(pt)
+      : languageProblemRecordsK261(pt);
+    const solutionRecords=examMode
+      ? languageExamSolutionRecordsK263(st)
+      : languageSolutionRecordsK261(st);
+    const passages=examMode
+      ? languageExamRangePassagesK263(pt)
+      : languageRangePassages(pt);
+    const pg=sharedPassageGroupsK261(passages);
+    const xistory=!examMode && isXistoryKoreanReading(subject,title,pf.name,sf.name,pt,st);
+
+    const listeningCutoff=(examMode&&subject==='영어')
+      ? detectEnglishListeningCutoffK263(pt)
+      : 0;
+
+    const allCodes=[...problemRecords.keys()]
+      .sort((a,b)=>(examNoK263(a)||0)-(examNoK263(b)||0) || a.localeCompare(b,undefined,{numeric:true}));
+    const codes=examMode&&subject==='영어'
+      ? allCodes.filter(code=>examNoK263(code)>listeningCutoff)
+      : allCodes;
+
+    const excludedListening=examMode&&subject==='영어'
+      ? allCodes.filter(code=>examNoK263(code)<=listeningCutoff).length
+      : 0;
 
     const answerMap=new Map(),answerSource=new Map();
+    const examAnswers=examMode?languageExamAnswerMapK263(probeSt):new Map();
+
     for(const code of codes){
       if(jsonAnswers.has(code)){
         answerMap.set(code,jsonAnswers.get(code));
         answerSource.set(code,'정답 JSON');
+        continue;
+      }
+      if(examMode && examAnswers.has(code)){
+        answerMap.set(code,examAnswers.get(code));
+        answerSource.set(code,'해설편 빠른 정답표');
         continue;
       }
       if(xistory){
@@ -7815,7 +8083,7 @@ async function analyzeLanguageStrictK261(){
       const a=answerFromExactSolutionK261(sol);
       if(a){
         answerMap.set(code,a);
-        answerSource.set(code,'해설편 동일 코드');
+        answerSource.set(code,examMode?'해설편 동일 문항':'해설편 동일 코드');
       }
     }
 
@@ -7833,6 +8101,7 @@ async function analyzeLanguageStrictK261(){
       const val=strictValidateLanguageK261(parsed,!!sr?.chunk);
       return {
         code,
+        actualNo:examMode?(pr?.actualNo||examNoK263(code)):null,
         problem:pr?.chunk||'',
         problemPage:pr?.page||null,
         solution:sr?.chunk||'',
@@ -7847,6 +8116,8 @@ async function analyzeLanguageStrictK261(){
       };
     });
 
+    const examMeta=examMode?detectLanguageExamMetaK263(subject,title,pf.name,pt):null;
+
     languageStrictK261={
       rows,
       subject,
@@ -7858,9 +8129,12 @@ async function analyzeLanguageStrictK261(){
       answerMap,
       answerSource,
       passageGroups:pg.groups,
-      problemFile:pf
+      problemFile:pf,
+      mode:examMode?'exam':'code',
+      excludedListening,
+      examMeta
     };
-    // 기존 코드가 쓰는 상태와도 동기화
+
     languageParsed=rows.map(x=>({
       code:x.code,
       problem:x.problem,
@@ -7869,15 +8143,19 @@ async function analyzeLanguageStrictK261(){
       parsed:x.parsed,
       knownAnswer:x.answer,
       passage:x.passage,
-      method:'K261 정확 코드',
+      method:examMode?'K263 동일 문항번호':'K261 정확 코드',
       confidence:'high'
     }));
+
+    if(examMode && subject==='영어' && excludedListening===0 && allCodes.some(c=>examNoK263(c)<=17)){
+      throw new Error('영어 듣기 문항 제외 검증에 실패했습니다. 1~17번이 등록 대상에 남을 수 있어 등록을 중단했습니다.');
+    }
 
     renderLanguageStrictResultK261();
   }catch(e){
     console.error(e);
     if(badge)badge.textContent='분석 실패';
-    box.innerHTML=`<div class="empty danger-text"><b>K261 분석 실패</b><br>${esc(e.message||String(e))}</div>`;
+    box.innerHTML=`<div class="empty danger-text"><b>K263 분석 실패</b><br>${esc(e.message||String(e))}</div>`;
   }
 }
 
@@ -7921,13 +8199,14 @@ async function registerLanguageStrictK261(){
     renderBank();fillSubjects();renderExplanationEditor();
 
     alert(
-      `${subject} K261 등록 완료\n\n`+
+      `${subject} ${languageStrictK261.mode==='exam'?'K263 수능형':'K261 교재형'} 등록 완료\n\n`+
       `검증 통과 등록 ${rows.length}개\n`+
+      `${languageStrictK261.excludedListening?`영어 듣기 제외 ${languageStrictK261.excludedListening}개\n`:''}`+
       `검수 필요 미등록 ${(languageStrictK261.rows||[]).length-rows.length}개\n`+
       `구형 LANG 문항 비활성화 ${legacyDisabled}개\n\n`+
-      `새 ID는 LANG2-${subject}-${datasetKey}-A01 형식이라 다른 교재의 A01과 충돌하지 않습니다.`
+      `자료별 datasetKey를 사용하므로 다른 시험의 같은 문항번호와 충돌하지 않습니다.`
     );
-    window.examBankLawGuard?.onBankUpload(rows.map(x=>x.id),'국어·영어 코드 전용 등록 K261');
+    window.examBankLawGuard?.onBankUpload(rows.map(x=>x.id),languageStrictK261.mode==='exam'?'국어·영어 수능형 등록 K263':'국어·영어 코드 전용 등록 K261');
   }catch(e){
     console.error(e);
     alert('K261 문제은행 저장 실패\n'+(e.message||e));
@@ -7953,10 +8232,11 @@ if($('#langClearBtn'))$('#langClearBtn').onclick=()=>{
   languageParsed=[];
   languageStrictK261={
     rows:[],subject:'',title:'',pfName:'',sfName:'',datasetKey:'',
-    problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map()
+    problemCodes:[],answerMap:new Map(),answerSource:new Map(),passageGroups:new Map(),
+    mode:'code',excludedListening:0,examMeta:null
   };
   if($('#langStageBadge'))$('#langStageBadge').textContent='분석 전';
-  $('#langResult').innerHTML='<div class="empty">문제편과 해설편을 선택한 뒤 <b>코드 기준 검증</b>을 눌러주세요.</div>';
+  $('#langResult').innerHTML='<div class="empty">문제편과 해설편을 선택한 뒤 <b>자동 유형 판별 · 검증</b>을 눌러주세요.</div>';
 };
 
 
