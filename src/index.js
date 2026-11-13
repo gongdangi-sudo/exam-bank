@@ -20,6 +20,21 @@ async function ensure(env){
     "CREATE TABLE IF NOT EXISTS view_assets (id TEXT PRIMARY KEY, image BLOB NOT NULL, mime_type TEXT NOT NULL, updated_at TEXT NOT NULL)"
   ).run();
 }
+// 삭제(초기화) API는 Cloudflare 환경변수(Secret) ADMIN_RESET_TOKEN과 일치하는 토큰이 있어야만 동작한다.
+// 이전에는 화면 소스에 보이는 고정 문구만으로 누구나 전체 데이터를 지울 수 있었다.
+function adminTokenError(request,env){
+  const expected=String(env.ADMIN_RESET_TOKEN||'');
+  if(!expected)return json({ok:false,error:'서버에 ADMIN_RESET_TOKEN이 설정되지 않아 초기화가 비활성화되어 있습니다.'},403);
+  if(request.headers.get('x-admin-token')!==expected)return json({ok:false,error:'관리자 토큰이 올바르지 않습니다.'},403);
+  return null;
+}
+// 테이블 생성 확인은 Worker 인스턴스당 한 번만 수행한다.
+// (매 API 요청마다 DDL 3회 → 요청마다 약 3초 지연이 있었음)
+let ensurePromise=null;
+function ensureOnce(env){
+  if(!ensurePromise)ensurePromise=ensure(env).catch(e=>{ensurePromise=null;throw e});
+  return ensurePromise;
+}
 async function readProblems(env){
   const rows=await env.DB.prepare("SELECT data FROM problems ORDER BY id").all();
   if((rows.results||[]).length){
@@ -32,7 +47,7 @@ export default{
   async fetch(request,env){
     const u=new URL(request.url);
     if(u.pathname.startsWith('/api/')){
-      try{await ensure(env)}catch(e){return json({ok:false,error:String(e?.message||e)},500)}
+      try{await ensureOnce(env)}catch(e){return json({ok:false,error:String(e?.message||e)},500)}
     }
 
     if(u.pathname==='/api/health')return json({ok:true,service:'exam-bank'});
@@ -44,6 +59,7 @@ export default{
 
     if(u.pathname==='/api/admin/full-reset'&&request.method==='POST'){
       // destructive: same-origin UI requires explicit phrase + header
+      {const denied=adminTokenError(request,env);if(denied)return denied;}
       if(request.headers.get('x-exam-bank-reset')!=='R249-RESET-ALL'){
         return json({ok:false,error:'reset header mismatch'},403);
       }
@@ -74,6 +90,7 @@ export default{
 
 
     if(u.pathname==='/api/admin/reset-language'&&request.method==='POST'){
+      {const denied=adminTokenError(request,env);if(denied)return denied;}
       if(request.headers.get('x-exam-bank-reset')!=='K262-RESET-LANGUAGE'){
         return json({ok:false,error:'language reset header mismatch'},403);
       }
@@ -257,6 +274,42 @@ export default{
       return json({ok:true,written:items.length});
     }
 
+    // 클라이언트(flushCloudChangesP271)가 문제 삭제 시 호출하는 엔드포인트.
+    // 없으면 405가 나서 동기화가 1.2초마다 무한 재시도되고 삭제한 문제가 새로고침 후 되살아난다.
+    if(u.pathname==='/api/problems/delete-bulk'&&request.method==='POST'){
+      let b={};try{b=await request.json()}catch{}
+      const ids=[...new Set((Array.isArray(b?.ids)?b.ids:[]).map(String).filter(Boolean))];
+      for(let i=0;i<ids.length;i+=50){
+        const st=ids.slice(i,i+50).map(id=>env.DB.prepare("DELETE FROM problems WHERE id=?").bind(id));
+        if(st.length)await env.DB.batch(st);
+      }
+      // 구형 app_state 'problems' 캐시가 남아 있으면 problems 테이블이 비었을 때 옛 데이터가 되살아나므로 함께 제거.
+      if(ids.length)await env.DB.prepare("DELETE FROM app_state WHERE key='problems'").run();
+      return json({ok:true,deleted:ids.length});
+    }
+
+    // 필요한 문항만 읽는다. (전체 /api/problems는 약 29MB라 25초 제한에 걸림)
+    if(u.pathname==='/api/problems/by-ids'&&request.method==='POST'){
+      let b={};try{b=await request.json()}catch{}
+      const ids=[...new Set((Array.isArray(b?.ids)?b.ids:[]).map(String).filter(Boolean))];
+      const out=[];
+      for(let i=0;i<ids.length;i+=50){
+        const part=ids.slice(i,i+50);
+        const rows=await env.DB.prepare(`SELECT data FROM problems WHERE id IN (${part.map(()=>'?').join(',')})`).bind(...part).all();
+        for(const r of (rows.results||[])){try{out.push(JSON.parse(r.data))}catch{}}
+      }
+      return json({ok:true,problems:out});
+    }
+
+    // 클라이언트(verifySingleProblemP275)가 부르는 단건 조회. 없으면 29MB 전체 조회로 대체되고 있었음.
+    if(u.pathname==='/api/problem'&&request.method==='GET'){
+      const id=u.searchParams.get('id')||'';
+      const r=await env.DB.prepare("SELECT data FROM problems WHERE id=?").bind(id).first();
+      if(!r)return json({ok:false,error:'not found'},404);
+      let problem=null;try{problem=JSON.parse(r.data)}catch{}
+      return json({ok:!!problem,problem});
+    }
+
     if(u.pathname==='/api/problems'&&request.method==='GET'){
       return json({ok:true,problems:await readProblems(env)});
     }
@@ -267,13 +320,26 @@ export default{
       return json({ok:true,history:h});
     }
     if(u.pathname==='/api/history'&&request.method==='PUT'){
-      const b=await request.json(),h=Array.isArray(b?.history)?b.history:[];
+      const b=await request.json();
+      let h=Array.isArray(b?.history)?b.history:[];
+      // 신형 클라이언트는 knownIds(마지막 동기화 때 본 이력 ID)를 함께 보낸다.
+      // 서버에만 있고 클라이언트가 본 적 없는 이력(다른 탭/PC에서 추가)은 지우지 않고 병합한다.
+      if(Array.isArray(b?.knownIds)){
+        const known=new Set(b.knownIds.map(String));
+        const clientIds=new Set(h.map(x=>String(x?.id||'')));
+        const cur=await env.DB.prepare("SELECT value FROM app_state WHERE key='history'").first();
+        let server=[];try{server=JSON.parse(cur?.value||'[]')}catch{}
+        const extra=(Array.isArray(server)?server:[]).filter(x=>{const id=String(x?.id||'');return id&&!clientIds.has(id)&&!known.has(id);});
+        if(extra.length){
+          h=[...h,...extra].sort((a,b2)=>String(b2?.createdAt||'').localeCompare(String(a?.createdAt||''))).slice(0,1000);
+        }
+      }
       const now=new Date().toISOString();
       await env.DB.prepare(`
         INSERT INTO app_state(key,value,updated_at) VALUES('history',?,?)
         ON CONFLICT(key) DO UPDATE SET value=excluded.value,updated_at=excluded.updated_at
       `).bind(JSON.stringify(h),now).run();
-      return json({ok:true});
+      return json({ok:true,history:h});
     }
 
     if(u.pathname==='/api/state'){
