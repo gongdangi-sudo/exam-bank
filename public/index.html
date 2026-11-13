@@ -588,6 +588,8 @@
 
 
 #lawModal .law-import-auto-held{border-color:#f59e0b!important;background:#fffbeb!important}
+/* FIX-PDF: 비활성 버튼이 활성처럼 보여 '눌러도 반응 없음'으로 보이던 문제 */
+.btn:disabled,.btn[disabled]{opacity:.45;cursor:not-allowed;filter:grayscale(.4)}
 </style>
 </head>
 <body>
@@ -9761,11 +9763,30 @@ function annotateCurrent(){
   const issues=currentIssues();
   // No review form or date in exam output. Show an error only for changed/held sets.
   if(issues.length){
+    // FIX-PDF: 어떤 문항이 왜 막혔는지 보여주고, 한 번에 교체할 수 있게 한다.
+    // (이전에는 PDF·Word 버튼만 말없이 비활성화되어 '저장이 안 된다'로 보였음)
     const notice=document.createElement('div');notice.id='lawCurrentNotice';notice.className='notice no-print';
-    notice.textContent=`문제은행의 저장 상태에 따라 ${issues.length}문항이 보류·제외됩니다. 문제은행에서 해당 기록을 확인하거나 다시 출제해주세요.`;
+    notice.style.cssText='border-color:#f59e0b;background:#fffbeb';
+    const head=document.createElement('div');
+    head.innerHTML=`<b>PDF·Word 저장이 잠겨 있습니다.</b> 아래 ${issues.length}문항이 문제은행에서 보류·제외 상태입니다. 교체하면 바로 저장할 수 있습니다.`;
+    notice.appendChild(head);
+    const list=document.createElement('ul');list.style.cssText='margin:8px 0 8px 18px;padding:0';
+    for(const x of issues){const li=document.createElement('li');li.textContent=`문 ${x.slot}: ${x.reason}`;list.appendChild(li);}
+    notice.appendChild(list);
+    const btn=document.createElement('button');btn.type='button';btn.className='btn primary';
+    btn.textContent=`보류 ${issues.length}문항 다른 문제로 교체`;
+    btn.onclick=async()=>{
+      if(typeof quickReplaceCurrentQuestionE256!=='function'){alert('교체 기능을 찾지 못했습니다. 새로고침 후 다시 시도해주세요.');return;}
+      btn.disabled=true;btn.textContent='교체 중…';
+      try{for(const x of currentIssues())await quickReplaceCurrentQuestionE256(x.slot-1);}
+      finally{annotateCurrent();}
+      const left=currentIssues();
+      if(left.length)alert(`교체하지 못한 문항이 ${left.length}개 남았습니다.\n${messageIssues(left)}\n\n같은 과목에 조건을 통과한 다른 문제가 부족할 수 있습니다. 출제 조건을 바꿔 다시 출제해주세요.`);
+    };
+    notice.appendChild(btn);
     host.prepend(notice);
   }
-  ['wordProblem','wordSolution','printCurrent'].forEach(id=>{const el=$l(id);if(el){el.disabled=!!issues.length;el.title=issues.length?'문제은행에서 보류·제외된 문항이 포함되어 있습니다.':'';}});
+  ['wordProblem','wordSolution','printCurrent'].forEach(id=>{const el=$l(id);if(el){el.disabled=!!issues.length;el.title=issues.length?'보류·제외 문항이 있어 잠겨 있습니다. 위 안내에서 교체해주세요.':'';}});
 }
 function annotateBank(){
   document.querySelectorAll('#bankBody tr[data-problem-id]').forEach(tr=>{
