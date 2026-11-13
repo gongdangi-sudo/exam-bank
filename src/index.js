@@ -19,6 +19,23 @@ async function ensure(env){
   await env.DB.prepare(
     "CREATE TABLE IF NOT EXISTS view_assets (id TEXT PRIMARY KEY, image BLOB NOT NULL, mime_type TEXT NOT NULL, updated_at TEXT NOT NULL)"
   ).run();
+
+  // /api/sync 변경분 조회용 색인
+  await env.DB.prepare(
+    "CREATE INDEX IF NOT EXISTS idx_problems_updated_at ON problems(updated_at)"
+  ).run();
+}
+// 저장된 JSON 문자열을 다시 parse/stringify 하지 않고 그대로 이어 붙인다(약 29MB 처리 비용 절감).
+function rawJsonArray(rows){
+  const parts=[];
+  for(const r of rows){
+    const s=typeof r.data==='string'?r.data.trim():'';
+    if(s.startsWith('{')&&s.endsWith('}'))parts.push(s);
+  }
+  return '['+parts.join(',')+']';
+}
+function rawJsonResponse(body){
+  return new Response(body,{headers:{"content-type":"application/json; charset=utf-8","cache-control":"no-store"}});
 }
 // 삭제(초기화) API는 Cloudflare 환경변수(Secret) ADMIN_RESET_TOKEN과 일치하는 토큰이 있어야만 동작한다.
 // 이전에는 화면 소스에 보이는 고정 문구만으로 누구나 전체 데이터를 지울 수 있었다.
@@ -342,12 +359,40 @@ export default{
       return json({ok:true,history:h});
     }
 
+    // 변경분 동기화: 브라우저에 저장된 사본(IndexedDB) 이후 바뀐 문항만 보낸다.
+    // since가 없으면 전체를 보낸다. ids(전체 ID 목록)로 삭제·누락을 클라이언트가 맞춘다.
+    if(u.pathname==='/api/sync'&&request.method==='GET'){
+      const serverTime=new Date().toISOString();
+      const sinceRaw=u.searchParams.get('since')||'';
+      const since=!Number.isNaN(Date.parse(sinceRaw))?new Date(sinceRaw).toISOString():'';
+      const hr=await env.DB.prepare("SELECT value FROM app_state WHERE key='history'").first();
+      let historyJson='[]';
+      try{const h=JSON.parse(hr?.value||'[]');historyJson=JSON.stringify(Array.isArray(h)?h:[]);}catch{}
+      const count=(await env.DB.prepare("SELECT COUNT(*) AS n FROM problems").first())?.n||0;
+      if(!count){
+        // 구형 app_state 저장본만 있는 경우: 전체 전송
+        const legacy=await readProblems(env);
+        return rawJsonResponse(`{"ok":true,"full":true,"serverTime":${JSON.stringify(serverTime)},"problems":${JSON.stringify(legacy)},"ids":${JSON.stringify(legacy.map(p=>String(p?.id||'')))},"history":${historyJson}}`);
+      }
+      const rows=since
+        ? await env.DB.prepare("SELECT data FROM problems WHERE updated_at>=? ORDER BY id").bind(since).all()
+        : await env.DB.prepare("SELECT data FROM problems ORDER BY id").all();
+      const idRows=since?await env.DB.prepare("SELECT id FROM problems ORDER BY id").all():null;
+      const ids=since?(idRows.results||[]).map(r=>String(r.id)):null;
+      return rawJsonResponse(`{"ok":true,"full":${since?'false':'true'},"serverTime":${JSON.stringify(serverTime)},"problems":${rawJsonArray(rows.results||[])},"ids":${ids?JSON.stringify(ids):'null'},"history":${historyJson}}`);
+    }
+
     if(u.pathname==='/api/state'){
       if(request.method==='GET'){
-        const problems=await readProblems(env);
         const hr=await env.DB.prepare("SELECT value FROM app_state WHERE key='history'").first();
-        let history=[];try{history=JSON.parse(hr?.value||'[]')}catch{}
-        return json({problems,history});
+        let historyJson='[]';
+        try{const h=JSON.parse(hr?.value||'[]');historyJson=JSON.stringify(Array.isArray(h)?h:[]);}catch{}
+        const rows=await env.DB.prepare("SELECT data FROM problems ORDER BY id").all();
+        if((rows.results||[]).length){
+          return rawJsonResponse(`{"problems":${rawJsonArray(rows.results)},"history":${historyJson}}`);
+        }
+        const problems=await readProblems(env);
+        return rawJsonResponse(`{"problems":${JSON.stringify(problems)},"history":${historyJson}}`);
       }
       if(request.method==='PUT'){
         const b=await request.json();
