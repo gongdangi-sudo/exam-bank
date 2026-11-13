@@ -1706,14 +1706,84 @@ function save(){
   try{localStorage.setItem(K_HISTORY,JSON.stringify(history));}catch(e){}
   queueCloudSave();
 }
+// ===== FIX-LOAD: 브라우저(IndexedDB) 사본 + 변경분 동기화 =====
+// 매번 문제 전체(약 29MB)를 받던 첫 로딩을, 두 번째 접속부터는 '마지막 접속 이후 바뀐 문항'만 받도록 한다.
+// 사본은 서버에서 막 받은 상태만 저장하므로(로컬 미저장 수정은 저장하지 않음) 서버와 어긋나지 않는다.
+const PROBLEM_CACHE_KEY_FIX='problems-v1';
+function idbOpenFix(){
+  return new Promise((resolve,reject)=>{
+    if(!('indexedDB' in window)){reject(new Error('no indexedDB'));return;}
+    const req=indexedDB.open('examBankCacheV1',1);
+    req.onupgradeneeded=()=>{req.result.createObjectStore('kv');};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+async function idbGetFix(key){
+  const db=await idbOpenFix();
+  try{
+    return await new Promise((resolve,reject)=>{
+      const req=db.transaction('kv','readonly').objectStore('kv').get(key);
+      req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error);
+    });
+  }finally{db.close();}
+}
+async function idbSetFix(key,value){
+  const db=await idbOpenFix();
+  try{
+    await new Promise((resolve,reject)=>{
+      const tx=db.transaction('kv','readwrite');
+      tx.objectStore('kv').put(value,key);
+      tx.oncomplete=()=>resolve();tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);
+    });
+  }finally{db.close();}
+}
+async function fetchProblemsByIdsFix(ids){
+  const out=[];
+  for(let i=0;i<ids.length;i+=500){
+    const r=await fetch('/api/problems/by-ids',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({ids:ids.slice(i,i+500)})});
+    if(!r.ok)throw new Error('누락 문항 조회 실패: '+r.status);
+    const d=await r.json();
+    out.push(...(Array.isArray(d.problems)?d.problems:[]));
+  }
+  return out;
+}
+// 서버 상태를 받아 온다. 브라우저 사본이 있으면 변경분만 받는다.
+async function loadRemoteStateFix(cache){
+  const hasCache=!!(cache&&Array.isArray(cache.problems)&&cache.problems.length&&cache.since);
+  // 서버 시계/동시 저장 오차를 감안해 10분 겹쳐서 받는다(중복은 덮어써서 무해).
+  const since=hasCache?new Date(Date.parse(cache.since)-10*60*1000).toISOString():'';
+  const r=await fetch('/api/sync'+(since?'?since='+encodeURIComponent(since):''),{cache:'no-store'});
+  if(!r.ok)throw new Error(await r.text());
+  const d=await r.json();
+  const changed=Array.isArray(d.problems)?d.problems:[];
+  const remoteHistory=Array.isArray(d.history)?d.history:[];
+  if(d.full||!hasCache||!Array.isArray(d.ids)){
+    return {problems:changed,history:remoteHistory,serverTime:d.serverTime,mode:'full',changed:changed.length};
+  }
+  const map=new Map(cache.problems.map(p=>[String(p.id),p]));
+  for(const p of changed)map.set(String(p.id),p);
+  const missing=d.ids.map(String).filter(id=>!map.has(id));
+  if(missing.length){for(const p of await fetchProblemsByIdsFix(missing))map.set(String(p.id),p);}
+  const list=d.ids.map(id=>map.get(String(id))).filter(Boolean);
+  return {problems:list,history:remoteHistory,serverTime:d.serverTime,mode:'delta',changed:changed.length+missing.length};
+}
 async function bootstrapCloudState(){
   setCloudStatus('☁ D1 데이터 불러오는 중');
+  let cache=null;
+  try{cache=await idbGetFix(PROBLEM_CACHE_KEY_FIX);}catch(e){console.warn('problem cache read skipped',e);}
+  const hasCache=!!(cache&&Array.isArray(cache.problems)&&cache.problems.length&&cache.since);
+  if(hasCache){
+    // 최신 변경분을 받기 전까지 사본을 먼저 보여준다. 저장은 동기화 완료 후에만 허용된다.
+    problems=cache.problems;
+    try{refreshFilters();}catch(e){}
+    try{fillSubjects();}catch(e){}
+    setCloudStatus(`☁ 저장된 사본 표시 중 · 문제 ${problems.length.toLocaleString()}개 · 최신 변경 확인 중`);
+  }
   try{
-    const r=await fetch('/api/state',{cache:'no-store'});
-    if(!r.ok)throw new Error(await r.text());
-    const d=await r.json();
-    const remoteProblems=Array.isArray(d.problems)?d.problems:[];
-    const remoteHistory=Array.isArray(d.history)?d.history:[];
+    const remote=await loadRemoteStateFix(hasCache?cache:null);
+    const remoteProblems=remote.problems;
+    const remoteHistory=remote.history;
 
     if(remoteProblems.length||remoteHistory.length){
       problems=remoteProblems;
@@ -1722,9 +1792,14 @@ async function bootstrapCloudState(){
       resetProblemVersionsP271();
       rememberHistorySyncFix(history);
       cloudBootstrappedFix=true;cloudReady=true;
+      // 서버에서 막 받은 상태만 사본으로 저장(아래 오류정리 전). 실패해도 동작에는 영향 없음.
+      if(remote.serverTime){
+        idbSetFix(PROBLEM_CACHE_KEY_FIX,{problems:remoteProblems,since:remote.serverTime,savedAt:new Date().toISOString()})
+          .catch(e=>console.warn('problem cache write skipped',e));
+      }
       const repaired=repairExistingSourceNoise();
-      setCloudStatus(`☁ D1 연결 · 문제 ${problems.length.toLocaleString()}개${repaired?` · 오류정리 ${repaired}개`:''}`);
-    }else if(problems.length||history.length){
+      setCloudStatus(`☁ D1 연결 · 문제 ${problems.length.toLocaleString()}개${remote.mode==='delta'?` · 변경분 ${remote.changed}개만 받음`:''}${repaired?` · 오류정리 ${repaired}개`:''}`);
+    }else if(!hasCache&&(problems.length||history.length)){
       // 최초 이전만 변경분 전체를 problems 테이블로 올린다.
       p271ProblemVersions=new Map();
       p271KnownIds=new Set();
@@ -1733,6 +1808,7 @@ async function bootstrapCloudState(){
       await flushCloudChangesP271();
       setCloudStatus(`☁ 기존 자료 D1 이전 · 문제 ${problems.length.toLocaleString()}개`);
     }else{
+      if(hasCache){problems=[];history=[];idbSetFix(PROBLEM_CACHE_KEY_FIX,null).catch(()=>{});}
       resetProblemVersionsP271();
       rememberHistorySyncFix(history);
       cloudBootstrappedFix=true;
@@ -1746,7 +1822,7 @@ async function bootstrapCloudState(){
     try{renderHistory();}catch(e){}
   }catch(e){
     console.error('Cloud bootstrap failed',e);
-    setCloudStatus('⚠ D1 연결 실패 · 로컬 모드',false);
+    setCloudStatus(hasCache?'⚠ D1 연결 실패 · 저장된 사본만 표시(저장 보류) · 새로고침해주세요':'⚠ D1 연결 실패 · 로컬 모드',false);
   }
 }
 function uid(){return 'Q'+Date.now().toString(36)+Math.random().toString(36).slice(2,6).toUpperCase()}
